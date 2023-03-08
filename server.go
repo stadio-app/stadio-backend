@@ -13,7 +13,7 @@ type Response struct {
 	Message string `json:"message"`
 }
 
-const PORT = 3000
+const PORT uint = 3000
 
 func main() {
 	db_conn := util.DbConnection()
