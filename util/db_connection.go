@@ -12,7 +12,7 @@ func DbConnection() *sql.DB {
 		"postgres",
 		"password",
 		"postgres",
-		"54321",
+		"5432",
 		"verify-full",
 	)
 	db_conn, err := sql.Open("postgres", dns)
