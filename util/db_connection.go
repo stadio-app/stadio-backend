@@ -10,10 +10,10 @@ func DbConnection() *sql.DB {
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=America/Chicago",
 		"localhost",
 		"postgres",
-		"password",
 		"postgres",
-		"5432",
-		"verify-full",
+		"postgres",
+		"5433",
+		"disable",
 	)
 	db_conn, err := sql.Open("postgres", dns)
 	if err != nil {
