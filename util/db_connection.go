@@ -7,7 +7,7 @@ import (
 
 func DbConnection() *sql.DB {
 	dns := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=America/Chicago", 
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=America/Chicago",
 		"localhost",
 		"postgres",
 		"password",
