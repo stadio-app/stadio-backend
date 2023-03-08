@@ -1,12 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/lib/pq"
+	"github.com/m3-app/backend/util"
 )
 
 type Response struct {
@@ -16,19 +16,8 @@ type Response struct {
 const PORT = 3000
 
 func main() {
-	dns := fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=America/Chicago", 
-		"localhost",
-		"postgres",
-		"password",
-		"postgres",
-		"5432",
-		"verify-full",
-	)
-	_, err := sql.Open("postgres", dns)
-	if err != nil {
-		panic(err)
-	}
+	db_conn := util.DbConnection()
+	defer db_conn.Close()
 	
 	app := fiber.New()
 	app.Get("/", func (c *fiber.Ctx) error {
@@ -38,6 +27,6 @@ func main() {
     })
 
 	if err := app.Listen(fmt.Sprintf(":%d", PORT)); err != nil {
-		log.Fatalf("Could not start server. Port %d is already in use", PORT)
+		log.Fatalf("port %d is already in use", PORT)
 	}
 }
