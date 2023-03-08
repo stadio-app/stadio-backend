@@ -7,6 +7,7 @@ require github.com/google/uuid v1.3.0
 require (
 	github.com/gofiber/utils v0.0.10 // indirect
 	github.com/gorilla/schema v1.1.0 // indirect
+	github.com/lib/pq v1.10.7 // indirect
 )
 
 require (
