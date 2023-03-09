@@ -3,6 +3,10 @@ package util
 import (
 	"database/sql"
 	"fmt"
+
+	"entgo.io/ent/dialect"
+	entsql "entgo.io/ent/dialect/sql"
+	"github.com/m3-app/backend/ent"
 )
 
 func DbConnection() *sql.DB {
@@ -24,4 +28,9 @@ func DbConnection() *sql.DB {
 		panic(err)
 	}
 	return db_conn
+}
+
+func CreateEntClient(db_conn *sql.DB) *ent.Client {
+	driver := entsql.OpenDB(dialect.Postgres, db_conn)
+	return ent.NewClient(ent.Driver(driver))
 }
