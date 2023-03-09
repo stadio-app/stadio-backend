@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 
@@ -19,14 +20,23 @@ func main() {
 	db_conn := util.DbConnection()
 	defer db_conn.Close()
 
-	app := fiber.New()
-	app.Get("/", func(c *fiber.Ctx) error {
+	ent_manager := util.CreateEntClient(db_conn).Debug()
+	ent_manager.Location.Create()
+
+	server := fiber.New()
+	server.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(Response{
 			Message: "Hello",
 		})
 	})
 
-	if err := app.Listen(fmt.Sprintf(":%d", PORT)); err != nil {
+	ctx := context.Background()
+
+	if err := ent_manager.Schema.Create(ctx); err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+
+	if err := server.Listen(fmt.Sprintf(":%d", PORT)); err != nil {
 		log.Fatalf("port %d is already in use", PORT)
 	}
 }
