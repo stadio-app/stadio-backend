@@ -4,8 +4,8 @@ run:
 build:
 	go build server.go
 
-ent-generate-schema:
-	go generate go run -mod=mod entgo.io/ent/cmd/ent generate ./schema
+ent-generate:
+	go generate ./ent
 
 ent-create: # arguments  [entity name]
 	go run -mod=mod entgo.io/ent/cmd/ent new
