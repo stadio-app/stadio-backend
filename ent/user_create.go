@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,9 +21,99 @@ type UserCreate struct {
 	hooks    []Hook
 }
 
-// SetFullName sets the "full_name" field.
-func (uc *UserCreate) SetFullName(s string) *UserCreate {
-	uc.mutation.SetFullName(s)
+// SetEmail sets the "email" field.
+func (uc *UserCreate) SetEmail(s string) *UserCreate {
+	uc.mutation.SetEmail(s)
+	return uc
+}
+
+// SetPhoneNumber sets the "phone_number" field.
+func (uc *UserCreate) SetPhoneNumber(s string) *UserCreate {
+	uc.mutation.SetPhoneNumber(s)
+	return uc
+}
+
+// SetNillablePhoneNumber sets the "phone_number" field if the given value is not nil.
+func (uc *UserCreate) SetNillablePhoneNumber(s *string) *UserCreate {
+	if s != nil {
+		uc.SetPhoneNumber(*s)
+	}
+	return uc
+}
+
+// SetName sets the "name" field.
+func (uc *UserCreate) SetName(s string) *UserCreate {
+	uc.mutation.SetName(s)
+	return uc
+}
+
+// SetAvatar sets the "avatar" field.
+func (uc *UserCreate) SetAvatar(s string) *UserCreate {
+	uc.mutation.SetAvatar(s)
+	return uc
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (uc *UserCreate) SetNillableAvatar(s *string) *UserCreate {
+	if s != nil {
+		uc.SetAvatar(*s)
+	}
+	return uc
+}
+
+// SetBirthDate sets the "birth_date" field.
+func (uc *UserCreate) SetBirthDate(t time.Time) *UserCreate {
+	uc.mutation.SetBirthDate(t)
+	return uc
+}
+
+// SetNillableBirthDate sets the "birth_date" field if the given value is not nil.
+func (uc *UserCreate) SetNillableBirthDate(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetBirthDate(*t)
+	}
+	return uc
+}
+
+// SetBio sets the "bio" field.
+func (uc *UserCreate) SetBio(s string) *UserCreate {
+	uc.mutation.SetBio(s)
+	return uc
+}
+
+// SetNillableBio sets the "bio" field if the given value is not nil.
+func (uc *UserCreate) SetNillableBio(s *string) *UserCreate {
+	if s != nil {
+		uc.SetBio(*s)
+	}
+	return uc
+}
+
+// SetActive sets the "active" field.
+func (uc *UserCreate) SetActive(b bool) *UserCreate {
+	uc.mutation.SetActive(b)
+	return uc
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (uc *UserCreate) SetNillableActive(b *bool) *UserCreate {
+	if b != nil {
+		uc.SetActive(*b)
+	}
+	return uc
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
+	uc.mutation.SetCreatedAt(t)
+	return uc
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetCreatedAt(*t)
+	}
 	return uc
 }
 
@@ -75,6 +166,14 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UserCreate) defaults() {
+	if _, ok := uc.mutation.Active(); !ok {
+		v := user.DefaultActive
+		uc.mutation.SetActive(v)
+	}
+	if _, ok := uc.mutation.CreatedAt(); !ok {
+		v := user.DefaultCreatedAt()
+		uc.mutation.SetCreatedAt(v)
+	}
 	if _, ok := uc.mutation.ID(); !ok {
 		v := user.DefaultID()
 		uc.mutation.SetID(v)
@@ -83,8 +182,17 @@ func (uc *UserCreate) defaults() {
 
 // check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
-	if _, ok := uc.mutation.FullName(); !ok {
-		return &ValidationError{Name: "full_name", err: errors.New(`ent: missing required field "User.full_name"`)}
+	if _, ok := uc.mutation.Email(); !ok {
+		return &ValidationError{Name: "email", err: errors.New(`ent: missing required field "User.email"`)}
+	}
+	if _, ok := uc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
+	}
+	if _, ok := uc.mutation.Active(); !ok {
+		return &ValidationError{Name: "active", err: errors.New(`ent: missing required field "User.active"`)}
+	}
+	if _, ok := uc.mutation.CreatedAt(); !ok {
+		return &ValidationError{Name: "created_at", err: errors.New(`ent: missing required field "User.created_at"`)}
 	}
 	return nil
 }
@@ -121,9 +229,37 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		_node.ID = id
 		_spec.ID.Value = &id
 	}
-	if value, ok := uc.mutation.FullName(); ok {
-		_spec.SetField(user.FieldFullName, field.TypeString, value)
-		_node.FullName = value
+	if value, ok := uc.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+		_node.Email = value
+	}
+	if value, ok := uc.mutation.PhoneNumber(); ok {
+		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
+		_node.PhoneNumber = value
+	}
+	if value, ok := uc.mutation.Name(); ok {
+		_spec.SetField(user.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
+	if value, ok := uc.mutation.Avatar(); ok {
+		_spec.SetField(user.FieldAvatar, field.TypeString, value)
+		_node.Avatar = value
+	}
+	if value, ok := uc.mutation.BirthDate(); ok {
+		_spec.SetField(user.FieldBirthDate, field.TypeTime, value)
+		_node.BirthDate = value
+	}
+	if value, ok := uc.mutation.Bio(); ok {
+		_spec.SetField(user.FieldBio, field.TypeString, value)
+		_node.Bio = value
+	}
+	if value, ok := uc.mutation.Active(); ok {
+		_spec.SetField(user.FieldActive, field.TypeBool, value)
+		_node.Active = value
+	}
+	if value, ok := uc.mutation.CreatedAt(); ok {
+		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
+		_node.CreatedAt = value
 	}
 	return _node, _spec
 }

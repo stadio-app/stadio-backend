@@ -3,6 +3,8 @@
 package user
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 )
 
@@ -11,8 +13,22 @@ const (
 	Label = "user"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldFullName holds the string denoting the full_name field in the database.
-	FieldFullName = "full_name"
+	// FieldEmail holds the string denoting the email field in the database.
+	FieldEmail = "email"
+	// FieldPhoneNumber holds the string denoting the phone_number field in the database.
+	FieldPhoneNumber = "phone_number"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
+	// FieldAvatar holds the string denoting the avatar field in the database.
+	FieldAvatar = "avatar"
+	// FieldBirthDate holds the string denoting the birth_date field in the database.
+	FieldBirthDate = "birth_date"
+	// FieldBio holds the string denoting the bio field in the database.
+	FieldBio = "bio"
+	// FieldActive holds the string denoting the active field in the database.
+	FieldActive = "active"
+	// FieldCreatedAt holds the string denoting the created_at field in the database.
+	FieldCreatedAt = "created_at"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 )
@@ -20,7 +36,14 @@ const (
 // Columns holds all SQL columns for user fields.
 var Columns = []string{
 	FieldID,
-	FieldFullName,
+	FieldEmail,
+	FieldPhoneNumber,
+	FieldName,
+	FieldAvatar,
+	FieldBirthDate,
+	FieldBio,
+	FieldActive,
+	FieldCreatedAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -34,6 +57,10 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultActive holds the default value on creation for the "active" field.
+	DefaultActive bool
+	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
+	DefaultCreatedAt func() time.Time
 	// DefaultID holds the default value on creation for the "id" field.
 	DefaultID func() uuid.UUID
 )

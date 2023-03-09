@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -27,9 +28,123 @@ func (uu *UserUpdate) Where(ps ...predicate.User) *UserUpdate {
 	return uu
 }
 
-// SetFullName sets the "full_name" field.
-func (uu *UserUpdate) SetFullName(s string) *UserUpdate {
-	uu.mutation.SetFullName(s)
+// SetEmail sets the "email" field.
+func (uu *UserUpdate) SetEmail(s string) *UserUpdate {
+	uu.mutation.SetEmail(s)
+	return uu
+}
+
+// SetPhoneNumber sets the "phone_number" field.
+func (uu *UserUpdate) SetPhoneNumber(s string) *UserUpdate {
+	uu.mutation.SetPhoneNumber(s)
+	return uu
+}
+
+// SetNillablePhoneNumber sets the "phone_number" field if the given value is not nil.
+func (uu *UserUpdate) SetNillablePhoneNumber(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetPhoneNumber(*s)
+	}
+	return uu
+}
+
+// ClearPhoneNumber clears the value of the "phone_number" field.
+func (uu *UserUpdate) ClearPhoneNumber() *UserUpdate {
+	uu.mutation.ClearPhoneNumber()
+	return uu
+}
+
+// SetName sets the "name" field.
+func (uu *UserUpdate) SetName(s string) *UserUpdate {
+	uu.mutation.SetName(s)
+	return uu
+}
+
+// SetAvatar sets the "avatar" field.
+func (uu *UserUpdate) SetAvatar(s string) *UserUpdate {
+	uu.mutation.SetAvatar(s)
+	return uu
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableAvatar(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetAvatar(*s)
+	}
+	return uu
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (uu *UserUpdate) ClearAvatar() *UserUpdate {
+	uu.mutation.ClearAvatar()
+	return uu
+}
+
+// SetBirthDate sets the "birth_date" field.
+func (uu *UserUpdate) SetBirthDate(t time.Time) *UserUpdate {
+	uu.mutation.SetBirthDate(t)
+	return uu
+}
+
+// SetNillableBirthDate sets the "birth_date" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableBirthDate(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetBirthDate(*t)
+	}
+	return uu
+}
+
+// ClearBirthDate clears the value of the "birth_date" field.
+func (uu *UserUpdate) ClearBirthDate() *UserUpdate {
+	uu.mutation.ClearBirthDate()
+	return uu
+}
+
+// SetBio sets the "bio" field.
+func (uu *UserUpdate) SetBio(s string) *UserUpdate {
+	uu.mutation.SetBio(s)
+	return uu
+}
+
+// SetNillableBio sets the "bio" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableBio(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetBio(*s)
+	}
+	return uu
+}
+
+// ClearBio clears the value of the "bio" field.
+func (uu *UserUpdate) ClearBio() *UserUpdate {
+	uu.mutation.ClearBio()
+	return uu
+}
+
+// SetActive sets the "active" field.
+func (uu *UserUpdate) SetActive(b bool) *UserUpdate {
+	uu.mutation.SetActive(b)
+	return uu
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableActive(b *bool) *UserUpdate {
+	if b != nil {
+		uu.SetActive(*b)
+	}
+	return uu
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (uu *UserUpdate) SetCreatedAt(t time.Time) *UserUpdate {
+	uu.mutation.SetCreatedAt(t)
+	return uu
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableCreatedAt(t *time.Time) *UserUpdate {
+	if t != nil {
+		uu.SetCreatedAt(*t)
+	}
 	return uu
 }
 
@@ -74,8 +189,41 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := uu.mutation.FullName(); ok {
-		_spec.SetField(user.FieldFullName, field.TypeString, value)
+	if value, ok := uu.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.PhoneNumber(); ok {
+		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
+	}
+	if uu.mutation.PhoneNumberCleared() {
+		_spec.ClearField(user.FieldPhoneNumber, field.TypeString)
+	}
+	if value, ok := uu.mutation.Name(); ok {
+		_spec.SetField(user.FieldName, field.TypeString, value)
+	}
+	if value, ok := uu.mutation.Avatar(); ok {
+		_spec.SetField(user.FieldAvatar, field.TypeString, value)
+	}
+	if uu.mutation.AvatarCleared() {
+		_spec.ClearField(user.FieldAvatar, field.TypeString)
+	}
+	if value, ok := uu.mutation.BirthDate(); ok {
+		_spec.SetField(user.FieldBirthDate, field.TypeTime, value)
+	}
+	if uu.mutation.BirthDateCleared() {
+		_spec.ClearField(user.FieldBirthDate, field.TypeTime)
+	}
+	if value, ok := uu.mutation.Bio(); ok {
+		_spec.SetField(user.FieldBio, field.TypeString, value)
+	}
+	if uu.mutation.BioCleared() {
+		_spec.ClearField(user.FieldBio, field.TypeString)
+	}
+	if value, ok := uu.mutation.Active(); ok {
+		_spec.SetField(user.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := uu.mutation.CreatedAt(); ok {
+		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -97,9 +245,123 @@ type UserUpdateOne struct {
 	mutation *UserMutation
 }
 
-// SetFullName sets the "full_name" field.
-func (uuo *UserUpdateOne) SetFullName(s string) *UserUpdateOne {
-	uuo.mutation.SetFullName(s)
+// SetEmail sets the "email" field.
+func (uuo *UserUpdateOne) SetEmail(s string) *UserUpdateOne {
+	uuo.mutation.SetEmail(s)
+	return uuo
+}
+
+// SetPhoneNumber sets the "phone_number" field.
+func (uuo *UserUpdateOne) SetPhoneNumber(s string) *UserUpdateOne {
+	uuo.mutation.SetPhoneNumber(s)
+	return uuo
+}
+
+// SetNillablePhoneNumber sets the "phone_number" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillablePhoneNumber(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetPhoneNumber(*s)
+	}
+	return uuo
+}
+
+// ClearPhoneNumber clears the value of the "phone_number" field.
+func (uuo *UserUpdateOne) ClearPhoneNumber() *UserUpdateOne {
+	uuo.mutation.ClearPhoneNumber()
+	return uuo
+}
+
+// SetName sets the "name" field.
+func (uuo *UserUpdateOne) SetName(s string) *UserUpdateOne {
+	uuo.mutation.SetName(s)
+	return uuo
+}
+
+// SetAvatar sets the "avatar" field.
+func (uuo *UserUpdateOne) SetAvatar(s string) *UserUpdateOne {
+	uuo.mutation.SetAvatar(s)
+	return uuo
+}
+
+// SetNillableAvatar sets the "avatar" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableAvatar(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetAvatar(*s)
+	}
+	return uuo
+}
+
+// ClearAvatar clears the value of the "avatar" field.
+func (uuo *UserUpdateOne) ClearAvatar() *UserUpdateOne {
+	uuo.mutation.ClearAvatar()
+	return uuo
+}
+
+// SetBirthDate sets the "birth_date" field.
+func (uuo *UserUpdateOne) SetBirthDate(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetBirthDate(t)
+	return uuo
+}
+
+// SetNillableBirthDate sets the "birth_date" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableBirthDate(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetBirthDate(*t)
+	}
+	return uuo
+}
+
+// ClearBirthDate clears the value of the "birth_date" field.
+func (uuo *UserUpdateOne) ClearBirthDate() *UserUpdateOne {
+	uuo.mutation.ClearBirthDate()
+	return uuo
+}
+
+// SetBio sets the "bio" field.
+func (uuo *UserUpdateOne) SetBio(s string) *UserUpdateOne {
+	uuo.mutation.SetBio(s)
+	return uuo
+}
+
+// SetNillableBio sets the "bio" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableBio(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetBio(*s)
+	}
+	return uuo
+}
+
+// ClearBio clears the value of the "bio" field.
+func (uuo *UserUpdateOne) ClearBio() *UserUpdateOne {
+	uuo.mutation.ClearBio()
+	return uuo
+}
+
+// SetActive sets the "active" field.
+func (uuo *UserUpdateOne) SetActive(b bool) *UserUpdateOne {
+	uuo.mutation.SetActive(b)
+	return uuo
+}
+
+// SetNillableActive sets the "active" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableActive(b *bool) *UserUpdateOne {
+	if b != nil {
+		uuo.SetActive(*b)
+	}
+	return uuo
+}
+
+// SetCreatedAt sets the "created_at" field.
+func (uuo *UserUpdateOne) SetCreatedAt(t time.Time) *UserUpdateOne {
+	uuo.mutation.SetCreatedAt(t)
+	return uuo
+}
+
+// SetNillableCreatedAt sets the "created_at" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableCreatedAt(t *time.Time) *UserUpdateOne {
+	if t != nil {
+		uuo.SetCreatedAt(*t)
+	}
 	return uuo
 }
 
@@ -174,8 +436,41 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			}
 		}
 	}
-	if value, ok := uuo.mutation.FullName(); ok {
-		_spec.SetField(user.FieldFullName, field.TypeString, value)
+	if value, ok := uuo.mutation.Email(); ok {
+		_spec.SetField(user.FieldEmail, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.PhoneNumber(); ok {
+		_spec.SetField(user.FieldPhoneNumber, field.TypeString, value)
+	}
+	if uuo.mutation.PhoneNumberCleared() {
+		_spec.ClearField(user.FieldPhoneNumber, field.TypeString)
+	}
+	if value, ok := uuo.mutation.Name(); ok {
+		_spec.SetField(user.FieldName, field.TypeString, value)
+	}
+	if value, ok := uuo.mutation.Avatar(); ok {
+		_spec.SetField(user.FieldAvatar, field.TypeString, value)
+	}
+	if uuo.mutation.AvatarCleared() {
+		_spec.ClearField(user.FieldAvatar, field.TypeString)
+	}
+	if value, ok := uuo.mutation.BirthDate(); ok {
+		_spec.SetField(user.FieldBirthDate, field.TypeTime, value)
+	}
+	if uuo.mutation.BirthDateCleared() {
+		_spec.ClearField(user.FieldBirthDate, field.TypeTime)
+	}
+	if value, ok := uuo.mutation.Bio(); ok {
+		_spec.SetField(user.FieldBio, field.TypeString, value)
+	}
+	if uuo.mutation.BioCleared() {
+		_spec.ClearField(user.FieldBio, field.TypeString)
+	}
+	if value, ok := uuo.mutation.Active(); ok {
+		_spec.SetField(user.FieldActive, field.TypeBool, value)
+	}
+	if value, ok := uuo.mutation.CreatedAt(); ok {
+		_spec.SetField(user.FieldCreatedAt, field.TypeTime, value)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

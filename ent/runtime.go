@@ -3,6 +3,8 @@
 package ent
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/schema"
 	"github.com/m3-app/backend/ent/user"
@@ -14,6 +16,14 @@ import (
 func init() {
 	userFields := schema.User{}.Fields()
 	_ = userFields
+	// userDescActive is the schema descriptor for active field.
+	userDescActive := userFields[7].Descriptor()
+	// user.DefaultActive holds the default value on creation for the active field.
+	user.DefaultActive = userDescActive.Default.(bool)
+	// userDescCreatedAt is the schema descriptor for created_at field.
+	userDescCreatedAt := userFields[8].Descriptor()
+	// user.DefaultCreatedAt holds the default value on creation for the created_at field.
+	user.DefaultCreatedAt = userDescCreatedAt.Default.(func() time.Time)
 	// userDescID is the schema descriptor for id field.
 	userDescID := userFields[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.
