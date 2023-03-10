@@ -10,7 +10,7 @@ import (
 	"github.com/m3-app/backend/utils"
 )
 
-const PORT uint = 3000
+const PORT uint = 8080
 
 func main() {
 	db_conn := utils.DbConnection()

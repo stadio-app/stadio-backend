@@ -24,5 +24,8 @@ func New(app_ctx types.AppContext, service services.Service) Controller {
 			Message: "Hello world",
 		})
 	})
+	auth := server.Group("/auth")
+	auth.Get("/:provider", controller.SignIn)
+	auth.Get("/:provider/callback", controller.Callback)
 	return controller
 }
