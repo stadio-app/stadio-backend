@@ -1,13 +1,13 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	_ "github.com/lib/pq"
-	"github.com/m3-app/backend/util"
+	"github.com/m3-app/backend/app"
+	"github.com/m3-app/backend/utils"
 )
 
 type Response struct {
@@ -17,26 +17,13 @@ type Response struct {
 const PORT uint = 3000
 
 func main() {
-	db_conn := util.DbConnection()
+	db_conn := utils.DbConnection()
 	defer db_conn.Close()
 
-	ent_manager := util.CreateEntClient(db_conn).Debug()
-	ent_manager.Location.Create()
-
 	server := fiber.New()
-	server.Get("/", func(c *fiber.Ctx) error {
-		return c.JSON(Response{
-			Message: "Hello",
-		})
-	})
+	app := app.New(db_conn, server)
 
-	ctx := context.Background()
-
-	if err := ent_manager.Schema.Create(ctx); err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
-
-	if err := server.Listen(fmt.Sprintf(":%d", PORT)); err != nil {
+	if err := app.Server.Listen(fmt.Sprintf(":%d", PORT)); err != nil {
 		log.Fatalf("port %d is already in use", PORT)
 	}
 }
