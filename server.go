@@ -10,10 +10,6 @@ import (
 	"github.com/m3-app/backend/utils"
 )
 
-type Response struct {
-	Message string `json:"message"`
-}
-
 const PORT uint = 3000
 
 func main() {
