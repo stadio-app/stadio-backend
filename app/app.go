@@ -31,7 +31,7 @@ func New(db_conn *sql.DB, server *fiber.App) *AppBase {
 }
 
 func (app *AppBase) NewBaseHandler() *AppBase {
-	app.EntityManager = utils.CreateEntClient(app.DbConn).Debug()
+	app.EntityManager = utils.CreateEntClient(app.DbConn) // chain .Debug() to show messages
 	// auto migration
 	ctx := context.Background()
 	if err := app.EntityManager.Schema.Create(ctx); err != nil {
