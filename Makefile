@@ -1,8 +1,11 @@
 run:
-	go run server.go
+	make ent-generate && go run server.go
 
 build:
-	go build server.go
+	make ent-generate && go build server.go
+
+watch:
+	make ent-generate && go run github.com/go-playground/justdoit -build="go build server.go" -run="./server"
 
 ent-generate:
 	go generate ./ent
@@ -10,5 +13,5 @@ ent-generate:
 ent-create: # arguments  [entity name]
 	go run -mod=mod entgo.io/ent/cmd/ent new
 
-docker:
+docker-container:
 	docker compose -f ./docker/docker-compose.yml up

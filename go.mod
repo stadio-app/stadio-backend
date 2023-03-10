@@ -12,7 +12,11 @@ require (
 	github.com/agext/levenshtein v1.2.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
+	github.com/go-playground/ansi v2.1.0+incompatible // indirect
+	github.com/go-playground/errors v3.3.0+incompatible // indirect
+	github.com/go-playground/justdoit v0.0.0-20180413125108-f398c5dd9bd7 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/log v6.3.0+incompatible // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
@@ -21,6 +25,7 @@ require (
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
 	golang.org/x/text v0.3.8 // indirect
+	gopkg.in/fsnotify.v1 v1.4.7 // indirect
 )
 
 require (
