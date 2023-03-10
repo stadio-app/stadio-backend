@@ -55,7 +55,7 @@ func (app *AppBase) NewBaseHandler() *AppBase {
 		EntityManager: app.EntityManager,
 		Validator: app.Validator,
 	})
-	// utils.SetupOauthProviders(*app.Tokens) // oauth providers
+	utils.SetupOauthProviders(*app.Tokens)
 	controllers.New(app.AppContext, app.Services)
 	return app
 }
