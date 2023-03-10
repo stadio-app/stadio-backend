@@ -9,6 +9,7 @@ import (
 
 	"github.com/go-playground/validator"
 	"github.com/gofiber/fiber/v2"
+	"github.com/m3-app/backend/controllers"
 	"github.com/m3-app/backend/services"
 	"github.com/m3-app/backend/types"
 	"github.com/m3-app/backend/utils"
@@ -55,6 +56,6 @@ func (app *AppBase) NewBaseHandler() *AppBase {
 		Validator: app.Validator,
 	})
 	// utils.SetupOauthProviders(*app.Tokens) // oauth providers
-	// controllers.New(app.AppContext, app.Service)
+	controllers.New(app.AppContext, app.Services)
 	return app
 }
