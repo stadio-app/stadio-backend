@@ -6,9 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"entgo.io/contrib/entgql"
-	"entgo.io/ent/entc"
-	"entgo.io/ent/entc/gen"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
@@ -22,9 +19,6 @@ import (
 const defaultPort = "8080"
 
 func main() {
-	// GraphQL integration https://entgo.io/docs/graphql#quick-introduction
-	entc_generate()
-
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = defaultPort
@@ -69,14 +63,4 @@ func main() {
 	if err := http.ListenAndServe(port_str, router); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func entc_generate() {
-	ex, err := entgql.NewExtension()
-    if err != nil {
-        log.Fatalf("creating entgql extension: %v", err)
-    }
-    if err := entc.Generate("./ent/schema", &gen.Config{}, entc.Extensions(ex)); err != nil {
-        log.Fatalf("running ent codegen: %v", err)
-    }
 }
