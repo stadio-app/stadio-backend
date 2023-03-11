@@ -17,7 +17,7 @@ gql-generate:
 	go run github.com/99designs/gqlgen generate
 
 generate:
-	make ent-generate && make gql-generate
+	make gql-generate
 
 docker-container:
 	docker compose -f ./docker/docker-compose.yml up
