@@ -16,6 +16,7 @@ import (
 	"github.com/m3-app/backend/app"
 	"github.com/m3-app/backend/graph"
 	"github.com/m3-app/backend/utils"
+	"github.com/markbates/goth/gothic"
 )
 
 const defaultPort = "8080"
@@ -36,8 +37,23 @@ func main() {
 	port_str := fmt.Sprintf(":%s", app.Port)
 
 	router := chi.NewRouter()
-	router.Use(app.BaseMiddleware())
 	router.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
+	// oauth routes
+	router.Group(func(r chi.Router) {
+		r.Use(app.GothMiddleware())
+		r.HandleFunc("/auth/{provider:[a-z-]+}", func(w http.ResponseWriter, r *http.Request) {
+			gothic.BeginAuthHandler(w, r)
+		})
+		r.HandleFunc("/auth/{provider:[a-z-]+}/callback", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Content-Type", "application/json")
+			provider_user, err := gothic.CompleteUserAuth(w, r)
+			if err != nil {
+				utils.ErrorResponse(w, 400, "could not complete oauth transaction")
+				return
+			}
+			utils.DataResponse(w, provider_user)
+		})
+	})
 	// secure routes
 	router.Group(func(r chi.Router) {
 		gql_server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
