@@ -33,6 +33,9 @@ func GetBearerToken(authorization string) (string, error) {
 	if parsed_authorization[0] != "Bearer" || len(parsed_authorization) < 2 {
 		return "", fmt.Errorf("could not parse bearer token")
 	}
-	token := parsed_authorization[1]
+	token := strings.TrimSpace(parsed_authorization[1])
+	if token == "" {
+		return "", fmt.Errorf("token empty")
+	}
 	return token, nil
 }
