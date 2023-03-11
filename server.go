@@ -3,23 +3,32 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"os"
 
-	"github.com/gofiber/fiber/v2"
+	"github.com/99designs/gqlgen/graphql/playground"
 	_ "github.com/lib/pq"
 	"github.com/m3-app/backend/app"
 	"github.com/m3-app/backend/utils"
 )
 
-const PORT uint = 8080
+const defaultPort = "8080"
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+	
 	db_conn := utils.DbConnection()
 	defer db_conn.Close()
+	
+	app := app.New(db_conn, port)
+	port_str := fmt.Sprintf(":%s", app.Port)
+	
+	http.Handle("/graphql", app.GqlServer)
+	http.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 
-	server := fiber.New()
-	app := app.New(db_conn, server)
-
-	if err := app.Server.Listen(fmt.Sprintf(":%d", PORT)); err != nil {
-		log.Fatalf("port %d is already in use", PORT)
-	}
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", app.Port)
+	log.Fatal(http.ListenAndServe(port_str, nil))
 }

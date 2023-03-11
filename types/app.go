@@ -3,17 +3,18 @@ package types
 import (
 	"database/sql"
 
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-playground/validator"
-	"github.com/gofiber/fiber/v2"
 	"github.com/m3-app/backend/ent"
 )
 
 type AppContext struct {
 	DbConn *sql.DB
 	Tokens *Tokens
-	Server *fiber.App
+	GqlServer *handler.Server
 	Validator *validator.Validate
 	EntityManager *ent.Client
+	Port string
 }
 
 type DbConnectionOptions struct {
