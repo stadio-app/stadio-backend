@@ -24,7 +24,7 @@ require (
 	github.com/go-playground/log v6.3.0+incompatible // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/go-cmp v0.5.6 // indirect
+	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.1 // indirect
@@ -50,6 +50,7 @@ require (
 )
 
 require (
+	entgo.io/contrib v0.3.5
 	entgo.io/ent v0.11.9
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-playground/validator v9.31.0+incompatible
