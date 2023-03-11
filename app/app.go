@@ -7,9 +7,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/go-playground/validator"
-	"github.com/m3-app/backend/graph"
 	"github.com/m3-app/backend/services"
 	"github.com/m3-app/backend/types"
 	"github.com/m3-app/backend/utils"
@@ -56,8 +54,5 @@ func (app *AppBase) NewBaseHandler() *AppBase {
 		Validator: app.Validator,
 	})
 	utils.SetupOauthProviders(*app.Tokens)
-	app.GqlServer = handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
-		Resolvers: &graph.Resolver{},
-	}))
 	return app
 }

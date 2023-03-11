@@ -6,10 +6,12 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
 	"github.com/m3-app/backend/app"
+	"github.com/m3-app/backend/graph"
 	"github.com/m3-app/backend/utils"
 )
 
@@ -26,15 +28,20 @@ func main() {
 	
 	app := app.New(db_conn, port)
 	port_str := fmt.Sprintf(":%s", app.Port)
-	
+
 	router := chi.NewRouter()
 	router.Use(app.BaseMiddleware())
+	router.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 	// secure routes
 	router.Group(func(r chi.Router) {
+		gql_server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
+			Resolvers: &graph.Resolver{
+				AppBase: app,
+			},
+		}))
 		r.Use(app.AuthMiddleware())
-		r.Handle("/graphql", app.GqlServer)
+		r.Handle("/graphql", gql_server)
 	})
-	router.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
 
 	log.Printf("Server running on http://localhost:%s/\n", app.Port)
 	if err := http.ListenAndServe(port_str, router); err != nil {
