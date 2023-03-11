@@ -9,6 +9,54 @@ import (
 	"github.com/m3-app/backend/ent"
 )
 
+// The AddressFunc type is an adapter to allow the use of ordinary
+// function as Address mutator.
+type AddressFunc func(context.Context, *ent.AddressMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f AddressFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.AddressMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.AddressMutation", m)
+}
+
+// The LocationFunc type is an adapter to allow the use of ordinary
+// function as Location mutator.
+type LocationFunc func(context.Context, *ent.LocationMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LocationFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LocationMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LocationMutation", m)
+}
+
+// The OwnerFunc type is an adapter to allow the use of ordinary
+// function as Owner mutator.
+type OwnerFunc func(context.Context, *ent.OwnerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f OwnerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.OwnerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.OwnerMutation", m)
+}
+
+// The ReviewFunc type is an adapter to allow the use of ordinary
+// function as Review mutator.
+type ReviewFunc func(context.Context, *ent.ReviewMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ReviewFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ReviewMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ReviewMutation", m)
+}
+
 // The UserFunc type is an adapter to allow the use of ordinary
 // function as User mutator.
 type UserFunc func(context.Context, *ent.UserMutation) (ent.Value, error)
@@ -116,7 +164,6 @@ func HasFields(field string, fields ...string) Condition {
 // If executes the given hook under condition.
 //
 //	hook.If(ComputeAverage, And(HasFields(...), HasAddedFields(...)))
-//
 func If(hk ent.Hook, cond Condition) ent.Hook {
 	return func(next ent.Mutator) ent.Mutator {
 		return ent.MutateFunc(func(ctx context.Context, m ent.Mutation) (ent.Value, error) {
@@ -131,7 +178,6 @@ func If(hk ent.Hook, cond Condition) ent.Hook {
 // On executes the given hook only for the given operation.
 //
 //	hook.On(Log, ent.Delete|ent.Create)
-//
 func On(hk ent.Hook, op ent.Op) ent.Hook {
 	return If(hk, HasOp(op))
 }
@@ -139,7 +185,6 @@ func On(hk ent.Hook, op ent.Op) ent.Hook {
 // Unless skips the given hook only for the given operation.
 //
 //	hook.Unless(Log, ent.Update|ent.UpdateOne)
-//
 func Unless(hk ent.Hook, op ent.Op) ent.Hook {
 	return If(hk, Not(HasOp(op)))
 }
@@ -160,7 +205,6 @@ func FixedError(err error) ent.Hook {
 //			Reject(ent.Delete|ent.Update),
 //		}
 //	}
-//
 func Reject(op ent.Op) ent.Hook {
 	hk := FixedError(fmt.Errorf("%s operation is not allowed", op))
 	return On(hk, op)

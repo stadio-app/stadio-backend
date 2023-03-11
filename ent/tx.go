@@ -12,6 +12,14 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// Address is the client for interacting with the Address builders.
+	Address *AddressClient
+	// Location is the client for interacting with the Location builders.
+	Location *LocationClient
+	// Owner is the client for interacting with the Owner builders.
+	Owner *OwnerClient
+	// Review is the client for interacting with the Review builders.
+	Review *ReviewClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 
@@ -145,6 +153,10 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.Address = NewAddressClient(tx.config)
+	tx.Location = NewLocationClient(tx.config)
+	tx.Owner = NewOwnerClient(tx.config)
+	tx.Review = NewReviewClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 }
 
@@ -155,7 +167,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: User.QueryXXX(), the query will be executed
+// applies a query, for example: Address.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

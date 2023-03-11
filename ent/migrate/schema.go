@@ -8,6 +8,81 @@ import (
 )
 
 var (
+	// AddressesColumns holds the columns for the "addresses" table.
+	AddressesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "address_id", Type: field.TypeInt64, Unique: true},
+		{Name: "latitude", Type: field.TypeFloat64},
+		{Name: "longitude", Type: field.TypeFloat64},
+		{Name: "maps_link", Type: field.TypeString, Size: 2147483647},
+		{Name: "full_address", Type: field.TypeString},
+		{Name: "location_address", Type: field.TypeInt, Nullable: true},
+	}
+	// AddressesTable holds the schema information for the "addresses" table.
+	AddressesTable = &schema.Table{
+		Name:       "addresses",
+		Columns:    AddressesColumns,
+		PrimaryKey: []*schema.Column{AddressesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "addresses_locations_address",
+				Columns:    []*schema.Column{AddressesColumns[6]},
+				RefColumns: []*schema.Column{LocationsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// LocationsColumns holds the columns for the "locations" table.
+	LocationsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "location_id", Type: field.TypeInt64, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "type", Type: field.TypeString},
+		{Name: "owner_locations", Type: field.TypeUUID, Nullable: true},
+	}
+	// LocationsTable holds the schema information for the "locations" table.
+	LocationsTable = &schema.Table{
+		Name:       "locations",
+		Columns:    LocationsColumns,
+		PrimaryKey: []*schema.Column{LocationsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "locations_owners_locations",
+				Columns:    []*schema.Column{LocationsColumns[4]},
+				RefColumns: []*schema.Column{OwnersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// OwnersColumns holds the columns for the "owners" table.
+	OwnersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeUUID, Unique: true},
+		{Name: "first_name", Type: field.TypeString},
+		{Name: "middle_name", Type: field.TypeString, Nullable: true},
+		{Name: "last_name", Type: field.TypeString},
+		{Name: "full_name", Type: field.TypeString},
+		{Name: "id_url", Type: field.TypeString, Unique: true},
+		{Name: "verified", Type: field.TypeBool, Default: false},
+	}
+	// OwnersTable holds the schema information for the "owners" table.
+	OwnersTable = &schema.Table{
+		Name:       "owners",
+		Columns:    OwnersColumns,
+		PrimaryKey: []*schema.Column{OwnersColumns[0]},
+	}
+	// ReviewsColumns holds the columns for the "reviews" table.
+	ReviewsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "review_id", Type: field.TypeInt64, Unique: true},
+		{Name: "rating", Type: field.TypeFloat64},
+		{Name: "message", Type: field.TypeString, Size: 2147483647},
+	}
+	// ReviewsTable holds the schema information for the "reviews" table.
+	ReviewsTable = &schema.Table{
+		Name:       "reviews",
+		Columns:    ReviewsColumns,
+		PrimaryKey: []*schema.Column{ReviewsColumns[0]},
+	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeUUID, Unique: true},
@@ -20,18 +95,62 @@ var (
 		{Name: "active", Type: field.TypeBool, Default: false},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
+		{Name: "owner_user", Type: field.TypeUUID, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "users_owners_user",
+				Columns:    []*schema.Column{UsersColumns[10]},
+				RefColumns: []*schema.Column{OwnersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// ReviewLocationColumns holds the columns for the "review_location" table.
+	ReviewLocationColumns = []*schema.Column{
+		{Name: "review_id", Type: field.TypeInt},
+		{Name: "location_id", Type: field.TypeInt},
+	}
+	// ReviewLocationTable holds the schema information for the "review_location" table.
+	ReviewLocationTable = &schema.Table{
+		Name:       "review_location",
+		Columns:    ReviewLocationColumns,
+		PrimaryKey: []*schema.Column{ReviewLocationColumns[0], ReviewLocationColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "review_location_review_id",
+				Columns:    []*schema.Column{ReviewLocationColumns[0]},
+				RefColumns: []*schema.Column{ReviewsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "review_location_location_id",
+				Columns:    []*schema.Column{ReviewLocationColumns[1]},
+				RefColumns: []*schema.Column{LocationsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AddressesTable,
+		LocationsTable,
+		OwnersTable,
+		ReviewsTable,
 		UsersTable,
+		ReviewLocationTable,
 	}
 )
 
 func init() {
+	AddressesTable.ForeignKeys[0].RefTable = LocationsTable
+	LocationsTable.ForeignKeys[0].RefTable = OwnersTable
+	UsersTable.ForeignKeys[0].RefTable = OwnersTable
+	ReviewLocationTable.ForeignKeys[0].RefTable = ReviewsTable
+	ReviewLocationTable.ForeignKeys[1].RefTable = LocationsTable
 }

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 	"github.com/google/uuid"
+	"github.com/m3-app/backend/ent/owner"
 	"github.com/m3-app/backend/ent/predicate"
 	"github.com/m3-app/backend/ent/user"
 )
@@ -22,8 +23,8 @@ type UserQuery struct {
 	order      []OrderFunc
 	inters     []Interceptor
 	predicates []predicate.User
-	modifiers  []func(*sql.Selector)
-	loadTotal  []func(context.Context, []*User) error
+	withOwner  *OwnerQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -58,6 +59,28 @@ func (uq *UserQuery) Unique(unique bool) *UserQuery {
 func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	uq.order = append(uq.order, o...)
 	return uq
+}
+
+// QueryOwner chains the current query on the "owner" edge.
+func (uq *UserQuery) QueryOwner() *OwnerQuery {
+	query := (&OwnerClient{config: uq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(owner.Table, owner.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, user.OwnerTable, user.OwnerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first User entity from the query.
@@ -252,10 +275,22 @@ func (uq *UserQuery) Clone() *UserQuery {
 		order:      append([]OrderFunc{}, uq.order...),
 		inters:     append([]Interceptor{}, uq.inters...),
 		predicates: append([]predicate.User{}, uq.predicates...),
+		withOwner:  uq.withOwner.Clone(),
 		// clone intermediate query.
 		sql:  uq.sql.Clone(),
 		path: uq.path,
 	}
+}
+
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithOwner(opts ...func(*OwnerQuery)) *UserQuery {
+	query := (&OwnerClient{config: uq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withOwner = query
+	return uq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -272,7 +307,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 //		GroupBy(user.FieldEmail).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
-//
 func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 	uq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &UserGroupBy{build: uq}
@@ -294,7 +328,6 @@ func (uq *UserQuery) GroupBy(field string, fields ...string) *UserGroupBy {
 //	client.User.Query().
 //		Select(user.FieldEmail).
 //		Scan(ctx, &v)
-//
 func (uq *UserQuery) Select(fields ...string) *UserSelect {
 	uq.ctx.Fields = append(uq.ctx.Fields, fields...)
 	sbuild := &UserSelect{UserQuery: uq}
@@ -336,19 +369,27 @@ func (uq *UserQuery) prepareQuery(ctx context.Context) error {
 
 func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, error) {
 	var (
-		nodes = []*User{}
-		_spec = uq.querySpec()
+		nodes       = []*User{}
+		withFKs     = uq.withFKs
+		_spec       = uq.querySpec()
+		loadedTypes = [1]bool{
+			uq.withOwner != nil,
+		}
 	)
+	if uq.withOwner != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, user.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*User).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &User{config: uq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
-	}
-	if len(uq.modifiers) > 0 {
-		_spec.Modifiers = uq.modifiers
 	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
@@ -359,19 +400,50 @@ func (uq *UserQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*User, e
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	for i := range uq.loadTotal {
-		if err := uq.loadTotal[i](ctx, nodes); err != nil {
+	if query := uq.withOwner; query != nil {
+		if err := uq.loadOwner(ctx, query, nodes, nil,
+			func(n *User, e *Owner) { n.Edges.Owner = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
+func (uq *UserQuery) loadOwner(ctx context.Context, query *OwnerQuery, nodes []*User, init func(*User), assign func(*User, *Owner)) error {
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*User)
+	for i := range nodes {
+		if nodes[i].owner_user == nil {
+			continue
+		}
+		fk := *nodes[i].owner_user
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(owner.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "owner_user" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+
 func (uq *UserQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := uq.querySpec()
-	if len(uq.modifiers) > 0 {
-		_spec.Modifiers = uq.modifiers
-	}
 	_spec.Node.Columns = uq.ctx.Fields
 	if len(uq.ctx.Fields) > 0 {
 		_spec.Unique = uq.ctx.Unique != nil && *uq.ctx.Unique

@@ -11,6 +11,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
+	"github.com/m3-app/backend/ent/owner"
 	"github.com/m3-app/backend/ent/predicate"
 	"github.com/m3-app/backend/ent/user"
 )
@@ -162,9 +164,34 @@ func (uu *UserUpdate) SetNillableUpdatedAt(t *time.Time) *UserUpdate {
 	return uu
 }
 
+// SetOwnerID sets the "owner" edge to the Owner entity by ID.
+func (uu *UserUpdate) SetOwnerID(id uuid.UUID) *UserUpdate {
+	uu.mutation.SetOwnerID(id)
+	return uu
+}
+
+// SetNillableOwnerID sets the "owner" edge to the Owner entity by ID if the given value is not nil.
+func (uu *UserUpdate) SetNillableOwnerID(id *uuid.UUID) *UserUpdate {
+	if id != nil {
+		uu = uu.SetOwnerID(*id)
+	}
+	return uu
+}
+
+// SetOwner sets the "owner" edge to the Owner entity.
+func (uu *UserUpdate) SetOwner(o *Owner) *UserUpdate {
+	return uu.SetOwnerID(o.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
+}
+
+// ClearOwner clears the "owner" edge to the Owner entity.
+func (uu *UserUpdate) ClearOwner() *UserUpdate {
+	uu.mutation.ClearOwner()
+	return uu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -241,6 +268,41 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := uu.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if uu.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.OwnerTable,
+			Columns: []string{user.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: owner.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.OwnerTable,
+			Columns: []string{user.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: owner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
@@ -396,9 +458,34 @@ func (uuo *UserUpdateOne) SetNillableUpdatedAt(t *time.Time) *UserUpdateOne {
 	return uuo
 }
 
+// SetOwnerID sets the "owner" edge to the Owner entity by ID.
+func (uuo *UserUpdateOne) SetOwnerID(id uuid.UUID) *UserUpdateOne {
+	uuo.mutation.SetOwnerID(id)
+	return uuo
+}
+
+// SetNillableOwnerID sets the "owner" edge to the Owner entity by ID if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableOwnerID(id *uuid.UUID) *UserUpdateOne {
+	if id != nil {
+		uuo = uuo.SetOwnerID(*id)
+	}
+	return uuo
+}
+
+// SetOwner sets the "owner" edge to the Owner entity.
+func (uuo *UserUpdateOne) SetOwner(o *Owner) *UserUpdateOne {
+	return uuo.SetOwnerID(o.ID)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
+}
+
+// ClearOwner clears the "owner" edge to the Owner entity.
+func (uuo *UserUpdateOne) ClearOwner() *UserUpdateOne {
+	uuo.mutation.ClearOwner()
+	return uuo
 }
 
 // Where appends a list predicates to the UserUpdate builder.
@@ -505,6 +592,41 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if value, ok := uuo.mutation.UpdatedAt(); ok {
 		_spec.SetField(user.FieldUpdatedAt, field.TypeTime, value)
+	}
+	if uuo.mutation.OwnerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.OwnerTable,
+			Columns: []string{user.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: owner.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   user.OwnerTable,
+			Columns: []string{user.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeUUID,
+					Column: owner.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &User{config: uuo.config}
 	_spec.Assign = _node.assignValues

@@ -11,6 +11,10 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/m3-app/backend/ent/address"
+	"github.com/m3-app/backend/ent/location"
+	"github.com/m3-app/backend/ent/owner"
+	"github.com/m3-app/backend/ent/review"
 	"github.com/m3-app/backend/ent/user"
 )
 
@@ -65,7 +69,11 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		user.Table: user.ValidColumn,
+		address.Table:  address.ValidColumn,
+		location.Table: location.ValidColumn,
+		owner.Table:    owner.ValidColumn,
+		review.Table:   review.ValidColumn,
+		user.Table:     user.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
@@ -115,7 +123,6 @@ type AggregateFunc func(*sql.Selector) string
 //	GroupBy(field1, field2).
 //	Aggregate(ent.As(ent.Sum(field1), "sum_field1"), (ent.As(ent.Sum(field2), "sum_field2")).
 //	Scan(ctx, &v)
-//
 func As(fn AggregateFunc, end string) AggregateFunc {
 	return func(s *sql.Selector) string {
 		return sql.As(fn(s), end)
