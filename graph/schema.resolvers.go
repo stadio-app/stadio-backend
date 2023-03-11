@@ -6,15 +6,19 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/m3-app/backend/graph/model"
+	"github.com/m3-app/backend/ent"
 )
 
-// Me is the resolver for the me field.
-func (r *queryResolver) Me(ctx context.Context, name string) (*model.Me, error) {
-	return &model.Me{
-		Name: name,
-	}, nil
+// Node is the resolver for the node field.
+func (r *queryResolver) Node(ctx context.Context, id string) (ent.Noder, error) {
+	panic(fmt.Errorf("not implemented: Node - node"))
+}
+
+// Nodes is the resolver for the nodes field.
+func (r *queryResolver) Nodes(ctx context.Context, ids []string) ([]ent.Noder, error) {
+	panic(fmt.Errorf("not implemented: Nodes - nodes"))
 }
 
 // Query returns QueryResolver implementation.
