@@ -3,23 +3,80 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
+	"os"
 
-	"github.com/gofiber/fiber/v2"
+	"entgo.io/contrib/entgql"
+	"entgo.io/ent/entc"
+	"entgo.io/ent/entc/gen"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
 	"github.com/m3-app/backend/app"
+	"github.com/m3-app/backend/graph"
 	"github.com/m3-app/backend/utils"
+	"github.com/markbates/goth/gothic"
 )
 
-const PORT uint = 8080
+const defaultPort = "8080"
 
 func main() {
+	// GraphQL integration https://entgo.io/docs/graphql#quick-introduction
+	entc_generate()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
+	}
+	
 	db_conn := utils.DbConnection()
 	defer db_conn.Close()
+	
+	app := app.New(db_conn, port)
+	port_str := fmt.Sprintf(":%s", app.Port)
 
-	server := fiber.New()
-	app := app.New(db_conn, server)
+	router := chi.NewRouter()
+	router.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
+	// oauth routes
+	router.Group(func(r chi.Router) {
+		r.Use(app.GothMiddleware())
+		r.HandleFunc("/auth/{provider:[a-z-]+}", func(w http.ResponseWriter, r *http.Request) {
+			gothic.BeginAuthHandler(w, r)
+		})
+		r.HandleFunc("/auth/{provider:[a-z-]+}/callback", func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Add("Content-Type", "application/json")
+			provider_user, err := gothic.CompleteUserAuth(w, r)
+			if err != nil {
+				utils.ErrorResponse(w, 400, "could not complete oauth transaction")
+				return
+			}
+			utils.DataResponse(w, provider_user)
+		})
+	})
+	// secure routes
+	router.Group(func(r chi.Router) {
+		gql_server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
+			Resolvers: &graph.Resolver{
+				AppBase: app,
+			},
+		}))
+		r.Use(app.AuthMiddleware())
+		r.Handle("/graphql", gql_server)
+	})
 
-	if err := app.Server.Listen(fmt.Sprintf(":%d", PORT)); err != nil {
-		log.Fatalf("port %d is already in use", PORT)
+	log.Printf("Server running on http://localhost:%s/\n", app.Port)
+	if err := http.ListenAndServe(port_str, router); err != nil {
+		log.Fatal(err)
 	}
+}
+
+func entc_generate() {
+	ex, err := entgql.NewExtension()
+    if err != nil {
+        log.Fatalf("creating entgql extension: %v", err)
+    }
+    if err := entc.Generate("./ent/schema", &gen.Config{}, entc.Extensions(ex)); err != nil {
+        log.Fatalf("running ent codegen: %v", err)
+    }
 }

@@ -8,8 +8,6 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator"
-	"github.com/gofiber/fiber/v2"
-	"github.com/m3-app/backend/controllers"
 	"github.com/m3-app/backend/services"
 	"github.com/m3-app/backend/types"
 	"github.com/m3-app/backend/utils"
@@ -20,10 +18,10 @@ type AppBase struct {
 	Services services.Service
 }
 
-func New(db_conn *sql.DB, server *fiber.App) *AppBase {
+func New(db_conn *sql.DB, port string) *AppBase {
 	app := AppBase{}
 	app.DbConn = db_conn
-	app.Server = server
+	app.Port = port
 	// initialize tokens
 	tokens, tokens_err := utils.ParseTokens()
 	if tokens_err != nil {
@@ -56,6 +54,5 @@ func (app *AppBase) NewBaseHandler() *AppBase {
 		Validator: app.Validator,
 	})
 	utils.SetupOauthProviders(*app.Tokens)
-	controllers.New(app.AppContext, app.Services)
 	return app
 }

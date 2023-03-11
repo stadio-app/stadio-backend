@@ -1,43 +1,40 @@
 package utils
 
 import (
-	"github.com/gofiber/fiber/v2"
+	"encoding/json"
+	"net/http"
+
 	"github.com/m3-app/backend/types"
 )
 
-func ResponseWithStatusCode(c *fiber.Ctx, statusCode int, data interface{}) error {
-	return c.Status(statusCode).JSON(data)
+func JsonResponse(w http.ResponseWriter, status int, data interface{}) {
+	w.WriteHeader(status)
+	w.Header().Add("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		json.NewEncoder(w).Encode(
+			types.Response{
+				Message: "could not parse data",
+			},
+		)
+	}
 }
 
-// Generic json response with status code 200
-func JsonResponse(c *fiber.Ctx, data interface{}) error {
-	return ResponseWithStatusCode(c, fiber.StatusOK, data)
-}
-
-// types.Error json response with status code 400
-func FailResponse(c *fiber.Ctx, errors ...string) error {
-	return ResponseWithStatusCode(c, fiber.StatusBadRequest, types.Errors{
-		Errors: errors,
-	})
-}
-
-// types.Error json response with status code 401
-func FailResponseUnauthorized(c *fiber.Ctx, errors ...string) error {
-	return ResponseWithStatusCode(c, fiber.StatusUnauthorized, types.Errors{
+func ErrorResponse(w http.ResponseWriter, status int, errors ...string) {
+	JsonResponse(w, status, types.Errors{
 		Errors: errors,
 	})
 }
 
 // types.Data json response with status code 200
-func DataResponse(c *fiber.Ctx, data interface{}) error {
-	return ResponseWithStatusCode(c, fiber.StatusOK, types.Result{
+func DataResponse(w http.ResponseWriter, data interface{}) {
+	JsonResponse(w, http.StatusOK, types.Result{
 		Data: data,
 	})
 }
 
 // types.Data json response with status code 201
-func DataResponseCreated(c *fiber.Ctx, data interface{}) error {
-	return ResponseWithStatusCode(c, fiber.StatusCreated, types.Result{
+func DataResponseCreated(w http.ResponseWriter, data interface{}) {
+	JsonResponse(w, http.StatusCreated, types.Result{
 		Data: data,
 	})
 }
