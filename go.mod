@@ -3,6 +3,7 @@ module github.com/m3-app/backend
 go 1.18
 
 require (
+	github.com/99designs/gqlgen v0.17.26
 	github.com/google/uuid v1.3.0
 	github.com/lib/pq v1.10.7
 )
@@ -11,13 +12,11 @@ require (
 	ariga.io/atlas v0.9.1 // indirect
 	cloud.google.com/go v0.67.0 // indirect
 	github.com/agext/levenshtein v1.2.1 // indirect
+	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/apparentlymart/go-textseg/v13 v13.0.0 // indirect
+	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/go-openapi/inflect v0.19.0 // indirect
-	github.com/go-playground/ansi v2.1.0+incompatible // indirect
-	github.com/go-playground/errors v3.3.0+incompatible // indirect
-	github.com/go-playground/justdoit v0.0.0-20180413125108-f398c5dd9bd7 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
-	github.com/go-playground/log v6.3.0+incompatible // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
@@ -29,14 +28,20 @@ require (
 	github.com/leodido/go-urn v1.2.2 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/mrjones/oauth v0.0.0-20180629183705-f4e24b6d100c // indirect
+	github.com/russross/blackfriday/v2 v2.1.0 // indirect
+	github.com/urfave/cli/v2 v2.24.4 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.1 // indirect
+	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	github.com/zclconf/go-cty v1.8.0 // indirect
 	golang.org/x/mod v0.8.0 // indirect
-	golang.org/x/net v0.0.0-20220906165146-f3363e06e74c // indirect
+	golang.org/x/net v0.6.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914 // indirect
-	golang.org/x/text v0.3.8 // indirect
+	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/tools v0.6.1-0.20230222164832-25d2519c8696 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/protobuf v1.26.0 // indirect
-	gopkg.in/fsnotify.v1 v1.4.7 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (
@@ -44,7 +49,6 @@ require (
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/gofiber/fiber/v2 v2.42.0
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/klauspost/compress v1.15.9 // indirect
 	github.com/markbates/goth v1.76.1
 	github.com/mattn/go-colorable v0.1.13 // indirect
