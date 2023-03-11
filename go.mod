@@ -55,6 +55,7 @@ require (
 require (
 	entgo.io/ent v0.11.9
 	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/gofiber/fiber/v2 v2.42.0
 	github.com/klauspost/compress v1.15.9 // indirect
