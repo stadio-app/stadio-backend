@@ -46,8 +46,6 @@ type Query {
     ids: [ID!]!
   ): [Node]!
 }
-"""The builtin Time type"""
-scalar Time
 type User implements Node {
   id: ID!
   email: String!
