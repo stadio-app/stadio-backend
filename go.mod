@@ -62,6 +62,7 @@ require (
 	entgo.io/ent v0.11.9
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-playground/validator v9.31.0+incompatible
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/markbates/goth v1.76.1
 	golang.org/x/sys v0.5.0 // indirect
 )
