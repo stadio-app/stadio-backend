@@ -5,3 +5,9 @@ package model
 type Message struct {
 	Message string `json:"message"`
 }
+
+type UserInput struct {
+	Email     string  `json:"email"`
+	Name      string  `json:"name"`
+	AvatarURL *string `json:"avatarUrl"`
+}

@@ -12,6 +12,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/m3-app/backend/app"
 	"github.com/m3-app/backend/graph"
+	"github.com/m3-app/backend/graph/model"
 	"github.com/m3-app/backend/utils"
 	"github.com/markbates/goth/gothic"
 )
@@ -45,7 +46,20 @@ func main() {
 				utils.ErrorResponse(w, 400, "could not complete oauth transaction")
 				return
 			}
-			utils.DataResponse(w, provider_user)
+
+			user, err := app.Services.UserService.FindOrCreate(
+				provider_user.Email,
+				&model.UserInput{
+					Email: provider_user.Email,
+					Name: provider_user.Name,
+					AvatarURL: &provider_user.AvatarURL,
+				},
+			)
+			if err != nil {
+				utils.ErrorResponse(w, 400, "could not find or create user")
+				return
+			}
+			utils.DataResponse(w, user)
 		})
 	})
 	// secure routes
@@ -59,7 +73,7 @@ func main() {
 		r.Handle("/graphql", gql_server)
 	})
 
-	log.Printf("Server running on http://localhost:%s/\n", app.Port)
+	log.Printf("Server running on http://localhost:%s/playground\n", app.Port)
 	if err := http.ListenAndServe(port_str, router); err != nil {
 		log.Fatal(err)
 	}
