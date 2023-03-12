@@ -13,3 +13,8 @@ input UserInput {
     name: String!
     avatarUrl: String
 }
+
+type AuthState {
+    user: User!
+    token: String!
+}

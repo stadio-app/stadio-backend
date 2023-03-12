@@ -2,6 +2,15 @@
 
 package model
 
+import (
+	"github.com/m3-app/backend/ent"
+)
+
+type AuthState struct {
+	User  *ent.User `json:"user"`
+	Token string    `json:"token"`
+}
+
 type Message struct {
 	Message string `json:"message"`
 }
