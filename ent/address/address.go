@@ -2,13 +2,15 @@
 
 package address
 
+import (
+	"github.com/google/uuid"
+)
+
 const (
 	// Label holds the string label denoting the address type in the database.
 	Label = "address"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldAddressID holds the string denoting the address_id field in the database.
-	FieldAddressID = "address_id"
 	// FieldLatitude holds the string denoting the latitude field in the database.
 	FieldLatitude = "latitude"
 	// FieldLongitude holds the string denoting the longitude field in the database.
@@ -33,7 +35,6 @@ const (
 // Columns holds all SQL columns for address fields.
 var Columns = []string{
 	FieldID,
-	FieldAddressID,
 	FieldLatitude,
 	FieldLongitude,
 	FieldMapsLink,
@@ -60,3 +61,8 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)

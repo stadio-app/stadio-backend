@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/location"
 	"github.com/m3-app/backend/ent/review"
 )
@@ -18,12 +19,6 @@ type ReviewCreate struct {
 	config
 	mutation *ReviewMutation
 	hooks    []Hook
-}
-
-// SetReviewID sets the "review_id" field.
-func (rc *ReviewCreate) SetReviewID(i int64) *ReviewCreate {
-	rc.mutation.SetReviewID(i)
-	return rc
 }
 
 // SetRating sets the "rating" field.
@@ -38,15 +33,29 @@ func (rc *ReviewCreate) SetMessage(s string) *ReviewCreate {
 	return rc
 }
 
+// SetID sets the "id" field.
+func (rc *ReviewCreate) SetID(u uuid.UUID) *ReviewCreate {
+	rc.mutation.SetID(u)
+	return rc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (rc *ReviewCreate) SetNillableID(u *uuid.UUID) *ReviewCreate {
+	if u != nil {
+		rc.SetID(*u)
+	}
+	return rc
+}
+
 // AddLocationIDs adds the "location" edge to the Location entity by IDs.
-func (rc *ReviewCreate) AddLocationIDs(ids ...int) *ReviewCreate {
+func (rc *ReviewCreate) AddLocationIDs(ids ...uuid.UUID) *ReviewCreate {
 	rc.mutation.AddLocationIDs(ids...)
 	return rc
 }
 
 // AddLocation adds the "location" edges to the Location entity.
 func (rc *ReviewCreate) AddLocation(l ...*Location) *ReviewCreate {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -60,6 +69,7 @@ func (rc *ReviewCreate) Mutation() *ReviewMutation {
 
 // Save creates the Review in the database.
 func (rc *ReviewCreate) Save(ctx context.Context) (*Review, error) {
+	rc.defaults()
 	return withHooks[*Review, ReviewMutation](ctx, rc.sqlSave, rc.mutation, rc.hooks)
 }
 
@@ -85,11 +95,16 @@ func (rc *ReviewCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (rc *ReviewCreate) defaults() {
+	if _, ok := rc.mutation.ID(); !ok {
+		v := review.DefaultID()
+		rc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (rc *ReviewCreate) check() error {
-	if _, ok := rc.mutation.ReviewID(); !ok {
-		return &ValidationError{Name: "review_id", err: errors.New(`ent: missing required field "Review.review_id"`)}
-	}
 	if _, ok := rc.mutation.Rating(); !ok {
 		return &ValidationError{Name: "rating", err: errors.New(`ent: missing required field "Review.rating"`)}
 	}
@@ -110,8 +125,13 @@ func (rc *ReviewCreate) sqlSave(ctx context.Context) (*Review, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	rc.mutation.id = &_node.ID
 	rc.mutation.done = true
 	return _node, nil
@@ -120,11 +140,11 @@ func (rc *ReviewCreate) sqlSave(ctx context.Context) (*Review, error) {
 func (rc *ReviewCreate) createSpec() (*Review, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Review{config: rc.config}
-		_spec = sqlgraph.NewCreateSpec(review.Table, sqlgraph.NewFieldSpec(review.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(review.Table, sqlgraph.NewFieldSpec(review.FieldID, field.TypeUUID))
 	)
-	if value, ok := rc.mutation.ReviewID(); ok {
-		_spec.SetField(review.FieldReviewID, field.TypeInt64, value)
-		_node.ReviewID = value
+	if id, ok := rc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := rc.mutation.Rating(); ok {
 		_spec.SetField(review.FieldRating, field.TypeFloat64, value)
@@ -143,7 +163,7 @@ func (rc *ReviewCreate) createSpec() (*Review, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -170,6 +190,7 @@ func (rcb *ReviewCreateBulk) Save(ctx context.Context) ([]*Review, error) {
 	for i := range rcb.builders {
 		func(i int, root context.Context) {
 			builder := rcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ReviewMutation)
 				if !ok {
@@ -196,10 +217,6 @@ func (rcb *ReviewCreateBulk) Save(ctx context.Context) ([]*Review, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

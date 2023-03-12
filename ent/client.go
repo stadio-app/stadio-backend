@@ -175,6 +175,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 //		Address.
 //		Query().
 //		Count(ctx)
+//
 func (c *Client) Debug() *Client {
 	if c.debug {
 		return c
@@ -275,7 +276,7 @@ func (c *AddressClient) UpdateOne(a *Address) *AddressUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *AddressClient) UpdateOneID(id int) *AddressUpdateOne {
+func (c *AddressClient) UpdateOneID(id uuid.UUID) *AddressUpdateOne {
 	mutation := newAddressMutation(c.config, OpUpdateOne, withAddressID(id))
 	return &AddressUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -292,7 +293,7 @@ func (c *AddressClient) DeleteOne(a *Address) *AddressDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *AddressClient) DeleteOneID(id int) *AddressDeleteOne {
+func (c *AddressClient) DeleteOneID(id uuid.UUID) *AddressDeleteOne {
 	builder := c.Delete().Where(address.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -309,12 +310,12 @@ func (c *AddressClient) Query() *AddressQuery {
 }
 
 // Get returns a Address entity by its id.
-func (c *AddressClient) Get(ctx context.Context, id int) (*Address, error) {
+func (c *AddressClient) Get(ctx context.Context, id uuid.UUID) (*Address, error) {
 	return c.Query().Where(address.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *AddressClient) GetX(ctx context.Context, id int) *Address {
+func (c *AddressClient) GetX(ctx context.Context, id uuid.UUID) *Address {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -409,7 +410,7 @@ func (c *LocationClient) UpdateOne(l *Location) *LocationUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *LocationClient) UpdateOneID(id int) *LocationUpdateOne {
+func (c *LocationClient) UpdateOneID(id uuid.UUID) *LocationUpdateOne {
 	mutation := newLocationMutation(c.config, OpUpdateOne, withLocationID(id))
 	return &LocationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -426,7 +427,7 @@ func (c *LocationClient) DeleteOne(l *Location) *LocationDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *LocationClient) DeleteOneID(id int) *LocationDeleteOne {
+func (c *LocationClient) DeleteOneID(id uuid.UUID) *LocationDeleteOne {
 	builder := c.Delete().Where(location.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -443,12 +444,12 @@ func (c *LocationClient) Query() *LocationQuery {
 }
 
 // Get returns a Location entity by its id.
-func (c *LocationClient) Get(ctx context.Context, id int) (*Location, error) {
+func (c *LocationClient) Get(ctx context.Context, id uuid.UUID) (*Location, error) {
 	return c.Query().Where(location.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *LocationClient) GetX(ctx context.Context, id int) *Location {
+func (c *LocationClient) GetX(ctx context.Context, id uuid.UUID) *Location {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -725,7 +726,7 @@ func (c *ReviewClient) UpdateOne(r *Review) *ReviewUpdateOne {
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ReviewClient) UpdateOneID(id int) *ReviewUpdateOne {
+func (c *ReviewClient) UpdateOneID(id uuid.UUID) *ReviewUpdateOne {
 	mutation := newReviewMutation(c.config, OpUpdateOne, withReviewID(id))
 	return &ReviewUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
@@ -742,7 +743,7 @@ func (c *ReviewClient) DeleteOne(r *Review) *ReviewDeleteOne {
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *ReviewClient) DeleteOneID(id int) *ReviewDeleteOne {
+func (c *ReviewClient) DeleteOneID(id uuid.UUID) *ReviewDeleteOne {
 	builder := c.Delete().Where(review.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
@@ -759,12 +760,12 @@ func (c *ReviewClient) Query() *ReviewQuery {
 }
 
 // Get returns a Review entity by its id.
-func (c *ReviewClient) Get(ctx context.Context, id int) (*Review, error) {
+func (c *ReviewClient) Get(ctx context.Context, id uuid.UUID) (*Review, error) {
 	return c.Query().Where(review.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ReviewClient) GetX(ctx context.Context, id int) *Review {
+func (c *ReviewClient) GetX(ctx context.Context, id uuid.UUID) *Review {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)

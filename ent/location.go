@@ -16,9 +16,7 @@ import (
 type Location struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
-	// LocationID holds the value of the "location_id" field.
-	LocationID int64 `json:"location_id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Type holds the value of the "type" field.
@@ -40,6 +38,11 @@ type LocationEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
+	// totalCount holds the count of the edges above.
+	totalCount [3]map[string]int
+
+	namedAddress map[string][]*Address
+	namedReviews map[string][]*Review
 }
 
 // AddressOrErr returns the Address value or an error if the edge
@@ -78,10 +81,10 @@ func (*Location) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case location.FieldID, location.FieldLocationID:
-			values[i] = new(sql.NullInt64)
 		case location.FieldName, location.FieldType:
 			values[i] = new(sql.NullString)
+		case location.FieldID:
+			values[i] = new(uuid.UUID)
 		case location.ForeignKeys[0]: // owner_locations
 			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
@@ -100,16 +103,10 @@ func (l *Location) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case location.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			l.ID = int(value.Int64)
-		case location.FieldLocationID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field location_id", values[i])
-			} else if value.Valid {
-				l.LocationID = value.Int64
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				l.ID = *value
 			}
 		case location.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -173,9 +170,6 @@ func (l *Location) String() string {
 	var builder strings.Builder
 	builder.WriteString("Location(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", l.ID))
-	builder.WriteString("location_id=")
-	builder.WriteString(fmt.Sprintf("%v", l.LocationID))
-	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(l.Name)
 	builder.WriteString(", ")
@@ -183,6 +177,54 @@ func (l *Location) String() string {
 	builder.WriteString(l.Type)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedAddress returns the Address named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (l *Location) NamedAddress(name string) ([]*Address, error) {
+	if l.Edges.namedAddress == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := l.Edges.namedAddress[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (l *Location) appendNamedAddress(name string, edges ...*Address) {
+	if l.Edges.namedAddress == nil {
+		l.Edges.namedAddress = make(map[string][]*Address)
+	}
+	if len(edges) == 0 {
+		l.Edges.namedAddress[name] = []*Address{}
+	} else {
+		l.Edges.namedAddress[name] = append(l.Edges.namedAddress[name], edges...)
+	}
+}
+
+// NamedReviews returns the Reviews named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (l *Location) NamedReviews(name string) ([]*Review, error) {
+	if l.Edges.namedReviews == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := l.Edges.namedReviews[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (l *Location) appendNamedReviews(name string, edges ...*Review) {
+	if l.Edges.namedReviews == nil {
+		l.Edges.namedReviews = make(map[string][]*Review)
+	}
+	if len(edges) == 0 {
+		l.Edges.namedReviews[name] = []*Review{}
+	} else {
+		l.Edges.namedReviews[name] = append(l.Edges.namedReviews[name], edges...)
+	}
 }
 
 // Locations is a parsable slice of Location.

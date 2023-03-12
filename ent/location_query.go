@@ -22,14 +22,18 @@ import (
 // LocationQuery is the builder for querying Location entities.
 type LocationQuery struct {
 	config
-	ctx         *QueryContext
-	order       []OrderFunc
-	inters      []Interceptor
-	predicates  []predicate.Location
-	withAddress *AddressQuery
-	withReviews *ReviewQuery
-	withOwner   *OwnerQuery
-	withFKs     bool
+	ctx              *QueryContext
+	order            []OrderFunc
+	inters           []Interceptor
+	predicates       []predicate.Location
+	withAddress      *AddressQuery
+	withReviews      *ReviewQuery
+	withOwner        *OwnerQuery
+	withFKs          bool
+	modifiers        []func(*sql.Selector)
+	loadTotal        []func(context.Context, []*Location) error
+	withNamedAddress map[string]*AddressQuery
+	withNamedReviews map[string]*ReviewQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -156,8 +160,8 @@ func (lq *LocationQuery) FirstX(ctx context.Context) *Location {
 
 // FirstID returns the first Location ID from the query.
 // Returns a *NotFoundError when no Location ID was found.
-func (lq *LocationQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (lq *LocationQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = lq.Limit(1).IDs(setContextOp(ctx, lq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -169,7 +173,7 @@ func (lq *LocationQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (lq *LocationQuery) FirstIDX(ctx context.Context) int {
+func (lq *LocationQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := lq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -207,8 +211,8 @@ func (lq *LocationQuery) OnlyX(ctx context.Context) *Location {
 // OnlyID is like Only, but returns the only Location ID in the query.
 // Returns a *NotSingularError when more than one Location ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (lq *LocationQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (lq *LocationQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = lq.Limit(2).IDs(setContextOp(ctx, lq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -224,7 +228,7 @@ func (lq *LocationQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (lq *LocationQuery) OnlyIDX(ctx context.Context) int {
+func (lq *LocationQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := lq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -252,7 +256,7 @@ func (lq *LocationQuery) AllX(ctx context.Context) []*Location {
 }
 
 // IDs executes the query and returns a list of Location IDs.
-func (lq *LocationQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (lq *LocationQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if lq.ctx.Unique == nil && lq.path != nil {
 		lq.Unique(true)
 	}
@@ -264,7 +268,7 @@ func (lq *LocationQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (lq *LocationQuery) IDsX(ctx context.Context) []int {
+func (lq *LocationQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := lq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -372,14 +376,15 @@ func (lq *LocationQuery) WithOwner(opts ...func(*OwnerQuery)) *LocationQuery {
 // Example:
 //
 //	var v []struct {
-//		LocationID int64 `json:"location_id,omitempty"`
+//		Name string `json:"name,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Location.Query().
-//		GroupBy(location.FieldLocationID).
+//		GroupBy(location.FieldName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (lq *LocationQuery) GroupBy(field string, fields ...string) *LocationGroupBy {
 	lq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &LocationGroupBy{build: lq}
@@ -395,12 +400,13 @@ func (lq *LocationQuery) GroupBy(field string, fields ...string) *LocationGroupB
 // Example:
 //
 //	var v []struct {
-//		LocationID int64 `json:"location_id,omitempty"`
+//		Name string `json:"name,omitempty"`
 //	}
 //
 //	client.Location.Query().
-//		Select(location.FieldLocationID).
+//		Select(location.FieldName).
 //		Scan(ctx, &v)
+//
 func (lq *LocationQuery) Select(fields ...string) *LocationSelect {
 	lq.ctx.Fields = append(lq.ctx.Fields, fields...)
 	sbuild := &LocationSelect{LocationQuery: lq}
@@ -466,6 +472,9 @@ func (lq *LocationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Loc
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(lq.modifiers) > 0 {
+		_spec.Modifiers = lq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -495,12 +504,31 @@ func (lq *LocationQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Loc
 			return nil, err
 		}
 	}
+	for name, query := range lq.withNamedAddress {
+		if err := lq.loadAddress(ctx, query, nodes,
+			func(n *Location) { n.appendNamedAddress(name) },
+			func(n *Location, e *Address) { n.appendNamedAddress(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range lq.withNamedReviews {
+		if err := lq.loadReviews(ctx, query, nodes,
+			func(n *Location) { n.appendNamedReviews(name) },
+			func(n *Location, e *Review) { n.appendNamedReviews(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range lq.loadTotal {
+		if err := lq.loadTotal[i](ctx, nodes); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
 func (lq *LocationQuery) loadAddress(ctx context.Context, query *AddressQuery, nodes []*Location, init func(*Location), assign func(*Location, *Address)) error {
 	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Location)
+	nodeids := make(map[uuid.UUID]*Location)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
@@ -531,8 +559,8 @@ func (lq *LocationQuery) loadAddress(ctx context.Context, query *AddressQuery, n
 }
 func (lq *LocationQuery) loadReviews(ctx context.Context, query *ReviewQuery, nodes []*Location, init func(*Location), assign func(*Location, *Review)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Location)
-	nids := make(map[int]map[*Location]struct{})
+	byID := make(map[uuid.UUID]*Location)
+	nids := make(map[uuid.UUID]map[*Location]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -561,11 +589,11 @@ func (lq *LocationQuery) loadReviews(ctx context.Context, query *ReviewQuery, no
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Location]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -625,6 +653,9 @@ func (lq *LocationQuery) loadOwner(ctx context.Context, query *OwnerQuery, nodes
 
 func (lq *LocationQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := lq.querySpec()
+	if len(lq.modifiers) > 0 {
+		_spec.Modifiers = lq.modifiers
+	}
 	_spec.Node.Columns = lq.ctx.Fields
 	if len(lq.ctx.Fields) > 0 {
 		_spec.Unique = lq.ctx.Unique != nil && *lq.ctx.Unique
@@ -633,7 +664,7 @@ func (lq *LocationQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (lq *LocationQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(location.Table, location.Columns, sqlgraph.NewFieldSpec(location.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(location.Table, location.Columns, sqlgraph.NewFieldSpec(location.FieldID, field.TypeUUID))
 	_spec.From = lq.sql
 	if unique := lq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -702,6 +733,34 @@ func (lq *LocationQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedAddress tells the query-builder to eager-load the nodes that are connected to the "address"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (lq *LocationQuery) WithNamedAddress(name string, opts ...func(*AddressQuery)) *LocationQuery {
+	query := (&AddressClient{config: lq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if lq.withNamedAddress == nil {
+		lq.withNamedAddress = make(map[string]*AddressQuery)
+	}
+	lq.withNamedAddress[name] = query
+	return lq
+}
+
+// WithNamedReviews tells the query-builder to eager-load the nodes that are connected to the "reviews"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (lq *LocationQuery) WithNamedReviews(name string, opts ...func(*ReviewQuery)) *LocationQuery {
+	query := (&ReviewClient{config: lq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if lq.withNamedReviews == nil {
+		lq.withNamedReviews = make(map[string]*ReviewQuery)
+	}
+	lq.withNamedReviews[name] = query
+	return lq
 }
 
 // LocationGroupBy is the group-by builder for Location entities.

@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent"
@@ -18,10 +17,6 @@ func (r *queryResolver) Users(ctx context.Context) ([]*ent.User, error) {
 }
 
 // User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id string) (*ent.User, error) {
-	parsed_uuid, err := uuid.Parse(id)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse uuid")
-	}
-	return r.EntityManager.User.Get(ctx, parsed_uuid)
+func (r *queryResolver) User(ctx context.Context, id uuid.UUID) (*ent.User, error) {
+	return r.EntityManager.User.Get(ctx, id)
 }

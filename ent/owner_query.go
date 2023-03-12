@@ -21,12 +21,16 @@ import (
 // OwnerQuery is the builder for querying Owner entities.
 type OwnerQuery struct {
 	config
-	ctx           *QueryContext
-	order         []OrderFunc
-	inters        []Interceptor
-	predicates    []predicate.Owner
-	withLocations *LocationQuery
-	withUser      *UserQuery
+	ctx                *QueryContext
+	order              []OrderFunc
+	inters             []Interceptor
+	predicates         []predicate.Owner
+	withLocations      *LocationQuery
+	withUser           *UserQuery
+	modifiers          []func(*sql.Selector)
+	loadTotal          []func(context.Context, []*Owner) error
+	withNamedLocations map[string]*LocationQuery
+	withNamedUser      map[string]*UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -343,6 +347,7 @@ func (oq *OwnerQuery) WithUser(opts ...func(*UserQuery)) *OwnerQuery {
 //		GroupBy(owner.FieldFirstName).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (oq *OwnerQuery) GroupBy(field string, fields ...string) *OwnerGroupBy {
 	oq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &OwnerGroupBy{build: oq}
@@ -364,6 +369,7 @@ func (oq *OwnerQuery) GroupBy(field string, fields ...string) *OwnerGroupBy {
 //	client.Owner.Query().
 //		Select(owner.FieldFirstName).
 //		Scan(ctx, &v)
+//
 func (oq *OwnerQuery) Select(fields ...string) *OwnerSelect {
 	oq.ctx.Fields = append(oq.ctx.Fields, fields...)
 	sbuild := &OwnerSelect{OwnerQuery: oq}
@@ -421,6 +427,9 @@ func (oq *OwnerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Owner,
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(oq.modifiers) > 0 {
+		_spec.Modifiers = oq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -441,6 +450,25 @@ func (oq *OwnerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Owner,
 		if err := oq.loadUser(ctx, query, nodes,
 			func(n *Owner) { n.Edges.User = []*User{} },
 			func(n *Owner, e *User) { n.Edges.User = append(n.Edges.User, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range oq.withNamedLocations {
+		if err := oq.loadLocations(ctx, query, nodes,
+			func(n *Owner) { n.appendNamedLocations(name) },
+			func(n *Owner, e *Location) { n.appendNamedLocations(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for name, query := range oq.withNamedUser {
+		if err := oq.loadUser(ctx, query, nodes,
+			func(n *Owner) { n.appendNamedUser(name) },
+			func(n *Owner, e *User) { n.appendNamedUser(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range oq.loadTotal {
+		if err := oq.loadTotal[i](ctx, nodes); err != nil {
 			return nil, err
 		}
 	}
@@ -512,6 +540,9 @@ func (oq *OwnerQuery) loadUser(ctx context.Context, query *UserQuery, nodes []*O
 
 func (oq *OwnerQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := oq.querySpec()
+	if len(oq.modifiers) > 0 {
+		_spec.Modifiers = oq.modifiers
+	}
 	_spec.Node.Columns = oq.ctx.Fields
 	if len(oq.ctx.Fields) > 0 {
 		_spec.Unique = oq.ctx.Unique != nil && *oq.ctx.Unique
@@ -589,6 +620,34 @@ func (oq *OwnerQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedLocations tells the query-builder to eager-load the nodes that are connected to the "locations"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (oq *OwnerQuery) WithNamedLocations(name string, opts ...func(*LocationQuery)) *OwnerQuery {
+	query := (&LocationClient{config: oq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if oq.withNamedLocations == nil {
+		oq.withNamedLocations = make(map[string]*LocationQuery)
+	}
+	oq.withNamedLocations[name] = query
+	return oq
+}
+
+// WithNamedUser tells the query-builder to eager-load the nodes that are connected to the "user"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (oq *OwnerQuery) WithNamedUser(name string, opts ...func(*UserQuery)) *OwnerQuery {
+	query := (&UserClient{config: oq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if oq.withNamedUser == nil {
+		oq.withNamedUser = make(map[string]*UserQuery)
+	}
+	oq.withNamedUser[name] = query
+	return oq
 }
 
 // OwnerGroupBy is the group-by builder for Owner entities.

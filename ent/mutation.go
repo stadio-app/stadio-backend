@@ -41,9 +41,7 @@ type AddressMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *int
-	address_id      *int64
-	addaddress_id   *int64
+	id              *uuid.UUID
 	latitude        *float64
 	addlatitude     *float64
 	longitude       *float64
@@ -51,7 +49,7 @@ type AddressMutation struct {
 	maps_link       *string
 	full_address    *string
 	clearedFields   map[string]struct{}
-	location        *int
+	location        *uuid.UUID
 	clearedlocation bool
 	done            bool
 	oldValue        func(context.Context) (*Address, error)
@@ -78,7 +76,7 @@ func newAddressMutation(c config, op Op, opts ...addressOption) *AddressMutation
 }
 
 // withAddressID sets the ID field of the mutation.
-func withAddressID(id int) addressOption {
+func withAddressID(id uuid.UUID) addressOption {
 	return func(m *AddressMutation) {
 		var (
 			err   error
@@ -128,9 +126,15 @@ func (m AddressMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Address entities.
+func (m *AddressMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *AddressMutation) ID() (id int, exists bool) {
+func (m *AddressMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -141,12 +145,12 @@ func (m *AddressMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *AddressMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *AddressMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -154,62 +158,6 @@ func (m *AddressMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetAddressID sets the "address_id" field.
-func (m *AddressMutation) SetAddressID(i int64) {
-	m.address_id = &i
-	m.addaddress_id = nil
-}
-
-// AddressID returns the value of the "address_id" field in the mutation.
-func (m *AddressMutation) AddressID() (r int64, exists bool) {
-	v := m.address_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAddressID returns the old "address_id" field's value of the Address entity.
-// If the Address object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *AddressMutation) OldAddressID(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAddressID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAddressID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAddressID: %w", err)
-	}
-	return oldValue.AddressID, nil
-}
-
-// AddAddressID adds i to the "address_id" field.
-func (m *AddressMutation) AddAddressID(i int64) {
-	if m.addaddress_id != nil {
-		*m.addaddress_id += i
-	} else {
-		m.addaddress_id = &i
-	}
-}
-
-// AddedAddressID returns the value that was added to the "address_id" field in this mutation.
-func (m *AddressMutation) AddedAddressID() (r int64, exists bool) {
-	v := m.addaddress_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetAddressID resets all changes to the "address_id" field.
-func (m *AddressMutation) ResetAddressID() {
-	m.address_id = nil
-	m.addaddress_id = nil
 }
 
 // SetLatitude sets the "latitude" field.
@@ -397,7 +345,7 @@ func (m *AddressMutation) ResetFullAddress() {
 }
 
 // SetLocationID sets the "location" edge to the Location entity by id.
-func (m *AddressMutation) SetLocationID(id int) {
+func (m *AddressMutation) SetLocationID(id uuid.UUID) {
 	m.location = &id
 }
 
@@ -412,7 +360,7 @@ func (m *AddressMutation) LocationCleared() bool {
 }
 
 // LocationID returns the "location" edge ID in the mutation.
-func (m *AddressMutation) LocationID() (id int, exists bool) {
+func (m *AddressMutation) LocationID() (id uuid.UUID, exists bool) {
 	if m.location != nil {
 		return *m.location, true
 	}
@@ -422,7 +370,7 @@ func (m *AddressMutation) LocationID() (id int, exists bool) {
 // LocationIDs returns the "location" edge IDs in the mutation.
 // Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
 // LocationID instead. It exists only for internal usage by the builders.
-func (m *AddressMutation) LocationIDs() (ids []int) {
+func (m *AddressMutation) LocationIDs() (ids []uuid.UUID) {
 	if id := m.location; id != nil {
 		ids = append(ids, *id)
 	}
@@ -469,10 +417,7 @@ func (m *AddressMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *AddressMutation) Fields() []string {
-	fields := make([]string, 0, 5)
-	if m.address_id != nil {
-		fields = append(fields, address.FieldAddressID)
-	}
+	fields := make([]string, 0, 4)
 	if m.latitude != nil {
 		fields = append(fields, address.FieldLatitude)
 	}
@@ -493,8 +438,6 @@ func (m *AddressMutation) Fields() []string {
 // schema.
 func (m *AddressMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case address.FieldAddressID:
-		return m.AddressID()
 	case address.FieldLatitude:
 		return m.Latitude()
 	case address.FieldLongitude:
@@ -512,8 +455,6 @@ func (m *AddressMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *AddressMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case address.FieldAddressID:
-		return m.OldAddressID(ctx)
 	case address.FieldLatitude:
 		return m.OldLatitude(ctx)
 	case address.FieldLongitude:
@@ -531,13 +472,6 @@ func (m *AddressMutation) OldField(ctx context.Context, name string) (ent.Value,
 // type.
 func (m *AddressMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case address.FieldAddressID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAddressID(v)
-		return nil
 	case address.FieldLatitude:
 		v, ok := value.(float64)
 		if !ok {
@@ -574,9 +508,6 @@ func (m *AddressMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *AddressMutation) AddedFields() []string {
 	var fields []string
-	if m.addaddress_id != nil {
-		fields = append(fields, address.FieldAddressID)
-	}
 	if m.addlatitude != nil {
 		fields = append(fields, address.FieldLatitude)
 	}
@@ -591,8 +522,6 @@ func (m *AddressMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *AddressMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case address.FieldAddressID:
-		return m.AddedAddressID()
 	case address.FieldLatitude:
 		return m.AddedLatitude()
 	case address.FieldLongitude:
@@ -606,13 +535,6 @@ func (m *AddressMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *AddressMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case address.FieldAddressID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddAddressID(v)
-		return nil
 	case address.FieldLatitude:
 		v, ok := value.(float64)
 		if !ok {
@@ -654,9 +576,6 @@ func (m *AddressMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *AddressMutation) ResetField(name string) error {
 	switch name {
-	case address.FieldAddressID:
-		m.ResetAddressID()
-		return nil
 	case address.FieldLatitude:
 		m.ResetLatitude()
 		return nil
@@ -752,17 +671,15 @@ type LocationMutation struct {
 	config
 	op             Op
 	typ            string
-	id             *int
-	location_id    *int64
-	addlocation_id *int64
+	id             *uuid.UUID
 	name           *string
 	_type          *string
 	clearedFields  map[string]struct{}
-	address        map[int]struct{}
-	removedaddress map[int]struct{}
+	address        map[uuid.UUID]struct{}
+	removedaddress map[uuid.UUID]struct{}
 	clearedaddress bool
-	reviews        map[int]struct{}
-	removedreviews map[int]struct{}
+	reviews        map[uuid.UUID]struct{}
+	removedreviews map[uuid.UUID]struct{}
 	clearedreviews bool
 	owner          *uuid.UUID
 	clearedowner   bool
@@ -791,7 +708,7 @@ func newLocationMutation(c config, op Op, opts ...locationOption) *LocationMutat
 }
 
 // withLocationID sets the ID field of the mutation.
-func withLocationID(id int) locationOption {
+func withLocationID(id uuid.UUID) locationOption {
 	return func(m *LocationMutation) {
 		var (
 			err   error
@@ -841,9 +758,15 @@ func (m LocationMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Location entities.
+func (m *LocationMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *LocationMutation) ID() (id int, exists bool) {
+func (m *LocationMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -854,12 +777,12 @@ func (m *LocationMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *LocationMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *LocationMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -867,62 +790,6 @@ func (m *LocationMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetLocationID sets the "location_id" field.
-func (m *LocationMutation) SetLocationID(i int64) {
-	m.location_id = &i
-	m.addlocation_id = nil
-}
-
-// LocationID returns the value of the "location_id" field in the mutation.
-func (m *LocationMutation) LocationID() (r int64, exists bool) {
-	v := m.location_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLocationID returns the old "location_id" field's value of the Location entity.
-// If the Location object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *LocationMutation) OldLocationID(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldLocationID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldLocationID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLocationID: %w", err)
-	}
-	return oldValue.LocationID, nil
-}
-
-// AddLocationID adds i to the "location_id" field.
-func (m *LocationMutation) AddLocationID(i int64) {
-	if m.addlocation_id != nil {
-		*m.addlocation_id += i
-	} else {
-		m.addlocation_id = &i
-	}
-}
-
-// AddedLocationID returns the value that was added to the "location_id" field in this mutation.
-func (m *LocationMutation) AddedLocationID() (r int64, exists bool) {
-	v := m.addlocation_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetLocationID resets all changes to the "location_id" field.
-func (m *LocationMutation) ResetLocationID() {
-	m.location_id = nil
-	m.addlocation_id = nil
 }
 
 // SetName sets the "name" field.
@@ -998,9 +865,9 @@ func (m *LocationMutation) ResetType() {
 }
 
 // AddAddresIDs adds the "address" edge to the Address entity by ids.
-func (m *LocationMutation) AddAddresIDs(ids ...int) {
+func (m *LocationMutation) AddAddresIDs(ids ...uuid.UUID) {
 	if m.address == nil {
-		m.address = make(map[int]struct{})
+		m.address = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.address[ids[i]] = struct{}{}
@@ -1018,9 +885,9 @@ func (m *LocationMutation) AddressCleared() bool {
 }
 
 // RemoveAddresIDs removes the "address" edge to the Address entity by IDs.
-func (m *LocationMutation) RemoveAddresIDs(ids ...int) {
+func (m *LocationMutation) RemoveAddresIDs(ids ...uuid.UUID) {
 	if m.removedaddress == nil {
-		m.removedaddress = make(map[int]struct{})
+		m.removedaddress = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.address, ids[i])
@@ -1029,7 +896,7 @@ func (m *LocationMutation) RemoveAddresIDs(ids ...int) {
 }
 
 // RemovedAddress returns the removed IDs of the "address" edge to the Address entity.
-func (m *LocationMutation) RemovedAddressIDs() (ids []int) {
+func (m *LocationMutation) RemovedAddressIDs() (ids []uuid.UUID) {
 	for id := range m.removedaddress {
 		ids = append(ids, id)
 	}
@@ -1037,7 +904,7 @@ func (m *LocationMutation) RemovedAddressIDs() (ids []int) {
 }
 
 // AddressIDs returns the "address" edge IDs in the mutation.
-func (m *LocationMutation) AddressIDs() (ids []int) {
+func (m *LocationMutation) AddressIDs() (ids []uuid.UUID) {
 	for id := range m.address {
 		ids = append(ids, id)
 	}
@@ -1052,9 +919,9 @@ func (m *LocationMutation) ResetAddress() {
 }
 
 // AddReviewIDs adds the "reviews" edge to the Review entity by ids.
-func (m *LocationMutation) AddReviewIDs(ids ...int) {
+func (m *LocationMutation) AddReviewIDs(ids ...uuid.UUID) {
 	if m.reviews == nil {
-		m.reviews = make(map[int]struct{})
+		m.reviews = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.reviews[ids[i]] = struct{}{}
@@ -1072,9 +939,9 @@ func (m *LocationMutation) ReviewsCleared() bool {
 }
 
 // RemoveReviewIDs removes the "reviews" edge to the Review entity by IDs.
-func (m *LocationMutation) RemoveReviewIDs(ids ...int) {
+func (m *LocationMutation) RemoveReviewIDs(ids ...uuid.UUID) {
 	if m.removedreviews == nil {
-		m.removedreviews = make(map[int]struct{})
+		m.removedreviews = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.reviews, ids[i])
@@ -1083,7 +950,7 @@ func (m *LocationMutation) RemoveReviewIDs(ids ...int) {
 }
 
 // RemovedReviews returns the removed IDs of the "reviews" edge to the Review entity.
-func (m *LocationMutation) RemovedReviewsIDs() (ids []int) {
+func (m *LocationMutation) RemovedReviewsIDs() (ids []uuid.UUID) {
 	for id := range m.removedreviews {
 		ids = append(ids, id)
 	}
@@ -1091,7 +958,7 @@ func (m *LocationMutation) RemovedReviewsIDs() (ids []int) {
 }
 
 // ReviewsIDs returns the "reviews" edge IDs in the mutation.
-func (m *LocationMutation) ReviewsIDs() (ids []int) {
+func (m *LocationMutation) ReviewsIDs() (ids []uuid.UUID) {
 	for id := range m.reviews {
 		ids = append(ids, id)
 	}
@@ -1178,10 +1045,7 @@ func (m *LocationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LocationMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.location_id != nil {
-		fields = append(fields, location.FieldLocationID)
-	}
+	fields := make([]string, 0, 2)
 	if m.name != nil {
 		fields = append(fields, location.FieldName)
 	}
@@ -1196,8 +1060,6 @@ func (m *LocationMutation) Fields() []string {
 // schema.
 func (m *LocationMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case location.FieldLocationID:
-		return m.LocationID()
 	case location.FieldName:
 		return m.Name()
 	case location.FieldType:
@@ -1211,8 +1073,6 @@ func (m *LocationMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *LocationMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case location.FieldLocationID:
-		return m.OldLocationID(ctx)
 	case location.FieldName:
 		return m.OldName(ctx)
 	case location.FieldType:
@@ -1226,13 +1086,6 @@ func (m *LocationMutation) OldField(ctx context.Context, name string) (ent.Value
 // type.
 func (m *LocationMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case location.FieldLocationID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLocationID(v)
-		return nil
 	case location.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -1254,21 +1107,13 @@ func (m *LocationMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *LocationMutation) AddedFields() []string {
-	var fields []string
-	if m.addlocation_id != nil {
-		fields = append(fields, location.FieldLocationID)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *LocationMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case location.FieldLocationID:
-		return m.AddedLocationID()
-	}
 	return nil, false
 }
 
@@ -1277,13 +1122,6 @@ func (m *LocationMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *LocationMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case location.FieldLocationID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLocationID(v)
-		return nil
 	}
 	return fmt.Errorf("unknown Location numeric field %s", name)
 }
@@ -1311,9 +1149,6 @@ func (m *LocationMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *LocationMutation) ResetField(name string) error {
 	switch name {
-	case location.FieldLocationID:
-		m.ResetLocationID()
-		return nil
 	case location.FieldName:
 		m.ResetName()
 		return nil
@@ -1465,8 +1300,8 @@ type OwnerMutation struct {
 	id_url           *string
 	verified         *bool
 	clearedFields    map[string]struct{}
-	locations        map[int]struct{}
-	removedlocations map[int]struct{}
+	locations        map[uuid.UUID]struct{}
+	removedlocations map[uuid.UUID]struct{}
 	clearedlocations bool
 	user             map[uuid.UUID]struct{}
 	removeduser      map[uuid.UUID]struct{}
@@ -1810,9 +1645,9 @@ func (m *OwnerMutation) ResetVerified() {
 }
 
 // AddLocationIDs adds the "locations" edge to the Location entity by ids.
-func (m *OwnerMutation) AddLocationIDs(ids ...int) {
+func (m *OwnerMutation) AddLocationIDs(ids ...uuid.UUID) {
 	if m.locations == nil {
-		m.locations = make(map[int]struct{})
+		m.locations = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.locations[ids[i]] = struct{}{}
@@ -1830,9 +1665,9 @@ func (m *OwnerMutation) LocationsCleared() bool {
 }
 
 // RemoveLocationIDs removes the "locations" edge to the Location entity by IDs.
-func (m *OwnerMutation) RemoveLocationIDs(ids ...int) {
+func (m *OwnerMutation) RemoveLocationIDs(ids ...uuid.UUID) {
 	if m.removedlocations == nil {
-		m.removedlocations = make(map[int]struct{})
+		m.removedlocations = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.locations, ids[i])
@@ -1841,7 +1676,7 @@ func (m *OwnerMutation) RemoveLocationIDs(ids ...int) {
 }
 
 // RemovedLocations returns the removed IDs of the "locations" edge to the Location entity.
-func (m *OwnerMutation) RemovedLocationsIDs() (ids []int) {
+func (m *OwnerMutation) RemovedLocationsIDs() (ids []uuid.UUID) {
 	for id := range m.removedlocations {
 		ids = append(ids, id)
 	}
@@ -1849,7 +1684,7 @@ func (m *OwnerMutation) RemovedLocationsIDs() (ids []int) {
 }
 
 // LocationsIDs returns the "locations" edge IDs in the mutation.
-func (m *OwnerMutation) LocationsIDs() (ids []int) {
+func (m *OwnerMutation) LocationsIDs() (ids []uuid.UUID) {
 	for id := range m.locations {
 		ids = append(ids, id)
 	}
@@ -2257,15 +2092,13 @@ type ReviewMutation struct {
 	config
 	op              Op
 	typ             string
-	id              *int
-	review_id       *int64
-	addreview_id    *int64
+	id              *uuid.UUID
 	rating          *float64
 	addrating       *float64
 	message         *string
 	clearedFields   map[string]struct{}
-	location        map[int]struct{}
-	removedlocation map[int]struct{}
+	location        map[uuid.UUID]struct{}
+	removedlocation map[uuid.UUID]struct{}
 	clearedlocation bool
 	done            bool
 	oldValue        func(context.Context) (*Review, error)
@@ -2292,7 +2125,7 @@ func newReviewMutation(c config, op Op, opts ...reviewOption) *ReviewMutation {
 }
 
 // withReviewID sets the ID field of the mutation.
-func withReviewID(id int) reviewOption {
+func withReviewID(id uuid.UUID) reviewOption {
 	return func(m *ReviewMutation) {
 		var (
 			err   error
@@ -2342,9 +2175,15 @@ func (m ReviewMutation) Tx() (*Tx, error) {
 	return tx, nil
 }
 
+// SetID sets the value of the id field. Note that this
+// operation is only accepted on creation of Review entities.
+func (m *ReviewMutation) SetID(id uuid.UUID) {
+	m.id = &id
+}
+
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *ReviewMutation) ID() (id int, exists bool) {
+func (m *ReviewMutation) ID() (id uuid.UUID, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -2355,12 +2194,12 @@ func (m *ReviewMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *ReviewMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *ReviewMutation) IDs(ctx context.Context) ([]uuid.UUID, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
 		if exists {
-			return []int{id}, nil
+			return []uuid.UUID{id}, nil
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
@@ -2368,62 +2207,6 @@ func (m *ReviewMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetReviewID sets the "review_id" field.
-func (m *ReviewMutation) SetReviewID(i int64) {
-	m.review_id = &i
-	m.addreview_id = nil
-}
-
-// ReviewID returns the value of the "review_id" field in the mutation.
-func (m *ReviewMutation) ReviewID() (r int64, exists bool) {
-	v := m.review_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldReviewID returns the old "review_id" field's value of the Review entity.
-// If the Review object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *ReviewMutation) OldReviewID(ctx context.Context) (v int64, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldReviewID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldReviewID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldReviewID: %w", err)
-	}
-	return oldValue.ReviewID, nil
-}
-
-// AddReviewID adds i to the "review_id" field.
-func (m *ReviewMutation) AddReviewID(i int64) {
-	if m.addreview_id != nil {
-		*m.addreview_id += i
-	} else {
-		m.addreview_id = &i
-	}
-}
-
-// AddedReviewID returns the value that was added to the "review_id" field in this mutation.
-func (m *ReviewMutation) AddedReviewID() (r int64, exists bool) {
-	v := m.addreview_id
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetReviewID resets all changes to the "review_id" field.
-func (m *ReviewMutation) ResetReviewID() {
-	m.review_id = nil
-	m.addreview_id = nil
 }
 
 // SetRating sets the "rating" field.
@@ -2519,9 +2302,9 @@ func (m *ReviewMutation) ResetMessage() {
 }
 
 // AddLocationIDs adds the "location" edge to the Location entity by ids.
-func (m *ReviewMutation) AddLocationIDs(ids ...int) {
+func (m *ReviewMutation) AddLocationIDs(ids ...uuid.UUID) {
 	if m.location == nil {
-		m.location = make(map[int]struct{})
+		m.location = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		m.location[ids[i]] = struct{}{}
@@ -2539,9 +2322,9 @@ func (m *ReviewMutation) LocationCleared() bool {
 }
 
 // RemoveLocationIDs removes the "location" edge to the Location entity by IDs.
-func (m *ReviewMutation) RemoveLocationIDs(ids ...int) {
+func (m *ReviewMutation) RemoveLocationIDs(ids ...uuid.UUID) {
 	if m.removedlocation == nil {
-		m.removedlocation = make(map[int]struct{})
+		m.removedlocation = make(map[uuid.UUID]struct{})
 	}
 	for i := range ids {
 		delete(m.location, ids[i])
@@ -2550,7 +2333,7 @@ func (m *ReviewMutation) RemoveLocationIDs(ids ...int) {
 }
 
 // RemovedLocation returns the removed IDs of the "location" edge to the Location entity.
-func (m *ReviewMutation) RemovedLocationIDs() (ids []int) {
+func (m *ReviewMutation) RemovedLocationIDs() (ids []uuid.UUID) {
 	for id := range m.removedlocation {
 		ids = append(ids, id)
 	}
@@ -2558,7 +2341,7 @@ func (m *ReviewMutation) RemovedLocationIDs() (ids []int) {
 }
 
 // LocationIDs returns the "location" edge IDs in the mutation.
-func (m *ReviewMutation) LocationIDs() (ids []int) {
+func (m *ReviewMutation) LocationIDs() (ids []uuid.UUID) {
 	for id := range m.location {
 		ids = append(ids, id)
 	}
@@ -2606,10 +2389,7 @@ func (m *ReviewMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *ReviewMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.review_id != nil {
-		fields = append(fields, review.FieldReviewID)
-	}
+	fields := make([]string, 0, 2)
 	if m.rating != nil {
 		fields = append(fields, review.FieldRating)
 	}
@@ -2624,8 +2404,6 @@ func (m *ReviewMutation) Fields() []string {
 // schema.
 func (m *ReviewMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case review.FieldReviewID:
-		return m.ReviewID()
 	case review.FieldRating:
 		return m.Rating()
 	case review.FieldMessage:
@@ -2639,8 +2417,6 @@ func (m *ReviewMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *ReviewMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case review.FieldReviewID:
-		return m.OldReviewID(ctx)
 	case review.FieldRating:
 		return m.OldRating(ctx)
 	case review.FieldMessage:
@@ -2654,13 +2430,6 @@ func (m *ReviewMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *ReviewMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case review.FieldReviewID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetReviewID(v)
-		return nil
 	case review.FieldRating:
 		v, ok := value.(float64)
 		if !ok {
@@ -2683,9 +2452,6 @@ func (m *ReviewMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *ReviewMutation) AddedFields() []string {
 	var fields []string
-	if m.addreview_id != nil {
-		fields = append(fields, review.FieldReviewID)
-	}
 	if m.addrating != nil {
 		fields = append(fields, review.FieldRating)
 	}
@@ -2697,8 +2463,6 @@ func (m *ReviewMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *ReviewMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case review.FieldReviewID:
-		return m.AddedReviewID()
 	case review.FieldRating:
 		return m.AddedRating()
 	}
@@ -2710,13 +2474,6 @@ func (m *ReviewMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *ReviewMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case review.FieldReviewID:
-		v, ok := value.(int64)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddReviewID(v)
-		return nil
 	case review.FieldRating:
 		v, ok := value.(float64)
 		if !ok {
@@ -2751,9 +2508,6 @@ func (m *ReviewMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *ReviewMutation) ResetField(name string) error {
 	switch name {
-	case review.FieldReviewID:
-		m.ResetReviewID()
-		return nil
 	case review.FieldRating:
 		m.ResetRating()
 		return nil

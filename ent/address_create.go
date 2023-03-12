@@ -9,6 +9,7 @@ import (
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/address"
 	"github.com/m3-app/backend/ent/location"
 )
@@ -18,12 +19,6 @@ type AddressCreate struct {
 	config
 	mutation *AddressMutation
 	hooks    []Hook
-}
-
-// SetAddressID sets the "address_id" field.
-func (ac *AddressCreate) SetAddressID(i int64) *AddressCreate {
-	ac.mutation.SetAddressID(i)
-	return ac
 }
 
 // SetLatitude sets the "latitude" field.
@@ -50,14 +45,28 @@ func (ac *AddressCreate) SetFullAddress(s string) *AddressCreate {
 	return ac
 }
 
+// SetID sets the "id" field.
+func (ac *AddressCreate) SetID(u uuid.UUID) *AddressCreate {
+	ac.mutation.SetID(u)
+	return ac
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (ac *AddressCreate) SetNillableID(u *uuid.UUID) *AddressCreate {
+	if u != nil {
+		ac.SetID(*u)
+	}
+	return ac
+}
+
 // SetLocationID sets the "location" edge to the Location entity by ID.
-func (ac *AddressCreate) SetLocationID(id int) *AddressCreate {
+func (ac *AddressCreate) SetLocationID(id uuid.UUID) *AddressCreate {
 	ac.mutation.SetLocationID(id)
 	return ac
 }
 
 // SetNillableLocationID sets the "location" edge to the Location entity by ID if the given value is not nil.
-func (ac *AddressCreate) SetNillableLocationID(id *int) *AddressCreate {
+func (ac *AddressCreate) SetNillableLocationID(id *uuid.UUID) *AddressCreate {
 	if id != nil {
 		ac = ac.SetLocationID(*id)
 	}
@@ -76,6 +85,7 @@ func (ac *AddressCreate) Mutation() *AddressMutation {
 
 // Save creates the Address in the database.
 func (ac *AddressCreate) Save(ctx context.Context) (*Address, error) {
+	ac.defaults()
 	return withHooks[*Address, AddressMutation](ctx, ac.sqlSave, ac.mutation, ac.hooks)
 }
 
@@ -101,11 +111,16 @@ func (ac *AddressCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (ac *AddressCreate) defaults() {
+	if _, ok := ac.mutation.ID(); !ok {
+		v := address.DefaultID()
+		ac.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (ac *AddressCreate) check() error {
-	if _, ok := ac.mutation.AddressID(); !ok {
-		return &ValidationError{Name: "address_id", err: errors.New(`ent: missing required field "Address.address_id"`)}
-	}
 	if _, ok := ac.mutation.Latitude(); !ok {
 		return &ValidationError{Name: "latitude", err: errors.New(`ent: missing required field "Address.latitude"`)}
 	}
@@ -132,8 +147,13 @@ func (ac *AddressCreate) sqlSave(ctx context.Context) (*Address, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	ac.mutation.id = &_node.ID
 	ac.mutation.done = true
 	return _node, nil
@@ -142,11 +162,11 @@ func (ac *AddressCreate) sqlSave(ctx context.Context) (*Address, error) {
 func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Address{config: ac.config}
-		_spec = sqlgraph.NewCreateSpec(address.Table, sqlgraph.NewFieldSpec(address.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(address.Table, sqlgraph.NewFieldSpec(address.FieldID, field.TypeUUID))
 	)
-	if value, ok := ac.mutation.AddressID(); ok {
-		_spec.SetField(address.FieldAddressID, field.TypeInt64, value)
-		_node.AddressID = value
+	if id, ok := ac.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := ac.mutation.Latitude(); ok {
 		_spec.SetField(address.FieldLatitude, field.TypeFloat64, value)
@@ -173,7 +193,7 @@ func (ac *AddressCreate) createSpec() (*Address, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -201,6 +221,7 @@ func (acb *AddressCreateBulk) Save(ctx context.Context) ([]*Address, error) {
 	for i := range acb.builders {
 		func(i int, root context.Context) {
 			builder := acb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*AddressMutation)
 				if !ok {
@@ -227,10 +248,6 @@ func (acb *AddressCreateBulk) Save(ctx context.Context) ([]*Address, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

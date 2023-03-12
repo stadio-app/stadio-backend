@@ -2,13 +2,15 @@
 
 package review
 
+import (
+	"github.com/google/uuid"
+)
+
 const (
 	// Label holds the string label denoting the review type in the database.
 	Label = "review"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldReviewID holds the string denoting the review_id field in the database.
-	FieldReviewID = "review_id"
 	// FieldRating holds the string denoting the rating field in the database.
 	FieldRating = "rating"
 	// FieldMessage holds the string denoting the message field in the database.
@@ -27,7 +29,6 @@ const (
 // Columns holds all SQL columns for review fields.
 var Columns = []string{
 	FieldID,
-	FieldReviewID,
 	FieldRating,
 	FieldMessage,
 }
@@ -47,3 +48,8 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/address"
 	"github.com/m3-app/backend/ent/location"
 )
@@ -15,9 +16,7 @@ import (
 type Address struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
-	// AddressID holds the value of the "address_id" field.
-	AddressID int64 `json:"address_id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Latitude holds the value of the "latitude" field.
 	Latitude float64 `json:"latitude,omitempty"`
 	// Longitude holds the value of the "longitude" field.
@@ -29,7 +28,7 @@ type Address struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the AddressQuery when eager-loading is set.
 	Edges            AddressEdges `json:"edges"`
-	location_address *int
+	location_address *uuid.UUID
 }
 
 // AddressEdges holds the relations/edges for other nodes in the graph.
@@ -39,6 +38,8 @@ type AddressEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
 }
 
 // LocationOrErr returns the Location value or an error if the edge
@@ -61,12 +62,12 @@ func (*Address) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case address.FieldLatitude, address.FieldLongitude:
 			values[i] = new(sql.NullFloat64)
-		case address.FieldID, address.FieldAddressID:
-			values[i] = new(sql.NullInt64)
 		case address.FieldMapsLink, address.FieldFullAddress:
 			values[i] = new(sql.NullString)
+		case address.FieldID:
+			values[i] = new(uuid.UUID)
 		case address.ForeignKeys[0]: // location_address
-			values[i] = new(sql.NullInt64)
+			values[i] = &sql.NullScanner{S: new(uuid.UUID)}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Address", columns[i])
 		}
@@ -83,16 +84,10 @@ func (a *Address) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case address.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			a.ID = int(value.Int64)
-		case address.FieldAddressID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field address_id", values[i])
-			} else if value.Valid {
-				a.AddressID = value.Int64
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				a.ID = *value
 			}
 		case address.FieldLatitude:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -119,11 +114,11 @@ func (a *Address) assignValues(columns []string, values []any) error {
 				a.FullAddress = value.String
 			}
 		case address.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field location_address", value)
+			if value, ok := values[i].(*sql.NullScanner); !ok {
+				return fmt.Errorf("unexpected type %T for field location_address", values[i])
 			} else if value.Valid {
-				a.location_address = new(int)
-				*a.location_address = int(value.Int64)
+				a.location_address = new(uuid.UUID)
+				*a.location_address = *value.S.(*uuid.UUID)
 			}
 		}
 	}
@@ -158,9 +153,6 @@ func (a *Address) String() string {
 	var builder strings.Builder
 	builder.WriteString("Address(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", a.ID))
-	builder.WriteString("address_id=")
-	builder.WriteString(fmt.Sprintf("%v", a.AddressID))
-	builder.WriteString(", ")
 	builder.WriteString("latitude=")
 	builder.WriteString(fmt.Sprintf("%v", a.Latitude))
 	builder.WriteString(", ")

@@ -5,57 +5,53 @@ package address
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Address {
+func ID(id uuid.UUID) predicate.Address {
 	return predicate.Address(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Address {
+func IDEQ(id uuid.UUID) predicate.Address {
 	return predicate.Address(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Address {
+func IDNEQ(id uuid.UUID) predicate.Address {
 	return predicate.Address(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Address {
+func IDIn(ids ...uuid.UUID) predicate.Address {
 	return predicate.Address(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Address {
+func IDNotIn(ids ...uuid.UUID) predicate.Address {
 	return predicate.Address(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Address {
+func IDGT(id uuid.UUID) predicate.Address {
 	return predicate.Address(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Address {
+func IDGTE(id uuid.UUID) predicate.Address {
 	return predicate.Address(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Address {
+func IDLT(id uuid.UUID) predicate.Address {
 	return predicate.Address(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Address {
+func IDLTE(id uuid.UUID) predicate.Address {
 	return predicate.Address(sql.FieldLTE(FieldID, id))
-}
-
-// AddressID applies equality check predicate on the "address_id" field. It's identical to AddressIDEQ.
-func AddressID(v int64) predicate.Address {
-	return predicate.Address(sql.FieldEQ(FieldAddressID, v))
 }
 
 // Latitude applies equality check predicate on the "latitude" field. It's identical to LatitudeEQ.
@@ -76,46 +72,6 @@ func MapsLink(v string) predicate.Address {
 // FullAddress applies equality check predicate on the "full_address" field. It's identical to FullAddressEQ.
 func FullAddress(v string) predicate.Address {
 	return predicate.Address(sql.FieldEQ(FieldFullAddress, v))
-}
-
-// AddressIDEQ applies the EQ predicate on the "address_id" field.
-func AddressIDEQ(v int64) predicate.Address {
-	return predicate.Address(sql.FieldEQ(FieldAddressID, v))
-}
-
-// AddressIDNEQ applies the NEQ predicate on the "address_id" field.
-func AddressIDNEQ(v int64) predicate.Address {
-	return predicate.Address(sql.FieldNEQ(FieldAddressID, v))
-}
-
-// AddressIDIn applies the In predicate on the "address_id" field.
-func AddressIDIn(vs ...int64) predicate.Address {
-	return predicate.Address(sql.FieldIn(FieldAddressID, vs...))
-}
-
-// AddressIDNotIn applies the NotIn predicate on the "address_id" field.
-func AddressIDNotIn(vs ...int64) predicate.Address {
-	return predicate.Address(sql.FieldNotIn(FieldAddressID, vs...))
-}
-
-// AddressIDGT applies the GT predicate on the "address_id" field.
-func AddressIDGT(v int64) predicate.Address {
-	return predicate.Address(sql.FieldGT(FieldAddressID, v))
-}
-
-// AddressIDGTE applies the GTE predicate on the "address_id" field.
-func AddressIDGTE(v int64) predicate.Address {
-	return predicate.Address(sql.FieldGTE(FieldAddressID, v))
-}
-
-// AddressIDLT applies the LT predicate on the "address_id" field.
-func AddressIDLT(v int64) predicate.Address {
-	return predicate.Address(sql.FieldLT(FieldAddressID, v))
-}
-
-// AddressIDLTE applies the LTE predicate on the "address_id" field.
-func AddressIDLTE(v int64) predicate.Address {
-	return predicate.Address(sql.FieldLTE(FieldAddressID, v))
 }
 
 // LatitudeEQ applies the EQ predicate on the "latitude" field.

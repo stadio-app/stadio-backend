@@ -31,19 +31,6 @@ func (lu *LocationUpdate) Where(ps ...predicate.Location) *LocationUpdate {
 	return lu
 }
 
-// SetLocationID sets the "location_id" field.
-func (lu *LocationUpdate) SetLocationID(i int64) *LocationUpdate {
-	lu.mutation.ResetLocationID()
-	lu.mutation.SetLocationID(i)
-	return lu
-}
-
-// AddLocationID adds i to the "location_id" field.
-func (lu *LocationUpdate) AddLocationID(i int64) *LocationUpdate {
-	lu.mutation.AddLocationID(i)
-	return lu
-}
-
 // SetName sets the "name" field.
 func (lu *LocationUpdate) SetName(s string) *LocationUpdate {
 	lu.mutation.SetName(s)
@@ -57,14 +44,14 @@ func (lu *LocationUpdate) SetType(s string) *LocationUpdate {
 }
 
 // AddAddresIDs adds the "address" edge to the Address entity by IDs.
-func (lu *LocationUpdate) AddAddresIDs(ids ...int) *LocationUpdate {
+func (lu *LocationUpdate) AddAddresIDs(ids ...uuid.UUID) *LocationUpdate {
 	lu.mutation.AddAddresIDs(ids...)
 	return lu
 }
 
 // AddAddress adds the "address" edges to the Address entity.
 func (lu *LocationUpdate) AddAddress(a ...*Address) *LocationUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -72,14 +59,14 @@ func (lu *LocationUpdate) AddAddress(a ...*Address) *LocationUpdate {
 }
 
 // AddReviewIDs adds the "reviews" edge to the Review entity by IDs.
-func (lu *LocationUpdate) AddReviewIDs(ids ...int) *LocationUpdate {
+func (lu *LocationUpdate) AddReviewIDs(ids ...uuid.UUID) *LocationUpdate {
 	lu.mutation.AddReviewIDs(ids...)
 	return lu
 }
 
 // AddReviews adds the "reviews" edges to the Review entity.
 func (lu *LocationUpdate) AddReviews(r ...*Review) *LocationUpdate {
-	ids := make([]int, len(r))
+	ids := make([]uuid.UUID, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
@@ -117,14 +104,14 @@ func (lu *LocationUpdate) ClearAddress() *LocationUpdate {
 }
 
 // RemoveAddresIDs removes the "address" edge to Address entities by IDs.
-func (lu *LocationUpdate) RemoveAddresIDs(ids ...int) *LocationUpdate {
+func (lu *LocationUpdate) RemoveAddresIDs(ids ...uuid.UUID) *LocationUpdate {
 	lu.mutation.RemoveAddresIDs(ids...)
 	return lu
 }
 
 // RemoveAddress removes "address" edges to Address entities.
 func (lu *LocationUpdate) RemoveAddress(a ...*Address) *LocationUpdate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -138,14 +125,14 @@ func (lu *LocationUpdate) ClearReviews() *LocationUpdate {
 }
 
 // RemoveReviewIDs removes the "reviews" edge to Review entities by IDs.
-func (lu *LocationUpdate) RemoveReviewIDs(ids ...int) *LocationUpdate {
+func (lu *LocationUpdate) RemoveReviewIDs(ids ...uuid.UUID) *LocationUpdate {
 	lu.mutation.RemoveReviewIDs(ids...)
 	return lu
 }
 
 // RemoveReviews removes "reviews" edges to Review entities.
 func (lu *LocationUpdate) RemoveReviews(r ...*Review) *LocationUpdate {
-	ids := make([]int, len(r))
+	ids := make([]uuid.UUID, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
@@ -186,19 +173,13 @@ func (lu *LocationUpdate) ExecX(ctx context.Context) {
 }
 
 func (lu *LocationUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(location.Table, location.Columns, sqlgraph.NewFieldSpec(location.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(location.Table, location.Columns, sqlgraph.NewFieldSpec(location.FieldID, field.TypeUUID))
 	if ps := lu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := lu.mutation.LocationID(); ok {
-		_spec.SetField(location.FieldLocationID, field.TypeInt64, value)
-	}
-	if value, ok := lu.mutation.AddedLocationID(); ok {
-		_spec.AddField(location.FieldLocationID, field.TypeInt64, value)
 	}
 	if value, ok := lu.mutation.Name(); ok {
 		_spec.SetField(location.FieldName, field.TypeString, value)
@@ -215,7 +196,7 @@ func (lu *LocationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: address.FieldID,
 				},
 			},
@@ -231,7 +212,7 @@ func (lu *LocationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: address.FieldID,
 				},
 			},
@@ -250,7 +231,7 @@ func (lu *LocationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: address.FieldID,
 				},
 			},
@@ -269,7 +250,7 @@ func (lu *LocationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: review.FieldID,
 				},
 			},
@@ -285,7 +266,7 @@ func (lu *LocationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: review.FieldID,
 				},
 			},
@@ -304,7 +285,7 @@ func (lu *LocationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: review.FieldID,
 				},
 			},
@@ -369,19 +350,6 @@ type LocationUpdateOne struct {
 	mutation *LocationMutation
 }
 
-// SetLocationID sets the "location_id" field.
-func (luo *LocationUpdateOne) SetLocationID(i int64) *LocationUpdateOne {
-	luo.mutation.ResetLocationID()
-	luo.mutation.SetLocationID(i)
-	return luo
-}
-
-// AddLocationID adds i to the "location_id" field.
-func (luo *LocationUpdateOne) AddLocationID(i int64) *LocationUpdateOne {
-	luo.mutation.AddLocationID(i)
-	return luo
-}
-
 // SetName sets the "name" field.
 func (luo *LocationUpdateOne) SetName(s string) *LocationUpdateOne {
 	luo.mutation.SetName(s)
@@ -395,14 +363,14 @@ func (luo *LocationUpdateOne) SetType(s string) *LocationUpdateOne {
 }
 
 // AddAddresIDs adds the "address" edge to the Address entity by IDs.
-func (luo *LocationUpdateOne) AddAddresIDs(ids ...int) *LocationUpdateOne {
+func (luo *LocationUpdateOne) AddAddresIDs(ids ...uuid.UUID) *LocationUpdateOne {
 	luo.mutation.AddAddresIDs(ids...)
 	return luo
 }
 
 // AddAddress adds the "address" edges to the Address entity.
 func (luo *LocationUpdateOne) AddAddress(a ...*Address) *LocationUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -410,14 +378,14 @@ func (luo *LocationUpdateOne) AddAddress(a ...*Address) *LocationUpdateOne {
 }
 
 // AddReviewIDs adds the "reviews" edge to the Review entity by IDs.
-func (luo *LocationUpdateOne) AddReviewIDs(ids ...int) *LocationUpdateOne {
+func (luo *LocationUpdateOne) AddReviewIDs(ids ...uuid.UUID) *LocationUpdateOne {
 	luo.mutation.AddReviewIDs(ids...)
 	return luo
 }
 
 // AddReviews adds the "reviews" edges to the Review entity.
 func (luo *LocationUpdateOne) AddReviews(r ...*Review) *LocationUpdateOne {
-	ids := make([]int, len(r))
+	ids := make([]uuid.UUID, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
@@ -455,14 +423,14 @@ func (luo *LocationUpdateOne) ClearAddress() *LocationUpdateOne {
 }
 
 // RemoveAddresIDs removes the "address" edge to Address entities by IDs.
-func (luo *LocationUpdateOne) RemoveAddresIDs(ids ...int) *LocationUpdateOne {
+func (luo *LocationUpdateOne) RemoveAddresIDs(ids ...uuid.UUID) *LocationUpdateOne {
 	luo.mutation.RemoveAddresIDs(ids...)
 	return luo
 }
 
 // RemoveAddress removes "address" edges to Address entities.
 func (luo *LocationUpdateOne) RemoveAddress(a ...*Address) *LocationUpdateOne {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -476,14 +444,14 @@ func (luo *LocationUpdateOne) ClearReviews() *LocationUpdateOne {
 }
 
 // RemoveReviewIDs removes the "reviews" edge to Review entities by IDs.
-func (luo *LocationUpdateOne) RemoveReviewIDs(ids ...int) *LocationUpdateOne {
+func (luo *LocationUpdateOne) RemoveReviewIDs(ids ...uuid.UUID) *LocationUpdateOne {
 	luo.mutation.RemoveReviewIDs(ids...)
 	return luo
 }
 
 // RemoveReviews removes "reviews" edges to Review entities.
 func (luo *LocationUpdateOne) RemoveReviews(r ...*Review) *LocationUpdateOne {
-	ids := make([]int, len(r))
+	ids := make([]uuid.UUID, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
@@ -537,7 +505,7 @@ func (luo *LocationUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (luo *LocationUpdateOne) sqlSave(ctx context.Context) (_node *Location, err error) {
-	_spec := sqlgraph.NewUpdateSpec(location.Table, location.Columns, sqlgraph.NewFieldSpec(location.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(location.Table, location.Columns, sqlgraph.NewFieldSpec(location.FieldID, field.TypeUUID))
 	id, ok := luo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Location.id" for update`)}
@@ -562,12 +530,6 @@ func (luo *LocationUpdateOne) sqlSave(ctx context.Context) (_node *Location, err
 			}
 		}
 	}
-	if value, ok := luo.mutation.LocationID(); ok {
-		_spec.SetField(location.FieldLocationID, field.TypeInt64, value)
-	}
-	if value, ok := luo.mutation.AddedLocationID(); ok {
-		_spec.AddField(location.FieldLocationID, field.TypeInt64, value)
-	}
 	if value, ok := luo.mutation.Name(); ok {
 		_spec.SetField(location.FieldName, field.TypeString, value)
 	}
@@ -583,7 +545,7 @@ func (luo *LocationUpdateOne) sqlSave(ctx context.Context) (_node *Location, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: address.FieldID,
 				},
 			},
@@ -599,7 +561,7 @@ func (luo *LocationUpdateOne) sqlSave(ctx context.Context) (_node *Location, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: address.FieldID,
 				},
 			},
@@ -618,7 +580,7 @@ func (luo *LocationUpdateOne) sqlSave(ctx context.Context) (_node *Location, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: address.FieldID,
 				},
 			},
@@ -637,7 +599,7 @@ func (luo *LocationUpdateOne) sqlSave(ctx context.Context) (_node *Location, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: review.FieldID,
 				},
 			},
@@ -653,7 +615,7 @@ func (luo *LocationUpdateOne) sqlSave(ctx context.Context) (_node *Location, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: review.FieldID,
 				},
 			},
@@ -672,7 +634,7 @@ func (luo *LocationUpdateOne) sqlSave(ctx context.Context) (_node *Location, err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: review.FieldID,
 				},
 			},

@@ -11,6 +11,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/location"
 	"github.com/m3-app/backend/ent/predicate"
 	"github.com/m3-app/backend/ent/review"
@@ -19,11 +20,14 @@ import (
 // ReviewQuery is the builder for querying Review entities.
 type ReviewQuery struct {
 	config
-	ctx          *QueryContext
-	order        []OrderFunc
-	inters       []Interceptor
-	predicates   []predicate.Review
-	withLocation *LocationQuery
+	ctx               *QueryContext
+	order             []OrderFunc
+	inters            []Interceptor
+	predicates        []predicate.Review
+	withLocation      *LocationQuery
+	modifiers         []func(*sql.Selector)
+	loadTotal         []func(context.Context, []*Review) error
+	withNamedLocation map[string]*LocationQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -106,8 +110,8 @@ func (rq *ReviewQuery) FirstX(ctx context.Context) *Review {
 
 // FirstID returns the first Review ID from the query.
 // Returns a *NotFoundError when no Review ID was found.
-func (rq *ReviewQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (rq *ReviewQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = rq.Limit(1).IDs(setContextOp(ctx, rq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -119,7 +123,7 @@ func (rq *ReviewQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (rq *ReviewQuery) FirstIDX(ctx context.Context) int {
+func (rq *ReviewQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := rq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -157,8 +161,8 @@ func (rq *ReviewQuery) OnlyX(ctx context.Context) *Review {
 // OnlyID is like Only, but returns the only Review ID in the query.
 // Returns a *NotSingularError when more than one Review ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (rq *ReviewQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (rq *ReviewQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = rq.Limit(2).IDs(setContextOp(ctx, rq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -174,7 +178,7 @@ func (rq *ReviewQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (rq *ReviewQuery) OnlyIDX(ctx context.Context) int {
+func (rq *ReviewQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := rq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -202,7 +206,7 @@ func (rq *ReviewQuery) AllX(ctx context.Context) []*Review {
 }
 
 // IDs executes the query and returns a list of Review IDs.
-func (rq *ReviewQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (rq *ReviewQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if rq.ctx.Unique == nil && rq.path != nil {
 		rq.Unique(true)
 	}
@@ -214,7 +218,7 @@ func (rq *ReviewQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (rq *ReviewQuery) IDsX(ctx context.Context) []int {
+func (rq *ReviewQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := rq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -298,14 +302,15 @@ func (rq *ReviewQuery) WithLocation(opts ...func(*LocationQuery)) *ReviewQuery {
 // Example:
 //
 //	var v []struct {
-//		ReviewID int64 `json:"review_id,omitempty"`
+//		Rating float64 `json:"rating,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Review.Query().
-//		GroupBy(review.FieldReviewID).
+//		GroupBy(review.FieldRating).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (rq *ReviewQuery) GroupBy(field string, fields ...string) *ReviewGroupBy {
 	rq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &ReviewGroupBy{build: rq}
@@ -321,12 +326,13 @@ func (rq *ReviewQuery) GroupBy(field string, fields ...string) *ReviewGroupBy {
 // Example:
 //
 //	var v []struct {
-//		ReviewID int64 `json:"review_id,omitempty"`
+//		Rating float64 `json:"rating,omitempty"`
 //	}
 //
 //	client.Review.Query().
-//		Select(review.FieldReviewID).
+//		Select(review.FieldRating).
 //		Scan(ctx, &v)
+//
 func (rq *ReviewQuery) Select(fields ...string) *ReviewSelect {
 	rq.ctx.Fields = append(rq.ctx.Fields, fields...)
 	sbuild := &ReviewSelect{ReviewQuery: rq}
@@ -383,6 +389,9 @@ func (rq *ReviewQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Revie
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(rq.modifiers) > 0 {
+		_spec.Modifiers = rq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -399,13 +408,25 @@ func (rq *ReviewQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Revie
 			return nil, err
 		}
 	}
+	for name, query := range rq.withNamedLocation {
+		if err := rq.loadLocation(ctx, query, nodes,
+			func(n *Review) { n.appendNamedLocation(name) },
+			func(n *Review, e *Location) { n.appendNamedLocation(name, e) }); err != nil {
+			return nil, err
+		}
+	}
+	for i := range rq.loadTotal {
+		if err := rq.loadTotal[i](ctx, nodes); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
 func (rq *ReviewQuery) loadLocation(ctx context.Context, query *LocationQuery, nodes []*Review, init func(*Review), assign func(*Review, *Location)) error {
 	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Review)
-	nids := make(map[int]map[*Review]struct{})
+	byID := make(map[uuid.UUID]*Review)
+	nids := make(map[uuid.UUID]map[*Review]struct{})
 	for i, node := range nodes {
 		edgeIDs[i] = node.ID
 		byID[node.ID] = node
@@ -434,11 +455,11 @@ func (rq *ReviewQuery) loadLocation(ctx context.Context, query *LocationQuery, n
 				if err != nil {
 					return nil, err
 				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
+				return append([]any{new(uuid.UUID)}, values...), nil
 			}
 			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
+				outValue := *values[0].(*uuid.UUID)
+				inValue := *values[1].(*uuid.UUID)
 				if nids[inValue] == nil {
 					nids[inValue] = map[*Review]struct{}{byID[outValue]: {}}
 					return assign(columns[1:], values[1:])
@@ -466,6 +487,9 @@ func (rq *ReviewQuery) loadLocation(ctx context.Context, query *LocationQuery, n
 
 func (rq *ReviewQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := rq.querySpec()
+	if len(rq.modifiers) > 0 {
+		_spec.Modifiers = rq.modifiers
+	}
 	_spec.Node.Columns = rq.ctx.Fields
 	if len(rq.ctx.Fields) > 0 {
 		_spec.Unique = rq.ctx.Unique != nil && *rq.ctx.Unique
@@ -474,7 +498,7 @@ func (rq *ReviewQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (rq *ReviewQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(review.Table, review.Columns, sqlgraph.NewFieldSpec(review.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(review.Table, review.Columns, sqlgraph.NewFieldSpec(review.FieldID, field.TypeUUID))
 	_spec.From = rq.sql
 	if unique := rq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique
@@ -543,6 +567,20 @@ func (rq *ReviewQuery) sqlQuery(ctx context.Context) *sql.Selector {
 		selector.Limit(*limit)
 	}
 	return selector
+}
+
+// WithNamedLocation tells the query-builder to eager-load the nodes that are connected to the "location"
+// edge with the given name. The optional arguments are used to configure the query builder of the edge.
+func (rq *ReviewQuery) WithNamedLocation(name string, opts ...func(*LocationQuery)) *ReviewQuery {
+	query := (&LocationClient{config: rq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	if rq.withNamedLocation == nil {
+		rq.withNamedLocation = make(map[string]*LocationQuery)
+	}
+	rq.withNamedLocation[name] = query
+	return rq
 }
 
 // ReviewGroupBy is the group-by builder for Review entities.

@@ -10,13 +10,12 @@ import (
 var (
 	// AddressesColumns holds the columns for the "addresses" table.
 	AddressesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "address_id", Type: field.TypeInt64, Unique: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "latitude", Type: field.TypeFloat64},
 		{Name: "longitude", Type: field.TypeFloat64},
 		{Name: "maps_link", Type: field.TypeString, Size: 2147483647},
 		{Name: "full_address", Type: field.TypeString},
-		{Name: "location_address", Type: field.TypeInt, Nullable: true},
+		{Name: "location_address", Type: field.TypeUUID, Nullable: true},
 	}
 	// AddressesTable holds the schema information for the "addresses" table.
 	AddressesTable = &schema.Table{
@@ -26,7 +25,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "addresses_locations_address",
-				Columns:    []*schema.Column{AddressesColumns[6]},
+				Columns:    []*schema.Column{AddressesColumns[5]},
 				RefColumns: []*schema.Column{LocationsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -34,8 +33,7 @@ var (
 	}
 	// LocationsColumns holds the columns for the "locations" table.
 	LocationsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "location_id", Type: field.TypeInt64, Unique: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "type", Type: field.TypeString},
 		{Name: "owner_locations", Type: field.TypeUUID, Nullable: true},
@@ -48,7 +46,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "locations_owners_locations",
-				Columns:    []*schema.Column{LocationsColumns[4]},
+				Columns:    []*schema.Column{LocationsColumns[3]},
 				RefColumns: []*schema.Column{OwnersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -72,8 +70,7 @@ var (
 	}
 	// ReviewsColumns holds the columns for the "reviews" table.
 	ReviewsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "review_id", Type: field.TypeInt64, Unique: true},
+		{Name: "id", Type: field.TypeUUID, Unique: true},
 		{Name: "rating", Type: field.TypeFloat64},
 		{Name: "message", Type: field.TypeString, Size: 2147483647},
 	}
@@ -113,8 +110,8 @@ var (
 	}
 	// ReviewLocationColumns holds the columns for the "review_location" table.
 	ReviewLocationColumns = []*schema.Column{
-		{Name: "review_id", Type: field.TypeInt},
-		{Name: "location_id", Type: field.TypeInt},
+		{Name: "review_id", Type: field.TypeUUID},
+		{Name: "location_id", Type: field.TypeUUID},
 	}
 	// ReviewLocationTable holds the schema information for the "review_location" table.
 	ReviewLocationTable = &schema.Table{

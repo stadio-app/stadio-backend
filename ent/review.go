@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"entgo.io/ent/dialect/sql"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/review"
 )
 
@@ -14,9 +15,7 @@ import (
 type Review struct {
 	config `json:"-"`
 	// ID of the ent.
-	ID int `json:"id,omitempty"`
-	// ReviewID holds the value of the "review_id" field.
-	ReviewID int64 `json:"review_id,omitempty"`
+	ID uuid.UUID `json:"id,omitempty"`
 	// Rating holds the value of the "rating" field.
 	Rating float64 `json:"rating,omitempty"`
 	// Message holds the value of the "message" field.
@@ -33,6 +32,10 @@ type ReviewEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
+	// totalCount holds the count of the edges above.
+	totalCount [1]map[string]int
+
+	namedLocation map[string][]*Location
 }
 
 // LocationOrErr returns the Location value or an error if the edge
@@ -51,10 +54,10 @@ func (*Review) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case review.FieldRating:
 			values[i] = new(sql.NullFloat64)
-		case review.FieldID, review.FieldReviewID:
-			values[i] = new(sql.NullInt64)
 		case review.FieldMessage:
 			values[i] = new(sql.NullString)
+		case review.FieldID:
+			values[i] = new(uuid.UUID)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Review", columns[i])
 		}
@@ -71,16 +74,10 @@ func (r *Review) assignValues(columns []string, values []any) error {
 	for i := range columns {
 		switch columns[i] {
 		case review.FieldID:
-			value, ok := values[i].(*sql.NullInt64)
-			if !ok {
-				return fmt.Errorf("unexpected type %T for field id", value)
-			}
-			r.ID = int(value.Int64)
-		case review.FieldReviewID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field review_id", values[i])
-			} else if value.Valid {
-				r.ReviewID = value.Int64
+			if value, ok := values[i].(*uuid.UUID); !ok {
+				return fmt.Errorf("unexpected type %T for field id", values[i])
+			} else if value != nil {
+				r.ID = *value
 			}
 		case review.FieldRating:
 			if value, ok := values[i].(*sql.NullFloat64); !ok {
@@ -127,9 +124,6 @@ func (r *Review) String() string {
 	var builder strings.Builder
 	builder.WriteString("Review(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", r.ID))
-	builder.WriteString("review_id=")
-	builder.WriteString(fmt.Sprintf("%v", r.ReviewID))
-	builder.WriteString(", ")
 	builder.WriteString("rating=")
 	builder.WriteString(fmt.Sprintf("%v", r.Rating))
 	builder.WriteString(", ")
@@ -137,6 +131,30 @@ func (r *Review) String() string {
 	builder.WriteString(r.Message)
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedLocation returns the Location named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (r *Review) NamedLocation(name string) ([]*Location, error) {
+	if r.Edges.namedLocation == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := r.Edges.namedLocation[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (r *Review) appendNamedLocation(name string, edges ...*Location) {
+	if r.Edges.namedLocation == nil {
+		r.Edges.namedLocation = make(map[string][]*Location)
+	}
+	if len(edges) == 0 {
+		r.Edges.namedLocation[name] = []*Location{}
+	} else {
+		r.Edges.namedLocation[name] = append(r.Edges.namedLocation[name], edges...)
+	}
 }
 
 // Reviews is a parsable slice of Review.

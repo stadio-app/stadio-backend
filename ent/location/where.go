@@ -5,57 +5,53 @@ package location
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Location {
+func ID(id uuid.UUID) predicate.Location {
 	return predicate.Location(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Location {
+func IDEQ(id uuid.UUID) predicate.Location {
 	return predicate.Location(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Location {
+func IDNEQ(id uuid.UUID) predicate.Location {
 	return predicate.Location(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Location {
+func IDIn(ids ...uuid.UUID) predicate.Location {
 	return predicate.Location(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Location {
+func IDNotIn(ids ...uuid.UUID) predicate.Location {
 	return predicate.Location(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Location {
+func IDGT(id uuid.UUID) predicate.Location {
 	return predicate.Location(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Location {
+func IDGTE(id uuid.UUID) predicate.Location {
 	return predicate.Location(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Location {
+func IDLT(id uuid.UUID) predicate.Location {
 	return predicate.Location(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Location {
+func IDLTE(id uuid.UUID) predicate.Location {
 	return predicate.Location(sql.FieldLTE(FieldID, id))
-}
-
-// LocationID applies equality check predicate on the "location_id" field. It's identical to LocationIDEQ.
-func LocationID(v int64) predicate.Location {
-	return predicate.Location(sql.FieldEQ(FieldLocationID, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
@@ -66,46 +62,6 @@ func Name(v string) predicate.Location {
 // Type applies equality check predicate on the "type" field. It's identical to TypeEQ.
 func Type(v string) predicate.Location {
 	return predicate.Location(sql.FieldEQ(FieldType, v))
-}
-
-// LocationIDEQ applies the EQ predicate on the "location_id" field.
-func LocationIDEQ(v int64) predicate.Location {
-	return predicate.Location(sql.FieldEQ(FieldLocationID, v))
-}
-
-// LocationIDNEQ applies the NEQ predicate on the "location_id" field.
-func LocationIDNEQ(v int64) predicate.Location {
-	return predicate.Location(sql.FieldNEQ(FieldLocationID, v))
-}
-
-// LocationIDIn applies the In predicate on the "location_id" field.
-func LocationIDIn(vs ...int64) predicate.Location {
-	return predicate.Location(sql.FieldIn(FieldLocationID, vs...))
-}
-
-// LocationIDNotIn applies the NotIn predicate on the "location_id" field.
-func LocationIDNotIn(vs ...int64) predicate.Location {
-	return predicate.Location(sql.FieldNotIn(FieldLocationID, vs...))
-}
-
-// LocationIDGT applies the GT predicate on the "location_id" field.
-func LocationIDGT(v int64) predicate.Location {
-	return predicate.Location(sql.FieldGT(FieldLocationID, v))
-}
-
-// LocationIDGTE applies the GTE predicate on the "location_id" field.
-func LocationIDGTE(v int64) predicate.Location {
-	return predicate.Location(sql.FieldGTE(FieldLocationID, v))
-}
-
-// LocationIDLT applies the LT predicate on the "location_id" field.
-func LocationIDLT(v int64) predicate.Location {
-	return predicate.Location(sql.FieldLT(FieldLocationID, v))
-}
-
-// LocationIDLTE applies the LTE predicate on the "location_id" field.
-func LocationIDLTE(v int64) predicate.Location {
-	return predicate.Location(sql.FieldLTE(FieldLocationID, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

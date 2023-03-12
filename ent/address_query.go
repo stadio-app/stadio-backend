@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/address"
 	"github.com/m3-app/backend/ent/location"
 	"github.com/m3-app/backend/ent/predicate"
@@ -24,6 +25,8 @@ type AddressQuery struct {
 	predicates   []predicate.Address
 	withLocation *LocationQuery
 	withFKs      bool
+	modifiers    []func(*sql.Selector)
+	loadTotal    []func(context.Context, []*Address) error
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -106,8 +109,8 @@ func (aq *AddressQuery) FirstX(ctx context.Context) *Address {
 
 // FirstID returns the first Address ID from the query.
 // Returns a *NotFoundError when no Address ID was found.
-func (aq *AddressQuery) FirstID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *AddressQuery) FirstID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(1).IDs(setContextOp(ctx, aq.ctx, "FirstID")); err != nil {
 		return
 	}
@@ -119,7 +122,7 @@ func (aq *AddressQuery) FirstID(ctx context.Context) (id int, err error) {
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (aq *AddressQuery) FirstIDX(ctx context.Context) int {
+func (aq *AddressQuery) FirstIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -157,8 +160,8 @@ func (aq *AddressQuery) OnlyX(ctx context.Context) *Address {
 // OnlyID is like Only, but returns the only Address ID in the query.
 // Returns a *NotSingularError when more than one Address ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (aq *AddressQuery) OnlyID(ctx context.Context) (id int, err error) {
-	var ids []int
+func (aq *AddressQuery) OnlyID(ctx context.Context) (id uuid.UUID, err error) {
+	var ids []uuid.UUID
 	if ids, err = aq.Limit(2).IDs(setContextOp(ctx, aq.ctx, "OnlyID")); err != nil {
 		return
 	}
@@ -174,7 +177,7 @@ func (aq *AddressQuery) OnlyID(ctx context.Context) (id int, err error) {
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (aq *AddressQuery) OnlyIDX(ctx context.Context) int {
+func (aq *AddressQuery) OnlyIDX(ctx context.Context) uuid.UUID {
 	id, err := aq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -202,7 +205,7 @@ func (aq *AddressQuery) AllX(ctx context.Context) []*Address {
 }
 
 // IDs executes the query and returns a list of Address IDs.
-func (aq *AddressQuery) IDs(ctx context.Context) (ids []int, err error) {
+func (aq *AddressQuery) IDs(ctx context.Context) (ids []uuid.UUID, err error) {
 	if aq.ctx.Unique == nil && aq.path != nil {
 		aq.Unique(true)
 	}
@@ -214,7 +217,7 @@ func (aq *AddressQuery) IDs(ctx context.Context) (ids []int, err error) {
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (aq *AddressQuery) IDsX(ctx context.Context) []int {
+func (aq *AddressQuery) IDsX(ctx context.Context) []uuid.UUID {
 	ids, err := aq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -298,14 +301,15 @@ func (aq *AddressQuery) WithLocation(opts ...func(*LocationQuery)) *AddressQuery
 // Example:
 //
 //	var v []struct {
-//		AddressID int64 `json:"address_id,omitempty"`
+//		Latitude float64 `json:"latitude,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Address.Query().
-//		GroupBy(address.FieldAddressID).
+//		GroupBy(address.FieldLatitude).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
+//
 func (aq *AddressQuery) GroupBy(field string, fields ...string) *AddressGroupBy {
 	aq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &AddressGroupBy{build: aq}
@@ -321,12 +325,13 @@ func (aq *AddressQuery) GroupBy(field string, fields ...string) *AddressGroupBy 
 // Example:
 //
 //	var v []struct {
-//		AddressID int64 `json:"address_id,omitempty"`
+//		Latitude float64 `json:"latitude,omitempty"`
 //	}
 //
 //	client.Address.Query().
-//		Select(address.FieldAddressID).
+//		Select(address.FieldLatitude).
 //		Scan(ctx, &v)
+//
 func (aq *AddressQuery) Select(fields ...string) *AddressSelect {
 	aq.ctx.Fields = append(aq.ctx.Fields, fields...)
 	sbuild := &AddressSelect{AddressQuery: aq}
@@ -390,6 +395,9 @@ func (aq *AddressQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Addr
 		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
+	if len(aq.modifiers) > 0 {
+		_spec.Modifiers = aq.modifiers
+	}
 	for i := range hooks {
 		hooks[i](ctx, _spec)
 	}
@@ -405,12 +413,17 @@ func (aq *AddressQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Addr
 			return nil, err
 		}
 	}
+	for i := range aq.loadTotal {
+		if err := aq.loadTotal[i](ctx, nodes); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
 func (aq *AddressQuery) loadLocation(ctx context.Context, query *LocationQuery, nodes []*Address, init func(*Address), assign func(*Address, *Location)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Address)
+	ids := make([]uuid.UUID, 0, len(nodes))
+	nodeids := make(map[uuid.UUID][]*Address)
 	for i := range nodes {
 		if nodes[i].location_address == nil {
 			continue
@@ -443,6 +456,9 @@ func (aq *AddressQuery) loadLocation(ctx context.Context, query *LocationQuery, 
 
 func (aq *AddressQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := aq.querySpec()
+	if len(aq.modifiers) > 0 {
+		_spec.Modifiers = aq.modifiers
+	}
 	_spec.Node.Columns = aq.ctx.Fields
 	if len(aq.ctx.Fields) > 0 {
 		_spec.Unique = aq.ctx.Unique != nil && *aq.ctx.Unique
@@ -451,7 +467,7 @@ func (aq *AddressQuery) sqlCount(ctx context.Context) (int, error) {
 }
 
 func (aq *AddressQuery) querySpec() *sqlgraph.QuerySpec {
-	_spec := sqlgraph.NewQuerySpec(address.Table, address.Columns, sqlgraph.NewFieldSpec(address.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewQuerySpec(address.Table, address.Columns, sqlgraph.NewFieldSpec(address.FieldID, field.TypeUUID))
 	_spec.From = aq.sql
 	if unique := aq.ctx.Unique; unique != nil {
 		_spec.Unique = *unique

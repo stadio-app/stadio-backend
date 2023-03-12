@@ -23,12 +23,6 @@ type LocationCreate struct {
 	hooks    []Hook
 }
 
-// SetLocationID sets the "location_id" field.
-func (lc *LocationCreate) SetLocationID(i int64) *LocationCreate {
-	lc.mutation.SetLocationID(i)
-	return lc
-}
-
 // SetName sets the "name" field.
 func (lc *LocationCreate) SetName(s string) *LocationCreate {
 	lc.mutation.SetName(s)
@@ -41,15 +35,29 @@ func (lc *LocationCreate) SetType(s string) *LocationCreate {
 	return lc
 }
 
+// SetID sets the "id" field.
+func (lc *LocationCreate) SetID(u uuid.UUID) *LocationCreate {
+	lc.mutation.SetID(u)
+	return lc
+}
+
+// SetNillableID sets the "id" field if the given value is not nil.
+func (lc *LocationCreate) SetNillableID(u *uuid.UUID) *LocationCreate {
+	if u != nil {
+		lc.SetID(*u)
+	}
+	return lc
+}
+
 // AddAddresIDs adds the "address" edge to the Address entity by IDs.
-func (lc *LocationCreate) AddAddresIDs(ids ...int) *LocationCreate {
+func (lc *LocationCreate) AddAddresIDs(ids ...uuid.UUID) *LocationCreate {
 	lc.mutation.AddAddresIDs(ids...)
 	return lc
 }
 
 // AddAddress adds the "address" edges to the Address entity.
 func (lc *LocationCreate) AddAddress(a ...*Address) *LocationCreate {
-	ids := make([]int, len(a))
+	ids := make([]uuid.UUID, len(a))
 	for i := range a {
 		ids[i] = a[i].ID
 	}
@@ -57,14 +65,14 @@ func (lc *LocationCreate) AddAddress(a ...*Address) *LocationCreate {
 }
 
 // AddReviewIDs adds the "reviews" edge to the Review entity by IDs.
-func (lc *LocationCreate) AddReviewIDs(ids ...int) *LocationCreate {
+func (lc *LocationCreate) AddReviewIDs(ids ...uuid.UUID) *LocationCreate {
 	lc.mutation.AddReviewIDs(ids...)
 	return lc
 }
 
 // AddReviews adds the "reviews" edges to the Review entity.
 func (lc *LocationCreate) AddReviews(r ...*Review) *LocationCreate {
-	ids := make([]int, len(r))
+	ids := make([]uuid.UUID, len(r))
 	for i := range r {
 		ids[i] = r[i].ID
 	}
@@ -97,6 +105,7 @@ func (lc *LocationCreate) Mutation() *LocationMutation {
 
 // Save creates the Location in the database.
 func (lc *LocationCreate) Save(ctx context.Context) (*Location, error) {
+	lc.defaults()
 	return withHooks[*Location, LocationMutation](ctx, lc.sqlSave, lc.mutation, lc.hooks)
 }
 
@@ -122,11 +131,16 @@ func (lc *LocationCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (lc *LocationCreate) defaults() {
+	if _, ok := lc.mutation.ID(); !ok {
+		v := location.DefaultID()
+		lc.mutation.SetID(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (lc *LocationCreate) check() error {
-	if _, ok := lc.mutation.LocationID(); !ok {
-		return &ValidationError{Name: "location_id", err: errors.New(`ent: missing required field "Location.location_id"`)}
-	}
 	if _, ok := lc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Location.name"`)}
 	}
@@ -147,8 +161,13 @@ func (lc *LocationCreate) sqlSave(ctx context.Context) (*Location, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != nil {
+		if id, ok := _spec.ID.Value.(*uuid.UUID); ok {
+			_node.ID = *id
+		} else if err := _node.ID.Scan(_spec.ID.Value); err != nil {
+			return nil, err
+		}
+	}
 	lc.mutation.id = &_node.ID
 	lc.mutation.done = true
 	return _node, nil
@@ -157,11 +176,11 @@ func (lc *LocationCreate) sqlSave(ctx context.Context) (*Location, error) {
 func (lc *LocationCreate) createSpec() (*Location, *sqlgraph.CreateSpec) {
 	var (
 		_node = &Location{config: lc.config}
-		_spec = sqlgraph.NewCreateSpec(location.Table, sqlgraph.NewFieldSpec(location.FieldID, field.TypeInt))
+		_spec = sqlgraph.NewCreateSpec(location.Table, sqlgraph.NewFieldSpec(location.FieldID, field.TypeUUID))
 	)
-	if value, ok := lc.mutation.LocationID(); ok {
-		_spec.SetField(location.FieldLocationID, field.TypeInt64, value)
-		_node.LocationID = value
+	if id, ok := lc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = &id
 	}
 	if value, ok := lc.mutation.Name(); ok {
 		_spec.SetField(location.FieldName, field.TypeString, value)
@@ -180,7 +199,7 @@ func (lc *LocationCreate) createSpec() (*Location, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: address.FieldID,
 				},
 			},
@@ -199,7 +218,7 @@ func (lc *LocationCreate) createSpec() (*Location, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: review.FieldID,
 				},
 			},
@@ -246,6 +265,7 @@ func (lcb *LocationCreateBulk) Save(ctx context.Context) ([]*Location, error) {
 	for i := range lcb.builders {
 		func(i int, root context.Context) {
 			builder := lcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LocationMutation)
 				if !ok {
@@ -272,10 +292,6 @@ func (lcb *LocationCreateBulk) Save(ctx context.Context) ([]*Location, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
-					id := specs[i].ID.Value.(int64)
-					nodes[i].ID = int(id)
-				}
 				mutation.done = true
 				return nodes[i], nil
 			})

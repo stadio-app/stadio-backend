@@ -10,6 +10,10 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-multierror"
+	"github.com/m3-app/backend/ent/address"
+	"github.com/m3-app/backend/ent/location"
+	"github.com/m3-app/backend/ent/owner"
+	"github.com/m3-app/backend/ent/review"
 	"github.com/m3-app/backend/ent/user"
 )
 
@@ -17,6 +21,18 @@ import (
 type Noder interface {
 	IsNode()
 }
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Address) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Location) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Owner) IsNode() {}
+
+// IsNode implements the Node interface check for GQLGen.
+func (n *Review) IsNode() {}
 
 // IsNode implements the Node interface check for GQLGen.
 func (n *User) IsNode() {}
@@ -80,6 +96,54 @@ func (c *Client) Noder(ctx context.Context, id uuid.UUID, opts ...NodeOption) (_
 
 func (c *Client) noder(ctx context.Context, table string, id uuid.UUID) (Noder, error) {
 	switch table {
+	case address.Table:
+		query := c.Address.Query().
+			Where(address.ID(id))
+		query, err := query.CollectFields(ctx, "Address")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case location.Table:
+		query := c.Location.Query().
+			Where(location.ID(id))
+		query, err := query.CollectFields(ctx, "Location")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case owner.Table:
+		query := c.Owner.Query().
+			Where(owner.ID(id))
+		query, err := query.CollectFields(ctx, "Owner")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
+	case review.Table:
+		query := c.Review.Query().
+			Where(review.ID(id))
+		query, err := query.CollectFields(ctx, "Review")
+		if err != nil {
+			return nil, err
+		}
+		n, err := query.Only(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return n, nil
 	case user.Table:
 		query := c.User.Query().
 			Where(user.ID(id))
@@ -165,6 +229,70 @@ func (c *Client) noders(ctx context.Context, table string, ids []uuid.UUID) ([]N
 		idmap[id] = append(idmap[id], &noders[i])
 	}
 	switch table {
+	case address.Table:
+		query := c.Address.Query().
+			Where(address.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Address")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case location.Table:
+		query := c.Location.Query().
+			Where(location.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Location")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case owner.Table:
+		query := c.Owner.Query().
+			Where(owner.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Owner")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
+	case review.Table:
+		query := c.Review.Query().
+			Where(review.IDIn(ids...))
+		query, err := query.CollectFields(ctx, "Review")
+		if err != nil {
+			return nil, err
+		}
+		nodes, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, node := range nodes {
+			for _, noder := range idmap[node.ID] {
+				*noder = node
+			}
+		}
 	case user.Table:
 		query := c.User.Query().
 			Where(user.IDIn(ids...))

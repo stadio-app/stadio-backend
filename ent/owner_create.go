@@ -89,14 +89,14 @@ func (oc *OwnerCreate) SetNillableID(u *uuid.UUID) *OwnerCreate {
 }
 
 // AddLocationIDs adds the "locations" edge to the Location entity by IDs.
-func (oc *OwnerCreate) AddLocationIDs(ids ...int) *OwnerCreate {
+func (oc *OwnerCreate) AddLocationIDs(ids ...uuid.UUID) *OwnerCreate {
 	oc.mutation.AddLocationIDs(ids...)
 	return oc
 }
 
 // AddLocations adds the "locations" edges to the Location entity.
 func (oc *OwnerCreate) AddLocations(l ...*Location) *OwnerCreate {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -268,7 +268,7 @@ func (oc *OwnerCreate) createSpec() (*Owner, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},

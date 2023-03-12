@@ -2,13 +2,15 @@
 
 package location
 
+import (
+	"github.com/google/uuid"
+)
+
 const (
 	// Label holds the string label denoting the location type in the database.
 	Label = "location"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldLocationID holds the string denoting the location_id field in the database.
-	FieldLocationID = "location_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldType holds the string denoting the type field in the database.
@@ -45,7 +47,6 @@ const (
 // Columns holds all SQL columns for location fields.
 var Columns = []string{
 	FieldID,
-	FieldLocationID,
 	FieldName,
 	FieldType,
 }
@@ -76,3 +77,8 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultID holds the default value on creation for the "id" field.
+	DefaultID func() uuid.UUID
+)

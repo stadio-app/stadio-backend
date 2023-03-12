@@ -42,6 +42,11 @@ type OwnerEdges struct {
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
+	// totalCount holds the count of the edges above.
+	totalCount [2]map[string]int
+
+	namedLocations map[string][]*Location
+	namedUser      map[string][]*User
 }
 
 // LocationsOrErr returns the Locations value or an error if the edge
@@ -187,6 +192,54 @@ func (o *Owner) String() string {
 	builder.WriteString(fmt.Sprintf("%v", o.Verified))
 	builder.WriteByte(')')
 	return builder.String()
+}
+
+// NamedLocations returns the Locations named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (o *Owner) NamedLocations(name string) ([]*Location, error) {
+	if o.Edges.namedLocations == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := o.Edges.namedLocations[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (o *Owner) appendNamedLocations(name string, edges ...*Location) {
+	if o.Edges.namedLocations == nil {
+		o.Edges.namedLocations = make(map[string][]*Location)
+	}
+	if len(edges) == 0 {
+		o.Edges.namedLocations[name] = []*Location{}
+	} else {
+		o.Edges.namedLocations[name] = append(o.Edges.namedLocations[name], edges...)
+	}
+}
+
+// NamedUser returns the User named value or an error if the edge was not
+// loaded in eager-loading with this name.
+func (o *Owner) NamedUser(name string) ([]*User, error) {
+	if o.Edges.namedUser == nil {
+		return nil, &NotLoadedError{edge: name}
+	}
+	nodes, ok := o.Edges.namedUser[name]
+	if !ok {
+		return nil, &NotLoadedError{edge: name}
+	}
+	return nodes, nil
+}
+
+func (o *Owner) appendNamedUser(name string, edges ...*User) {
+	if o.Edges.namedUser == nil {
+		o.Edges.namedUser = make(map[string][]*User)
+	}
+	if len(edges) == 0 {
+		o.Edges.namedUser[name] = []*User{}
+	} else {
+		o.Edges.namedUser[name] = append(o.Edges.namedUser[name], edges...)
+	}
 }
 
 // Owners is a parsable slice of Owner.

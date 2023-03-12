@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/location"
 	"github.com/m3-app/backend/ent/predicate"
 	"github.com/m3-app/backend/ent/review"
@@ -25,19 +26,6 @@ type ReviewUpdate struct {
 // Where appends a list predicates to the ReviewUpdate builder.
 func (ru *ReviewUpdate) Where(ps ...predicate.Review) *ReviewUpdate {
 	ru.mutation.Where(ps...)
-	return ru
-}
-
-// SetReviewID sets the "review_id" field.
-func (ru *ReviewUpdate) SetReviewID(i int64) *ReviewUpdate {
-	ru.mutation.ResetReviewID()
-	ru.mutation.SetReviewID(i)
-	return ru
-}
-
-// AddReviewID adds i to the "review_id" field.
-func (ru *ReviewUpdate) AddReviewID(i int64) *ReviewUpdate {
-	ru.mutation.AddReviewID(i)
 	return ru
 }
 
@@ -61,14 +49,14 @@ func (ru *ReviewUpdate) SetMessage(s string) *ReviewUpdate {
 }
 
 // AddLocationIDs adds the "location" edge to the Location entity by IDs.
-func (ru *ReviewUpdate) AddLocationIDs(ids ...int) *ReviewUpdate {
+func (ru *ReviewUpdate) AddLocationIDs(ids ...uuid.UUID) *ReviewUpdate {
 	ru.mutation.AddLocationIDs(ids...)
 	return ru
 }
 
 // AddLocation adds the "location" edges to the Location entity.
 func (ru *ReviewUpdate) AddLocation(l ...*Location) *ReviewUpdate {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -87,14 +75,14 @@ func (ru *ReviewUpdate) ClearLocation() *ReviewUpdate {
 }
 
 // RemoveLocationIDs removes the "location" edge to Location entities by IDs.
-func (ru *ReviewUpdate) RemoveLocationIDs(ids ...int) *ReviewUpdate {
+func (ru *ReviewUpdate) RemoveLocationIDs(ids ...uuid.UUID) *ReviewUpdate {
 	ru.mutation.RemoveLocationIDs(ids...)
 	return ru
 }
 
 // RemoveLocation removes "location" edges to Location entities.
 func (ru *ReviewUpdate) RemoveLocation(l ...*Location) *ReviewUpdate {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -129,19 +117,13 @@ func (ru *ReviewUpdate) ExecX(ctx context.Context) {
 }
 
 func (ru *ReviewUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(review.Table, review.Columns, sqlgraph.NewFieldSpec(review.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(review.Table, review.Columns, sqlgraph.NewFieldSpec(review.FieldID, field.TypeUUID))
 	if ps := ru.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := ru.mutation.ReviewID(); ok {
-		_spec.SetField(review.FieldReviewID, field.TypeInt64, value)
-	}
-	if value, ok := ru.mutation.AddedReviewID(); ok {
-		_spec.AddField(review.FieldReviewID, field.TypeInt64, value)
 	}
 	if value, ok := ru.mutation.Rating(); ok {
 		_spec.SetField(review.FieldRating, field.TypeFloat64, value)
@@ -161,7 +143,7 @@ func (ru *ReviewUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -177,7 +159,7 @@ func (ru *ReviewUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -196,7 +178,7 @@ func (ru *ReviewUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -226,19 +208,6 @@ type ReviewUpdateOne struct {
 	mutation *ReviewMutation
 }
 
-// SetReviewID sets the "review_id" field.
-func (ruo *ReviewUpdateOne) SetReviewID(i int64) *ReviewUpdateOne {
-	ruo.mutation.ResetReviewID()
-	ruo.mutation.SetReviewID(i)
-	return ruo
-}
-
-// AddReviewID adds i to the "review_id" field.
-func (ruo *ReviewUpdateOne) AddReviewID(i int64) *ReviewUpdateOne {
-	ruo.mutation.AddReviewID(i)
-	return ruo
-}
-
 // SetRating sets the "rating" field.
 func (ruo *ReviewUpdateOne) SetRating(f float64) *ReviewUpdateOne {
 	ruo.mutation.ResetRating()
@@ -259,14 +228,14 @@ func (ruo *ReviewUpdateOne) SetMessage(s string) *ReviewUpdateOne {
 }
 
 // AddLocationIDs adds the "location" edge to the Location entity by IDs.
-func (ruo *ReviewUpdateOne) AddLocationIDs(ids ...int) *ReviewUpdateOne {
+func (ruo *ReviewUpdateOne) AddLocationIDs(ids ...uuid.UUID) *ReviewUpdateOne {
 	ruo.mutation.AddLocationIDs(ids...)
 	return ruo
 }
 
 // AddLocation adds the "location" edges to the Location entity.
 func (ruo *ReviewUpdateOne) AddLocation(l ...*Location) *ReviewUpdateOne {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -285,14 +254,14 @@ func (ruo *ReviewUpdateOne) ClearLocation() *ReviewUpdateOne {
 }
 
 // RemoveLocationIDs removes the "location" edge to Location entities by IDs.
-func (ruo *ReviewUpdateOne) RemoveLocationIDs(ids ...int) *ReviewUpdateOne {
+func (ruo *ReviewUpdateOne) RemoveLocationIDs(ids ...uuid.UUID) *ReviewUpdateOne {
 	ruo.mutation.RemoveLocationIDs(ids...)
 	return ruo
 }
 
 // RemoveLocation removes "location" edges to Location entities.
 func (ruo *ReviewUpdateOne) RemoveLocation(l ...*Location) *ReviewUpdateOne {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -340,7 +309,7 @@ func (ruo *ReviewUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (ruo *ReviewUpdateOne) sqlSave(ctx context.Context) (_node *Review, err error) {
-	_spec := sqlgraph.NewUpdateSpec(review.Table, review.Columns, sqlgraph.NewFieldSpec(review.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(review.Table, review.Columns, sqlgraph.NewFieldSpec(review.FieldID, field.TypeUUID))
 	id, ok := ruo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Review.id" for update`)}
@@ -365,12 +334,6 @@ func (ruo *ReviewUpdateOne) sqlSave(ctx context.Context) (_node *Review, err err
 			}
 		}
 	}
-	if value, ok := ruo.mutation.ReviewID(); ok {
-		_spec.SetField(review.FieldReviewID, field.TypeInt64, value)
-	}
-	if value, ok := ruo.mutation.AddedReviewID(); ok {
-		_spec.AddField(review.FieldReviewID, field.TypeInt64, value)
-	}
 	if value, ok := ruo.mutation.Rating(); ok {
 		_spec.SetField(review.FieldRating, field.TypeFloat64, value)
 	}
@@ -389,7 +352,7 @@ func (ruo *ReviewUpdateOne) sqlSave(ctx context.Context) (_node *Review, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -405,7 +368,7 @@ func (ruo *ReviewUpdateOne) sqlSave(ctx context.Context) (_node *Review, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -424,7 +387,7 @@ func (ruo *ReviewUpdateOne) sqlSave(ctx context.Context) (_node *Review, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},

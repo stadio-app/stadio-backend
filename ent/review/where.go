@@ -5,57 +5,53 @@ package review
 import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/predicate"
 )
 
 // ID filters vertices based on their ID field.
-func ID(id int) predicate.Review {
+func ID(id uuid.UUID) predicate.Review {
 	return predicate.Review(sql.FieldEQ(FieldID, id))
 }
 
 // IDEQ applies the EQ predicate on the ID field.
-func IDEQ(id int) predicate.Review {
+func IDEQ(id uuid.UUID) predicate.Review {
 	return predicate.Review(sql.FieldEQ(FieldID, id))
 }
 
 // IDNEQ applies the NEQ predicate on the ID field.
-func IDNEQ(id int) predicate.Review {
+func IDNEQ(id uuid.UUID) predicate.Review {
 	return predicate.Review(sql.FieldNEQ(FieldID, id))
 }
 
 // IDIn applies the In predicate on the ID field.
-func IDIn(ids ...int) predicate.Review {
+func IDIn(ids ...uuid.UUID) predicate.Review {
 	return predicate.Review(sql.FieldIn(FieldID, ids...))
 }
 
 // IDNotIn applies the NotIn predicate on the ID field.
-func IDNotIn(ids ...int) predicate.Review {
+func IDNotIn(ids ...uuid.UUID) predicate.Review {
 	return predicate.Review(sql.FieldNotIn(FieldID, ids...))
 }
 
 // IDGT applies the GT predicate on the ID field.
-func IDGT(id int) predicate.Review {
+func IDGT(id uuid.UUID) predicate.Review {
 	return predicate.Review(sql.FieldGT(FieldID, id))
 }
 
 // IDGTE applies the GTE predicate on the ID field.
-func IDGTE(id int) predicate.Review {
+func IDGTE(id uuid.UUID) predicate.Review {
 	return predicate.Review(sql.FieldGTE(FieldID, id))
 }
 
 // IDLT applies the LT predicate on the ID field.
-func IDLT(id int) predicate.Review {
+func IDLT(id uuid.UUID) predicate.Review {
 	return predicate.Review(sql.FieldLT(FieldID, id))
 }
 
 // IDLTE applies the LTE predicate on the ID field.
-func IDLTE(id int) predicate.Review {
+func IDLTE(id uuid.UUID) predicate.Review {
 	return predicate.Review(sql.FieldLTE(FieldID, id))
-}
-
-// ReviewID applies equality check predicate on the "review_id" field. It's identical to ReviewIDEQ.
-func ReviewID(v int64) predicate.Review {
-	return predicate.Review(sql.FieldEQ(FieldReviewID, v))
 }
 
 // Rating applies equality check predicate on the "rating" field. It's identical to RatingEQ.
@@ -66,46 +62,6 @@ func Rating(v float64) predicate.Review {
 // Message applies equality check predicate on the "message" field. It's identical to MessageEQ.
 func Message(v string) predicate.Review {
 	return predicate.Review(sql.FieldEQ(FieldMessage, v))
-}
-
-// ReviewIDEQ applies the EQ predicate on the "review_id" field.
-func ReviewIDEQ(v int64) predicate.Review {
-	return predicate.Review(sql.FieldEQ(FieldReviewID, v))
-}
-
-// ReviewIDNEQ applies the NEQ predicate on the "review_id" field.
-func ReviewIDNEQ(v int64) predicate.Review {
-	return predicate.Review(sql.FieldNEQ(FieldReviewID, v))
-}
-
-// ReviewIDIn applies the In predicate on the "review_id" field.
-func ReviewIDIn(vs ...int64) predicate.Review {
-	return predicate.Review(sql.FieldIn(FieldReviewID, vs...))
-}
-
-// ReviewIDNotIn applies the NotIn predicate on the "review_id" field.
-func ReviewIDNotIn(vs ...int64) predicate.Review {
-	return predicate.Review(sql.FieldNotIn(FieldReviewID, vs...))
-}
-
-// ReviewIDGT applies the GT predicate on the "review_id" field.
-func ReviewIDGT(v int64) predicate.Review {
-	return predicate.Review(sql.FieldGT(FieldReviewID, v))
-}
-
-// ReviewIDGTE applies the GTE predicate on the "review_id" field.
-func ReviewIDGTE(v int64) predicate.Review {
-	return predicate.Review(sql.FieldGTE(FieldReviewID, v))
-}
-
-// ReviewIDLT applies the LT predicate on the "review_id" field.
-func ReviewIDLT(v int64) predicate.Review {
-	return predicate.Review(sql.FieldLT(FieldReviewID, v))
-}
-
-// ReviewIDLTE applies the LTE predicate on the "review_id" field.
-func ReviewIDLTE(v int64) predicate.Review {
-	return predicate.Review(sql.FieldLTE(FieldReviewID, v))
 }
 
 // RatingEQ applies the EQ predicate on the "rating" field.

@@ -10,6 +10,7 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent/address"
 	"github.com/m3-app/backend/ent/location"
 	"github.com/m3-app/backend/ent/predicate"
@@ -25,19 +26,6 @@ type AddressUpdate struct {
 // Where appends a list predicates to the AddressUpdate builder.
 func (au *AddressUpdate) Where(ps ...predicate.Address) *AddressUpdate {
 	au.mutation.Where(ps...)
-	return au
-}
-
-// SetAddressID sets the "address_id" field.
-func (au *AddressUpdate) SetAddressID(i int64) *AddressUpdate {
-	au.mutation.ResetAddressID()
-	au.mutation.SetAddressID(i)
-	return au
-}
-
-// AddAddressID adds i to the "address_id" field.
-func (au *AddressUpdate) AddAddressID(i int64) *AddressUpdate {
-	au.mutation.AddAddressID(i)
 	return au
 }
 
@@ -80,13 +68,13 @@ func (au *AddressUpdate) SetFullAddress(s string) *AddressUpdate {
 }
 
 // SetLocationID sets the "location" edge to the Location entity by ID.
-func (au *AddressUpdate) SetLocationID(id int) *AddressUpdate {
+func (au *AddressUpdate) SetLocationID(id uuid.UUID) *AddressUpdate {
 	au.mutation.SetLocationID(id)
 	return au
 }
 
 // SetNillableLocationID sets the "location" edge to the Location entity by ID if the given value is not nil.
-func (au *AddressUpdate) SetNillableLocationID(id *int) *AddressUpdate {
+func (au *AddressUpdate) SetNillableLocationID(id *uuid.UUID) *AddressUpdate {
 	if id != nil {
 		au = au.SetLocationID(*id)
 	}
@@ -137,19 +125,13 @@ func (au *AddressUpdate) ExecX(ctx context.Context) {
 }
 
 func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	_spec := sqlgraph.NewUpdateSpec(address.Table, address.Columns, sqlgraph.NewFieldSpec(address.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(address.Table, address.Columns, sqlgraph.NewFieldSpec(address.FieldID, field.TypeUUID))
 	if ps := au.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := au.mutation.AddressID(); ok {
-		_spec.SetField(address.FieldAddressID, field.TypeInt64, value)
-	}
-	if value, ok := au.mutation.AddedAddressID(); ok {
-		_spec.AddField(address.FieldAddressID, field.TypeInt64, value)
 	}
 	if value, ok := au.mutation.Latitude(); ok {
 		_spec.SetField(address.FieldLatitude, field.TypeFloat64, value)
@@ -178,7 +160,7 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -194,7 +176,7 @@ func (au *AddressUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -222,19 +204,6 @@ type AddressUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *AddressMutation
-}
-
-// SetAddressID sets the "address_id" field.
-func (auo *AddressUpdateOne) SetAddressID(i int64) *AddressUpdateOne {
-	auo.mutation.ResetAddressID()
-	auo.mutation.SetAddressID(i)
-	return auo
-}
-
-// AddAddressID adds i to the "address_id" field.
-func (auo *AddressUpdateOne) AddAddressID(i int64) *AddressUpdateOne {
-	auo.mutation.AddAddressID(i)
-	return auo
 }
 
 // SetLatitude sets the "latitude" field.
@@ -276,13 +245,13 @@ func (auo *AddressUpdateOne) SetFullAddress(s string) *AddressUpdateOne {
 }
 
 // SetLocationID sets the "location" edge to the Location entity by ID.
-func (auo *AddressUpdateOne) SetLocationID(id int) *AddressUpdateOne {
+func (auo *AddressUpdateOne) SetLocationID(id uuid.UUID) *AddressUpdateOne {
 	auo.mutation.SetLocationID(id)
 	return auo
 }
 
 // SetNillableLocationID sets the "location" edge to the Location entity by ID if the given value is not nil.
-func (auo *AddressUpdateOne) SetNillableLocationID(id *int) *AddressUpdateOne {
+func (auo *AddressUpdateOne) SetNillableLocationID(id *uuid.UUID) *AddressUpdateOne {
 	if id != nil {
 		auo = auo.SetLocationID(*id)
 	}
@@ -346,7 +315,7 @@ func (auo *AddressUpdateOne) ExecX(ctx context.Context) {
 }
 
 func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err error) {
-	_spec := sqlgraph.NewUpdateSpec(address.Table, address.Columns, sqlgraph.NewFieldSpec(address.FieldID, field.TypeInt))
+	_spec := sqlgraph.NewUpdateSpec(address.Table, address.Columns, sqlgraph.NewFieldSpec(address.FieldID, field.TypeUUID))
 	id, ok := auo.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Address.id" for update`)}
@@ -370,12 +339,6 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := auo.mutation.AddressID(); ok {
-		_spec.SetField(address.FieldAddressID, field.TypeInt64, value)
-	}
-	if value, ok := auo.mutation.AddedAddressID(); ok {
-		_spec.AddField(address.FieldAddressID, field.TypeInt64, value)
 	}
 	if value, ok := auo.mutation.Latitude(); ok {
 		_spec.SetField(address.FieldLatitude, field.TypeFloat64, value)
@@ -404,7 +367,7 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -420,7 +383,7 @@ func (auo *AddressUpdateOne) sqlSave(ctx context.Context) (_node *Address, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},

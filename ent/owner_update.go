@@ -89,14 +89,14 @@ func (ou *OwnerUpdate) SetNillableVerified(b *bool) *OwnerUpdate {
 }
 
 // AddLocationIDs adds the "locations" edge to the Location entity by IDs.
-func (ou *OwnerUpdate) AddLocationIDs(ids ...int) *OwnerUpdate {
+func (ou *OwnerUpdate) AddLocationIDs(ids ...uuid.UUID) *OwnerUpdate {
 	ou.mutation.AddLocationIDs(ids...)
 	return ou
 }
 
 // AddLocations adds the "locations" edges to the Location entity.
 func (ou *OwnerUpdate) AddLocations(l ...*Location) *OwnerUpdate {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -130,14 +130,14 @@ func (ou *OwnerUpdate) ClearLocations() *OwnerUpdate {
 }
 
 // RemoveLocationIDs removes the "locations" edge to Location entities by IDs.
-func (ou *OwnerUpdate) RemoveLocationIDs(ids ...int) *OwnerUpdate {
+func (ou *OwnerUpdate) RemoveLocationIDs(ids ...uuid.UUID) *OwnerUpdate {
 	ou.mutation.RemoveLocationIDs(ids...)
 	return ou
 }
 
 // RemoveLocations removes "locations" edges to Location entities.
 func (ou *OwnerUpdate) RemoveLocations(l ...*Location) *OwnerUpdate {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -259,7 +259,7 @@ func (ou *OwnerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -275,7 +275,7 @@ func (ou *OwnerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -294,7 +294,7 @@ func (ou *OwnerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -437,14 +437,14 @@ func (ouo *OwnerUpdateOne) SetNillableVerified(b *bool) *OwnerUpdateOne {
 }
 
 // AddLocationIDs adds the "locations" edge to the Location entity by IDs.
-func (ouo *OwnerUpdateOne) AddLocationIDs(ids ...int) *OwnerUpdateOne {
+func (ouo *OwnerUpdateOne) AddLocationIDs(ids ...uuid.UUID) *OwnerUpdateOne {
 	ouo.mutation.AddLocationIDs(ids...)
 	return ouo
 }
 
 // AddLocations adds the "locations" edges to the Location entity.
 func (ouo *OwnerUpdateOne) AddLocations(l ...*Location) *OwnerUpdateOne {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -478,14 +478,14 @@ func (ouo *OwnerUpdateOne) ClearLocations() *OwnerUpdateOne {
 }
 
 // RemoveLocationIDs removes the "locations" edge to Location entities by IDs.
-func (ouo *OwnerUpdateOne) RemoveLocationIDs(ids ...int) *OwnerUpdateOne {
+func (ouo *OwnerUpdateOne) RemoveLocationIDs(ids ...uuid.UUID) *OwnerUpdateOne {
 	ouo.mutation.RemoveLocationIDs(ids...)
 	return ouo
 }
 
 // RemoveLocations removes "locations" edges to Location entities.
 func (ouo *OwnerUpdateOne) RemoveLocations(l ...*Location) *OwnerUpdateOne {
-	ids := make([]int, len(l))
+	ids := make([]uuid.UUID, len(l))
 	for i := range l {
 		ids[i] = l[i].ID
 	}
@@ -637,7 +637,7 @@ func (ouo *OwnerUpdateOne) sqlSave(ctx context.Context) (_node *Owner, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -653,7 +653,7 @@ func (ouo *OwnerUpdateOne) sqlSave(ctx context.Context) (_node *Owner, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},
@@ -672,7 +672,7 @@ func (ouo *OwnerUpdateOne) sqlSave(ctx context.Context) (_node *Owner, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
+					Type:   field.TypeUUID,
 					Column: location.FieldID,
 				},
 			},

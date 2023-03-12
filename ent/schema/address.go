@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"github.com/google/uuid"
 )
 
 // Address holds the schema definition for the Address entity.
@@ -14,8 +15,9 @@ type Address struct {
 // Fields of the Address.
 func (Address) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int64("address_id").
-			Unique(),
+		field.UUID("id", uuid.UUID{}).
+			Unique().
+			Default(uuid.New),
 		field.Float("latitude"),
 		field.Float("longitude"),
 		field.Text("maps_link"),
