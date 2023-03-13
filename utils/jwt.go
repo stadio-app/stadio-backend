@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/m3-app/backend/ent"
 )
 
@@ -16,14 +16,10 @@ func GenerateJWT(key string, user *ent.User) (string, error) {
 		"name": user.Name,
 		"email": user.Email,
 		"avatar": user.Avatar,
-		"creation": today.Unix(),
-		"expiration": today.Add(month).Unix(),
+		"iat": today.Unix(),
+		"exp": today.Add(month).Unix(),
 	})
-	token, err := jwt.SignedString([]byte(key))
-	if err != nil {
-		return "", err
-	}
-	return token, nil
+	return jwt.SignedString([]byte(key))
 }
 
 func GetJwtClaims(jwt_token string, key string) (jwt.MapClaims, error) {
@@ -34,7 +30,7 @@ func GetJwtClaims(jwt_token string, key string) (jwt.MapClaims, error) {
 		return []byte(key), nil
 	})
 	if token_err != nil {
-		return nil, fmt.Errorf("could not parse jwt token")
+		return nil, token_err
 	}
 	
 	// Get claims stored in parsed JWT token

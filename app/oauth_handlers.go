@@ -34,7 +34,7 @@ func (app AppBase) OAuthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	token, err := utils.GenerateJWT(app.Tokens.JwtKey, user)
 	if err != nil {
-		utils.ErrorResponse(w, 400, "could not generate jwt token")
+		utils.ErrorResponse(w, 400, err.Error())
 		return
 	}
 	auth_state := model.AuthState{

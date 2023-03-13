@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/99designs/gqlgen v0.17.26
 	github.com/go-playground/justdoit v0.0.0-20180413125108-f398c5dd9bd7
+	github.com/golang-jwt/jwt/v5 v5.0.0-rc.1
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/lib/pq v1.10.7
@@ -62,7 +63,6 @@ require (
 	entgo.io/ent v0.11.9
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/go-playground/validator v9.31.0+incompatible
-	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/markbates/goth v1.76.1
 	golang.org/x/sys v0.5.0 // indirect
 )
