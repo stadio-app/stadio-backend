@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/m3-app/backend/ent/user"
@@ -36,23 +35,15 @@ func (app AppBase) BaseMiddleware() FuncHandler {
 func (app AppBase) AuthMiddleware() FuncHandler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			today := time.Now()
 			auth_header := r.Header.Get(types.AuthHeader)
 			jwt_token, err := utils.GetBearerToken(auth_header)
 			if err != nil {
 				utils.ErrorResponse(w, http.StatusUnauthorized, "unauthorized")
 				return
 			}
-			
 			jwt_claims, err := utils.GetJwtClaims(jwt_token, app.Tokens.JwtKey)
 			if err != nil {
 				utils.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-				return
-			}
-
-			expiration, err := jwt_claims.GetExpirationTime()
-			if !today.Before(expiration.Time) && err != nil {
-				utils.ErrorResponse(w, http.StatusUnauthorized, "token expired")
 				return
 			}
 
