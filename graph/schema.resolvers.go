@@ -6,10 +6,27 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent"
+	"github.com/m3-app/backend/graph/model"
+	"github.com/m3-app/backend/utils"
 )
+
+// CreateOwner is the resolver for the createOwner field.
+func (r *mutationResolver) CreateOwner(ctx context.Context, input model.OwnerInput) (*ent.Owner, error) {
+	auth_state := utils.ParseAuthContext(ctx)
+	return r.EntityManager.Owner.Create().
+		SetFirstName(input.FirstName).
+		SetMiddleName(*input.MiddleName).
+		SetLastName(input.LastName).
+		SetFullName(fmt.Sprintf("%s %s %s", input.FirstName, *input.MiddleName, input.LastName)).
+		SetIDURL(input.IDURL).
+		SetUser(auth_state.User).
+		SetUserID(auth_state.User.ID).
+		Save(ctx)
+}
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*ent.User, error) {
@@ -20,3 +37,8 @@ func (r *queryResolver) Users(ctx context.Context) ([]*ent.User, error) {
 func (r *queryResolver) User(ctx context.Context, id uuid.UUID) (*ent.User, error) {
 	return r.EntityManager.User.Get(ctx, id)
 }
+
+// Mutation returns MutationResolver implementation.
+func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
+
+type mutationResolver struct{ *Resolver }
