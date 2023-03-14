@@ -6,20 +6,30 @@ type Address implements Node {
   longitude: Float!
   mapsLink: String!
   fullAddress: String!
-  location: Location
+  location: Location!
 }
 """
 Define a Relay Cursor type:
 https://relay.dev/graphql/connections.htm#sec-Cursor
 """
 scalar Cursor
+type Event implements Node {
+  id: ID!
+  name: String!
+  type: String
+  startDate: Time!
+  endDate: Time!
+  participants: [Participant!]
+  location: Location
+}
 type Location implements Node {
   id: ID!
   name: String!
   type: String!
-  address: [Address!]
+  address: Address
   reviews: [Review!]
   owner: Owner
+  events: [Event!]
 }
 """
 An object with an ID.
@@ -44,8 +54,8 @@ type Owner implements Node {
   fullName: String!
   idURL: String!
   verified: Boolean!
+  user: User!
   locations: [Location!]
-  user: [User!]
 }
 """
 Information about pagination in a connection.
@@ -60,6 +70,16 @@ type PageInfo {
   startCursor: Cursor
   """When paginating forwards, the cursor to continue."""
   endCursor: Cursor
+}
+type Participant implements Node {
+  id: ID!
+  nickname: String
+  admin: Boolean!
+  participates: Boolean!
+  skillLevel: String
+  user: User
+  reviews: [Review!]
+  event: Event
 }
 type Query {
   """Fetches an object given its ID."""
@@ -77,7 +97,8 @@ type Review implements Node {
   id: ID!
   rating: Float!
   message: String!
-  location: [Location!]
+  location: Location
+  participant: Participant
 }
 type User implements Node {
   id: ID!
@@ -91,4 +112,5 @@ type User implements Node {
   createdAt: Time!
   updatedAt: Time!
   owner: Owner
+  participants: [Participant!]
 }

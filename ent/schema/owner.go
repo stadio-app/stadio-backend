@@ -37,7 +37,10 @@ func (Owner) Fields() []ent.Field {
 // Edges of the Owner.
 func (Owner) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.From("user", User.Type).
+			Ref("owner").
+			Unique().
+			Required(),
 		edge.To("locations", Location.Type),
-		edge.To("user", User.Type),
 	}
 }

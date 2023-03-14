@@ -30,6 +30,7 @@ func (Address) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("location", Location.Type).
 			Ref("address").
-			Unique(),
+			Unique().
+			Required(),
 	}
 }

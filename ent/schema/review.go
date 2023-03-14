@@ -26,7 +26,11 @@ func (Review) Fields() []ent.Field {
 // Edges of the Review.
 func (Review) Edges() []ent.Edge {
 	return []ent.Edge{
-		// edge.To("participant", Participant.Type), // edge to Participant
-		edge.To("location", Location.Type),
+		edge.From("location", Location.Type).
+			Ref("reviews").
+			Unique(),
+		edge.From("participant", Participant.Type).
+			Ref("reviews").
+			Unique(),
 	}
 }

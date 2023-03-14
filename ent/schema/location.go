@@ -26,11 +26,11 @@ func (Location) Fields() []ent.Field {
 // Edges of the Location.
 func (Location) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("address", Address.Type),
-		edge.From("reviews", Review.Type).
-			Ref("location"),
+		edge.To("address", Address.Type).Unique(),
+		edge.To("reviews", Review.Type),
 		edge.From("owner", Owner.Type).
 			Ref("locations").
 			Unique(),
+		edge.To("events", Event.Type),
 	}
 }
