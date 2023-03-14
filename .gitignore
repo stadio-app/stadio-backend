@@ -5,3 +5,9 @@ ent/*
 !ent/schema
 !ent/entc.go
 !ent/generate.go
+
+# GraphQL
+graph/*
+!*resolver.go
+!*.graphql
+!*.graphqls
