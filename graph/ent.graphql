@@ -1,10 +1,36 @@
 directive @goField(forceResolver: Boolean, name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+type Address implements Node {
+  id: ID!
+  latitude: Float!
+  longitude: Float!
+  mapsLink: String!
+  fullAddress: String!
+  location: Location!
+}
 """
 Define a Relay Cursor type:
 https://relay.dev/graphql/connections.htm#sec-Cursor
 """
 scalar Cursor
+type Event implements Node {
+  id: ID!
+  name: String!
+  type: String
+  startDate: Time!
+  endDate: Time!
+  participants: [Participant!]
+  location: Location
+}
+type Location implements Node {
+  id: ID!
+  name: String!
+  type: String!
+  address: Address
+  reviews: [Review!]
+  owner: Owner
+  events: [Event!]
+}
 """
 An object with an ID.
 Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
@@ -20,6 +46,17 @@ enum OrderDirection {
   """Specifies a descending order for a given `orderBy` argument."""
   DESC
 }
+type Owner implements Node {
+  id: ID!
+  firstName: String!
+  middleName: String
+  lastName: String!
+  fullName: String!
+  idURL: String!
+  verified: Boolean!
+  user: User!
+  locations: [Location!]
+}
 """
 Information about pagination in a connection.
 https://relay.dev/graphql/connections.htm#sec-undefined.PageInfo
@@ -34,6 +71,16 @@ type PageInfo {
   """When paginating forwards, the cursor to continue."""
   endCursor: Cursor
 }
+type Participant implements Node {
+  id: ID!
+  nickname: String
+  admin: Boolean!
+  participates: Boolean!
+  skillLevel: String
+  user: User
+  reviews: [Review!]
+  event: Event
+}
 type Query {
   """Fetches an object given its ID."""
   node(
@@ -46,6 +93,13 @@ type Query {
     ids: [ID!]!
   ): [Node]!
 }
+type Review implements Node {
+  id: ID!
+  rating: Float!
+  message: String!
+  location: Location
+  participant: Participant
+}
 type User implements Node {
   id: ID!
   email: String!
@@ -57,4 +111,6 @@ type User implements Node {
   active: Boolean!
   createdAt: Time!
   updatedAt: Time!
+  owner: Owner
+  participants: [Participant!]
 }

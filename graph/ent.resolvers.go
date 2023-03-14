@@ -8,29 +8,21 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/m3-app/backend/ent"
 )
 
 // Node is the resolver for the node field.
-func (r *queryResolver) Node(ctx context.Context, id string) (ent.Noder, error) {
+func (r *queryResolver) Node(ctx context.Context, id uuid.UUID) (ent.Noder, error) {
 	panic(fmt.Errorf("not implemented: Node - node"))
 }
 
 // Nodes is the resolver for the nodes field.
-func (r *queryResolver) Nodes(ctx context.Context, ids []string) ([]ent.Noder, error) {
+func (r *queryResolver) Nodes(ctx context.Context, ids []uuid.UUID) ([]ent.Noder, error) {
 	panic(fmt.Errorf("not implemented: Nodes - nodes"))
-}
-
-// ID is the resolver for the id field.
-func (r *userResolver) ID(ctx context.Context, obj *ent.User) (string, error) {
-	panic(fmt.Errorf("not implemented: ID - id"))
 }
 
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-// User returns UserResolver implementation.
-func (r *Resolver) User() UserResolver { return &userResolver{r} }
-
 type queryResolver struct{ *Resolver }
-type userResolver struct{ *Resolver }
