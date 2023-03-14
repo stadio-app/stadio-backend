@@ -4,10 +4,6 @@ extend type Query {
     user(id: ID!): User!
 }
 
-type Message {
-    message: String!
-}
-
 input UserInput {
     email: String!
     name: String!
