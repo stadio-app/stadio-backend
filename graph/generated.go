@@ -48,6 +48,7 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+<<<<<<< HEAD
 	Address struct {
 		FullAddress func(childComplexity int) int
 		ID          func(childComplexity int) int
@@ -64,6 +65,11 @@ type ComplexityRoot struct {
 		Owner   func(childComplexity int) int
 		Reviews func(childComplexity int) int
 		Type    func(childComplexity int) int
+=======
+	AuthState struct {
+		Token func(childComplexity int) int
+		User  func(childComplexity int) int
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 	}
 
 	Message struct {
@@ -140,6 +146,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+<<<<<<< HEAD
 	case "Address.fullAddress":
 		if e.complexity.Address.FullAddress == nil {
 			break
@@ -223,6 +230,21 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Location.Type(childComplexity), true
+=======
+	case "AuthState.token":
+		if e.complexity.AuthState.Token == nil {
+			break
+		}
+
+		return e.complexity.AuthState.Token(childComplexity), true
+
+	case "AuthState.user":
+		if e.complexity.AuthState.User == nil {
+			break
+		}
+
+		return e.complexity.AuthState.User(childComplexity), true
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 
 	case "Message.message":
 		if e.complexity.Message.Message == nil {
@@ -477,7 +499,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputUserInput,
+	)
 	first := true
 
 	switch rc.Operation.Operation {
@@ -640,8 +664,13 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+<<<<<<< HEAD
 func (ec *executionContext) _Address_id(ctx context.Context, field graphql.CollectedField, obj *ent.Address) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Address_id(ctx, field)
+=======
+func (ec *executionContext) _AuthState_user(ctx context.Context, field graphql.CollectedField, obj *model.AuthState) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AuthState_user(ctx, field)
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 	if err != nil {
 		return graphql.Null
 	}
@@ -654,7 +683,11 @@ func (ec *executionContext) _Address_id(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
+<<<<<<< HEAD
 		return obj.ID, nil
+=======
+		return obj.User, nil
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -666,6 +699,7 @@ func (ec *executionContext) _Address_id(ctx context.Context, field graphql.Colle
 		}
 		return graphql.Null
 	}
+<<<<<<< HEAD
 	res := resTmp.(uuid.UUID)
 	fc.Result = res
 	return ec.marshalNID2githubᚗcomᚋgoogleᚋuuidᚐUUID(ctx, field.Selections, res)
@@ -674,10 +708,21 @@ func (ec *executionContext) _Address_id(ctx context.Context, field graphql.Colle
 func (ec *executionContext) fieldContext_Address_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Address",
+=======
+	res := resTmp.(*ent.User)
+	fc.Result = res
+	return ec.marshalNUser2ᚖgithubᚗcomᚋm3ᚑappᚋbackendᚋentᚐUser(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AuthState_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthState",
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+<<<<<<< HEAD
 			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
@@ -910,13 +955,43 @@ func (ec *executionContext) fieldContext_Address_location(ctx context.Context, f
 				return ec.fieldContext_Location_owner(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Location", field.Name)
+=======
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_User_id(ctx, field)
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "phoneNumber":
+				return ec.fieldContext_User_phoneNumber(ctx, field)
+			case "name":
+				return ec.fieldContext_User_name(ctx, field)
+			case "avatar":
+				return ec.fieldContext_User_avatar(ctx, field)
+			case "birthDate":
+				return ec.fieldContext_User_birthDate(ctx, field)
+			case "bio":
+				return ec.fieldContext_User_bio(ctx, field)
+			case "active":
+				return ec.fieldContext_User_active(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_User_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_User_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 		},
 	}
 	return fc, nil
 }
 
+<<<<<<< HEAD
 func (ec *executionContext) _Location_id(ctx context.Context, field graphql.CollectedField, obj *ent.Location) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Location_id(ctx, field)
+=======
+func (ec *executionContext) _AuthState_token(ctx context.Context, field graphql.CollectedField, obj *model.AuthState) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AuthState_token(ctx, field)
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 	if err != nil {
 		return graphql.Null
 	}
@@ -929,6 +1004,7 @@ func (ec *executionContext) _Location_id(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
+<<<<<<< HEAD
 		return obj.ID, nil
 	})
 	if err != nil {
@@ -974,6 +1050,9 @@ func (ec *executionContext) _Location_name(ctx context.Context, field graphql.Co
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
+=======
+		return obj.Token, nil
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -990,9 +1069,15 @@ func (ec *executionContext) _Location_name(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
+<<<<<<< HEAD
 func (ec *executionContext) fieldContext_Location_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Location",
+=======
+func (ec *executionContext) fieldContext_AuthState_token(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AuthState",
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1003,6 +1088,7 @@ func (ec *executionContext) fieldContext_Location_name(ctx context.Context, fiel
 	return fc, nil
 }
 
+<<<<<<< HEAD
 func (ec *executionContext) _Location_type(ctx context.Context, field graphql.CollectedField, obj *ent.Location) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Location_type(ctx, field)
 	if err != nil {
@@ -1214,6 +1300,8 @@ func (ec *executionContext) fieldContext_Location_owner(ctx context.Context, fie
 	return fc, nil
 }
 
+=======
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 func (ec *executionContext) _Message_message(ctx context.Context, field graphql.CollectedField, obj *model.Message) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Message_message(ctx, field)
 	if err != nil {
@@ -4685,6 +4773,50 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputUserInput(ctx context.Context, obj interface{}) (model.UserInput, error) {
+	var it model.UserInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"email", "name", "avatarUrl"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "name":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			it.Name, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "avatarUrl":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("avatarUrl"))
+			it.AvatarURL, err = ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -4727,15 +4859,23 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 
 // region    **************************** object.gotpl ****************************
 
+<<<<<<< HEAD
 var addressImplementors = []string{"Address", "Node"}
 
 func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, obj *ent.Address) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, addressImplementors)
+=======
+var authStateImplementors = []string{"AuthState"}
+
+func (ec *executionContext) _AuthState(ctx context.Context, sel ast.SelectionSet, obj *model.AuthState) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, authStateImplementors)
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
+<<<<<<< HEAD
 			out.Values[i] = graphql.MarshalString("Address")
 		case "id":
 
@@ -4882,6 +5022,23 @@ func (ec *executionContext) _Location(ctx context.Context, sel ast.SelectionSet,
 				return innerFunc(ctx)
 
 			})
+=======
+			out.Values[i] = graphql.MarshalString("AuthState")
+		case "user":
+
+			out.Values[i] = ec._AuthState_user(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "token":
+
+			out.Values[i] = ec._AuthState_token(ctx, field, obj)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+>>>>>>> b38e065042e601437899af89cdf1a0e7356e86e2
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

@@ -7,6 +7,10 @@ import (
 	"github.com/m3-app/backend/ent"
 )
 
+type AuthKeyType string
+const AuthKey AuthKeyType = "auth"
+const AuthHeader string = "Authorization"
+
 type AppContext struct {
 	DbConn *sql.DB
 	Tokens *Tokens
