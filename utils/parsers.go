@@ -1,11 +1,13 @@
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"strings"
 
+	"github.com/m3-app/backend/graph/model"
 	"github.com/m3-app/backend/types"
 )
 
@@ -38,4 +40,10 @@ func GetBearerToken(authorization string) (string, error) {
 		return "", fmt.Errorf("token empty")
 	}
 	return token, nil
+}
+
+// Given a context, find and return the auth struct using the types.AuthKey key
+func ParseAuthContext(context context.Context) model.AuthState {
+	auth := context.Value(types.AuthKey).(model.AuthState)
+	return auth
 }

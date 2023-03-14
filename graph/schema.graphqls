@@ -7,3 +7,14 @@ extend type Query {
 type Message {
     message: String!
 }
+
+input UserInput {
+    email: String!
+    name: String!
+    avatarUrl: String
+}
+
+type AuthState {
+    user: User!
+    token: String!
+}

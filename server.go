@@ -13,7 +13,6 @@ import (
 	"github.com/m3-app/backend/app"
 	"github.com/m3-app/backend/graph"
 	"github.com/m3-app/backend/utils"
-	"github.com/markbates/goth/gothic"
 )
 
 const defaultPort = "8080"
@@ -35,18 +34,8 @@ func main() {
 	// oauth routes
 	router.Group(func(r chi.Router) {
 		r.Use(app.GothMiddleware())
-		r.HandleFunc("/auth/{provider:[a-z-]+}", func(w http.ResponseWriter, r *http.Request) {
-			gothic.BeginAuthHandler(w, r)
-		})
-		r.HandleFunc("/auth/{provider:[a-z-]+}/callback", func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Add("Content-Type", "application/json")
-			provider_user, err := gothic.CompleteUserAuth(w, r)
-			if err != nil {
-				utils.ErrorResponse(w, 400, "could not complete oauth transaction")
-				return
-			}
-			utils.DataResponse(w, provider_user)
-		})
+		r.HandleFunc("/auth/{provider}", app.OAuthSignIn)
+		r.HandleFunc("/auth/{provider}/callback", app.OAuthCallback)
 	})
 	// secure routes
 	router.Group(func(r chi.Router) {
@@ -59,7 +48,7 @@ func main() {
 		r.Handle("/graphql", gql_server)
 	})
 
-	log.Printf("Server running on http://localhost:%s/\n", app.Port)
+	log.Printf("Server running on http://localhost:%s/playground\n", app.Port)
 	if err := http.ListenAndServe(port_str, router); err != nil {
 		log.Fatal(err)
 	}
