@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
 	"github.com/markbates/goth/gothic"
 	"github.com/stadio-app/go-backend/ent/user"
 	"github.com/stadio-app/go-backend/graph/model"
@@ -48,11 +47,7 @@ func (app AppBase) AuthMiddleware() FuncHandler {
 				return
 			}
 
-			id, err := uuid.Parse(jwt_claims["id"].(string))
-			if err != nil {
-				utils.ErrorResponse(w, http.StatusUnauthorized, "invalid id claim")
-				return
-			}
+			id := jwt_claims["id"].(int)
 			email := jwt_claims["email"].(string)
 			user, err := app.EntityManager.User.
 				Query().
