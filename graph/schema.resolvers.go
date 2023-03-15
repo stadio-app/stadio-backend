@@ -6,7 +6,6 @@ package graph
 
 import (
 	"context"
-	"strconv"
 
 	"github.com/stadio-app/go-backend/ent"
 )
@@ -17,10 +16,6 @@ func (r *queryResolver) Users(ctx context.Context) ([]*ent.User, error) {
 }
 
 // User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id string) (*ent.User, error) {
-	parsed_id, err := strconv.ParseInt(id, 10, 32)
-	if err != nil {
-		return nil, err
-	}
-	return r.EntityManager.User.Get(ctx, uint64(parsed_id))
+func (r *queryResolver) User(ctx context.Context, id uint64) (*ent.User, error) {
+	return r.EntityManager.User.Get(ctx, id)
 }
