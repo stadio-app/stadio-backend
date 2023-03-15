@@ -47,7 +47,12 @@ func (app AppBase) AuthMiddleware() FuncHandler {
 				return
 			}
 
-			id := jwt_claims["id"].(int)
+			raw_id, ok := jwt_claims["id"].(float64)
+			if !ok {
+				utils.ErrorResponse(w, http.StatusUnauthorized, "could not parse id")
+				return
+			}
+			id := int(raw_id)
 			email := jwt_claims["email"].(string)
 			user, err := app.EntityManager.User.
 				Query().
