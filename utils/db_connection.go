@@ -6,7 +6,7 @@ import (
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
-	"github.com/m3-app/backend/ent"
+	"github.com/stadio-app/go-backend/ent"
 )
 
 func DbConnection() *sql.DB {

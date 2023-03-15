@@ -8,7 +8,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/m3-app/backend/ent"
+	"github.com/stadio-app/go-backend/ent"
 )
 
 // Users is the resolver for the users field.

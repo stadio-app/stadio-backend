@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/m3-app/backend/ent"
+	"github.com/stadio-app/go-backend/ent"
 )
 
 func GenerateJWT(key string, user *ent.User) (string, error) {

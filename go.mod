@@ -1,4 +1,4 @@
-module github.com/m3-app/backend
+module github.com/stadio-app/go-backend
 
 go 1.18
 

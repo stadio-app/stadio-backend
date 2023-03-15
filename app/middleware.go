@@ -6,11 +6,11 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	"github.com/m3-app/backend/ent/user"
-	"github.com/m3-app/backend/graph/model"
-	"github.com/m3-app/backend/types"
-	"github.com/m3-app/backend/utils"
 	"github.com/markbates/goth/gothic"
+	"github.com/stadio-app/go-backend/ent/user"
+	"github.com/stadio-app/go-backend/graph/model"
+	"github.com/stadio-app/go-backend/types"
+	"github.com/stadio-app/go-backend/utils"
 )
 
 type FuncHandler func(http.Handler) http.Handler

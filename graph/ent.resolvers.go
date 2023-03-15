@@ -9,7 +9,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
-	"github.com/m3-app/backend/ent"
+	"github.com/stadio-app/go-backend/ent"
 )
 
 // Node is the resolver for the node field.

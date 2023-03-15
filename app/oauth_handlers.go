@@ -3,9 +3,9 @@ package app
 import (
 	"net/http"
 
-	"github.com/m3-app/backend/graph/model"
-	"github.com/m3-app/backend/utils"
 	"github.com/markbates/goth/gothic"
+	"github.com/stadio-app/go-backend/graph/model"
+	"github.com/stadio-app/go-backend/utils"
 )
 
 func (app AppBase) OAuthSignIn(w http.ResponseWriter, r *http.Request) {
