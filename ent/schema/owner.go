@@ -4,7 +4,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // Owner holds the schema definition for the Owner entity.
@@ -15,9 +14,6 @@ type Owner struct {
 // Fields of the Owner.
 func (Owner) Fields() []ent.Field {
 	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).
-			Unique().
-			Default(uuid.New),
 		field.String("first_name").
 			NotEmpty(),
 		field.String("middle_name").
