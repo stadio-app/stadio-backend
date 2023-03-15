@@ -22,5 +22,5 @@ func (r *queryResolver) User(ctx context.Context, id string) (*ent.User, error) 
 	if err != nil {
 		return nil, err
 	}
-	return r.EntityManager.User.Get(ctx, int(parsed_id))
+	return r.EntityManager.User.Get(ctx, uint64(parsed_id))
 }

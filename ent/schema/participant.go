@@ -13,16 +13,19 @@ type Participant struct {
 
 // Fields of the Participant.
 func (Participant) Fields() []ent.Field {
-	return []ent.Field{
-		field.String("nickname").
-			Optional(),
-		field.Bool("admin").
-			Default(false),
-		field.Bool("participates").
-			Default(true),
-		field.String("skill_level").
-			Optional(),
-	}
+	return append(
+		[]ent.Field{
+			field.String("nickname").
+				Optional(),
+			field.Bool("admin").
+				Default(false),
+			field.Bool("participates").
+				Default(true),
+			field.String("skill_level").
+				Optional(),
+		},
+		BaseSchema()...,
+	)
 }
 
 // Edges of the Participant.

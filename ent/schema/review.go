@@ -13,10 +13,13 @@ type Review struct {
 
 // Fields of the Review.
 func (Review) Fields() []ent.Field {
-	return []ent.Field{
-		field.Float("rating"),
-		field.Text("message"),
-	}
+	return append(
+		[]ent.Field{
+			field.Float("rating"),
+			field.Text("message"),
+		},
+		BaseSchema()...,
+	)
 }
 
 // Edges of the Review.

@@ -13,10 +13,13 @@ type Location struct {
 
 // Fields of the Location.
 func (Location) Fields() []ent.Field {
-	return []ent.Field{
-		field.String("name"),
-		field.String("type"), // Making it a string temporarily until we define an Enum or a different way of defining a type.
-	}
+	return append(
+		[]ent.Field{
+			field.String("name"),
+			field.String("type"), // TODO: Define enum
+		},
+		BaseSchema()...,
+	)
 }
 
 // Edges of the Location.

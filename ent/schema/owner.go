@@ -13,21 +13,24 @@ type Owner struct {
 
 // Fields of the Owner.
 func (Owner) Fields() []ent.Field {
-	return []ent.Field{
-		field.String("first_name").
-			NotEmpty(),
-		field.String("middle_name").
-			Optional(),
-		field.String("last_name").
-			NotEmpty(),
-		field.String("full_name").
-			NotEmpty(),
-		field.String("id_url").
-			NotEmpty().
-			Unique(),
-		field.Bool("verified").
-			Default(false),
-	}
+	return append(
+		[]ent.Field{
+			field.String("first_name").
+				NotEmpty(),
+			field.String("middle_name").
+				Optional(),
+			field.String("last_name").
+				NotEmpty(),
+			field.String("full_name").
+				NotEmpty(),
+			field.String("id_url").
+				NotEmpty().
+				Unique(),
+			field.Bool("verified").
+				Default(false),
+		},
+		BaseSchema()...,
+	)
 }
 
 // Edges of the Owner.

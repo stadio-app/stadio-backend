@@ -52,7 +52,7 @@ func (app AppBase) AuthMiddleware() FuncHandler {
 				utils.ErrorResponse(w, http.StatusUnauthorized, "could not parse id")
 				return
 			}
-			id := int(raw_id)
+			id := uint64(raw_id)
 			email := jwt_claims["email"].(string)
 			user, err := app.EntityManager.User.
 				Query().
