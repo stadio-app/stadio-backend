@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/markbates/goth/gothic"
 	"github.com/stadio-app/go-backend/ent/user"
-	"github.com/stadio-app/go-backend/graph/model"
 	"github.com/stadio-app/go-backend/types"
 	"github.com/stadio-app/go-backend/utils"
 )
@@ -68,10 +67,10 @@ func (app AppBase) AuthMiddleware() FuncHandler {
 			r = r.WithContext(context.WithValue(
 				r.Context(), 
 				types.AuthKey, 
-				model.AuthState{
-					User: user,
-					Token: jwt_token,
-				},
+				// model.AuthState{
+				// 	User: user,
+				// 	Token: jwt_token,
+				// },
 			))
 			next.ServeHTTP(w, r)
 		})

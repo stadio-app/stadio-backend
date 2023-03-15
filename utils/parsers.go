@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/stadio-app/go-backend/graph/model"
 	"github.com/stadio-app/go-backend/types"
 )
 
@@ -43,7 +42,8 @@ func GetBearerToken(authorization string) (string, error) {
 }
 
 // Given a context, find and return the auth struct using the types.AuthKey key
-func ParseAuthContext(context context.Context) model.AuthState {
-	auth := context.Value(types.AuthKey).(model.AuthState)
-	return auth
+func ParseAuthContext(context context.Context) interface{} {
+	// auth := context.Value(types.AuthKey).(model.AuthState)
+	// return auth
+	return nil
 }
