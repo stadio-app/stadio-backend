@@ -6,6 +6,8 @@ type Address implements Node {
   longitude: Float!
   mapsLink: String!
   fullAddress: String!
+  createdAt: Time!
+  updatedAt: Time!
   location: Location!
 }
 """
@@ -19,6 +21,8 @@ type Event implements Node {
   type: String
   startDate: Time!
   endDate: Time!
+  createdAt: Time!
+  updatedAt: Time!
   participants: [Participant!]
   location: Location
 }
@@ -26,6 +30,8 @@ type Location implements Node {
   id: ID!
   name: String!
   type: String!
+  createdAt: Time!
+  updatedAt: Time!
   address: Address
   reviews: [Review!]
   owner: Owner
@@ -35,7 +41,7 @@ type Location implements Node {
 An object with an ID.
 Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
 """
-interface Node @goModel(model: "github.com/m3-app/backend/ent.Noder") {
+interface Node @goModel(model: "github.com/stadio-app/go-backend/ent.Noder") {
   """The id of the object."""
   id: ID!
 }
@@ -54,6 +60,8 @@ type Owner implements Node {
   fullName: String!
   idURL: String!
   verified: Boolean!
+  createdAt: Time!
+  updatedAt: Time!
   user: User!
   locations: [Location!]
 }
@@ -77,6 +85,8 @@ type Participant implements Node {
   admin: Boolean!
   participates: Boolean!
   skillLevel: String
+  createdAt: Time!
+  updatedAt: Time!
   user: User
   reviews: [Review!]
   event: Event
@@ -97,6 +107,8 @@ type Review implements Node {
   id: ID!
   rating: Float!
   message: String!
+  createdAt: Time!
+  updatedAt: Time!
   location: Location
   participant: Participant
 }

@@ -1,4 +1,4 @@
-module github.com/m3-app/backend
+module github.com/stadio-app/go-backend
 
 go 1.18
 
@@ -11,6 +11,7 @@ require (
 	github.com/lib/pq v1.10.7
 	github.com/vektah/gqlparser/v2 v2.5.1
 	github.com/vmihailenco/msgpack/v5 v5.0.0-beta.9
+	golang.org/x/sync v0.1.0
 )
 
 require (

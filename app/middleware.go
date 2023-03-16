@@ -5,12 +5,11 @@ import (
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
-	"github.com/m3-app/backend/ent/user"
-	"github.com/m3-app/backend/graph/model"
-	"github.com/m3-app/backend/types"
-	"github.com/m3-app/backend/utils"
 	"github.com/markbates/goth/gothic"
+	"github.com/stadio-app/go-backend/ent/user"
+	"github.com/stadio-app/go-backend/graph/model"
+	"github.com/stadio-app/go-backend/types"
+	"github.com/stadio-app/go-backend/utils"
 )
 
 type FuncHandler func(http.Handler) http.Handler
@@ -48,11 +47,12 @@ func (app AppBase) AuthMiddleware() FuncHandler {
 				return
 			}
 
-			id, err := uuid.Parse(jwt_claims["id"].(string))
-			if err != nil {
-				utils.ErrorResponse(w, http.StatusUnauthorized, "invalid id claim")
+			raw_id, ok := jwt_claims["id"].(float64)
+			if !ok {
+				utils.ErrorResponse(w, http.StatusUnauthorized, "could not parse id")
 				return
 			}
+			id := int64(raw_id)
 			email := jwt_claims["email"].(string)
 			user, err := app.EntityManager.User.
 				Query().
