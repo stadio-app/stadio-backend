@@ -28,3 +28,9 @@ type DbConnectionOptions struct {
 	SslMode bool
 	DisableLogger bool
 }
+
+type FullName struct {
+	FirstName string
+	MiddleName *string
+	LastName string
+}

@@ -6,21 +6,28 @@ package graph
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/stadio-app/go-backend/ent"
 	"github.com/stadio-app/go-backend/graph/model"
+	"github.com/stadio-app/go-backend/types"
 	"github.com/stadio-app/go-backend/utils"
 )
 
 // CreateOwner is the resolver for the createOwner field.
 func (r *mutationResolver) CreateOwner(ctx context.Context, input model.OwnerInput) (*ent.Owner, error) {
 	auth_state := utils.ParseAuthContext(ctx)
-	return r.EntityManager.Owner.Create().
+	owner := r.EntityManager.Owner.Create().
 		SetFirstName(input.FirstName).
-		SetMiddleName(*input.MiddleName).
-		SetLastName(input.LastName).
-		SetFullName(fmt.Sprintf("%s %s %s", input.FirstName, *input.MiddleName, input.LastName)).
+		SetLastName(input.LastName)
+	if input.MiddleName != nil {
+		owner = owner.SetMiddleName(*input.MiddleName)
+	}
+	return owner.
+		SetFullName(utils.CreateFullName(types.FullName{
+			FirstName:  input.FirstName,
+			MiddleName: input.MiddleName,
+			LastName:   input.LastName,
+		})).
 		SetIDURL(input.IDURL).
 		SetUser(auth_state.User).
 		SetUserID(auth_state.User.ID).
