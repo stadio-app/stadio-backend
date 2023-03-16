@@ -16,6 +16,6 @@ func (r *queryResolver) Users(ctx context.Context) ([]*ent.User, error) {
 }
 
 // User is the resolver for the user field.
-func (r *queryResolver) User(ctx context.Context, id uint64) (*ent.User, error) {
+func (r *queryResolver) User(ctx context.Context, id int64) (*ent.User, error) {
 	return r.EntityManager.User.Get(ctx, id)
 }

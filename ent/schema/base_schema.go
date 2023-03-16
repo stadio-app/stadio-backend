@@ -9,8 +9,9 @@ import (
 
 func BaseSchema() []ent.Field {
 	return []ent.Field{
-		field.Uint64("id").
-			Unique(),
+		field.Int64("id").
+			Unique().
+			Immutable(),
 		field.Time("created_at").
 			Default(time.Now),
 		field.Time("updated_at").
