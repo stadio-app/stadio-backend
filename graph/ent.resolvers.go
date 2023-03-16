@@ -8,17 +8,16 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/google/uuid"
-	"github.com/m3-app/backend/ent"
+	"github.com/stadio-app/go-backend/ent"
 )
 
 // Node is the resolver for the node field.
-func (r *queryResolver) Node(ctx context.Context, id uuid.UUID) (ent.Noder, error) {
+func (r *queryResolver) Node(ctx context.Context, id int64) (ent.Noder, error) {
 	panic(fmt.Errorf("not implemented: Node - node"))
 }
 
 // Nodes is the resolver for the nodes field.
-func (r *queryResolver) Nodes(ctx context.Context, ids []uuid.UUID) ([]ent.Noder, error) {
+func (r *queryResolver) Nodes(ctx context.Context, ids []int64) ([]ent.Noder, error) {
 	panic(fmt.Errorf("not implemented: Nodes - nodes"))
 }
 

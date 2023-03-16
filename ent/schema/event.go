@@ -6,7 +6,6 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/google/uuid"
 )
 
 // Event holds the schema definition for the Event entity.
@@ -16,17 +15,17 @@ type Event struct {
 
 // Fields of the Event.
 func (Event) Fields() []ent.Field {
-	return []ent.Field{
-		field.UUID("id", uuid.UUID{}).
-			Unique().
-			Default(uuid.New),
-		field.String("name"),
-		field.String("type").
-			Optional(),
-		field.Time("start_date").Default(time.Now),
-		field.Time("end_date").
-			Default(time.Now().Add(time.Hour * 24 * 7)),
-	}
+	return append(
+		[]ent.Field{
+			field.String("name"),
+			field.String("type").
+				Optional(),
+			field.Time("start_date").Default(time.Now),
+			field.Time("end_date").
+				Default(time.Now().Add(time.Hour * 24 * 7)),
+		},
+		BaseSchema()...
+	)
 }
 
 // Edges of the Event.

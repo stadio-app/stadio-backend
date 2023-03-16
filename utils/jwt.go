@@ -5,14 +5,14 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/m3-app/backend/ent"
+	"github.com/stadio-app/go-backend/ent"
 )
 
 func GenerateJWT(key string, user *ent.User) (string, error) {
 	today := time.Now()
 	month := (time.Hour * 24) * 30 // 24 hours * 30 days
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": user.ID.String(),
+		"id": user.ID,
 		"name": user.Name,
 		"email": user.Email,
 		"avatar": user.Avatar,

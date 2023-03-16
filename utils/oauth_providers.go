@@ -1,10 +1,10 @@
 package utils
 
 import (
-	"github.com/m3-app/backend/types"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/twitter"
+	"github.com/stadio-app/go-backend/types"
 )
 
 func SetupOauthProviders(tokens types.Tokens) {
