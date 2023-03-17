@@ -6,6 +6,7 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/stadio-app/go-backend/ent"
 	"github.com/stadio-app/go-backend/graph/model"
@@ -16,6 +17,10 @@ import (
 // CreateOwner is the resolver for the createOwner field.
 func (r *mutationResolver) CreateOwner(ctx context.Context, input model.OwnerInput) (*ent.Owner, error) {
 	auth_state := utils.ParseAuthContext(ctx)
+	user_owner, err := auth_state.User.Owner(ctx)
+	if err == nil && user_owner != nil {
+		return nil, fmt.Errorf("owner already exists for this account")
+	}
 	owner := r.EntityManager.Owner.Create().
 		SetFirstName(input.FirstName).
 		SetLastName(input.LastName)
