@@ -1,5 +1,7 @@
 //go:build ignore
 
+// Source: https://entgo.io/docs/versioned-migrations/#option-2-create-a-migration-generation-script
+
 package main
 
 import (
@@ -38,4 +40,3 @@ func main() {
         log.Fatalf("failed generating migration file: %v", err)
     }
 }
-
