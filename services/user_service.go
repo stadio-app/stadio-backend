@@ -3,9 +3,9 @@ package services
 import (
 	"context"
 
-	"github.com/stadio-app/go-backend/ent"
-	"github.com/stadio-app/go-backend/ent/user"
-	"github.com/stadio-app/go-backend/graph/model"
+	"github.com/stadio-app/stadio-backend/ent"
+	"github.com/stadio-app/stadio-backend/ent/user"
+	"github.com/stadio-app/stadio-backend/graph/model"
 )
 
 type UserService struct {

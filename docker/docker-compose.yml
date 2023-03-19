@@ -12,7 +12,7 @@ services:
     ports:
       - '5433:5432'
     volumes: 
-      - mc-db:/var/lib/postgresql/data
+      - stadio-db:/var/lib/postgresql/data
 volumes:
-  mc-db:
+  stadio-db:
     driver: local

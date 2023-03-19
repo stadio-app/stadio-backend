@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/go-playground/validator"
-	"github.com/stadio-app/go-backend/ent"
+	"github.com/stadio-app/stadio-backend/ent"
 )
 
 type AuthKeyType string
@@ -27,4 +27,10 @@ type DbConnectionOptions struct {
 	Port string
 	SslMode bool
 	DisableLogger bool
+}
+
+type FullName struct {
+	FirstName string
+	MiddleName *string
+	LastName string
 }

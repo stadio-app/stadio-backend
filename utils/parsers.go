@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"strings"
 
-	"github.com/stadio-app/go-backend/graph/model"
-	"github.com/stadio-app/go-backend/types"
+	"github.com/stadio-app/stadio-backend/graph/model"
+	"github.com/stadio-app/stadio-backend/types"
 )
 
 // Given a JSON file, map the contents into any struct dest

@@ -4,6 +4,17 @@ extend type Query {
     user(id: ID!): User!
 }
 
+extend type Mutation {
+    createOwner(input: OwnerInput!): Owner!
+}
+
+input OwnerInput {
+    firstName: String!
+    middleName: String
+    lastName: String!
+    idURL: String!
+}
+
 input UserInput {
     email: String!
     name: String!

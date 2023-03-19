@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/stadio-app/go-backend/types"
+	"github.com/stadio-app/stadio-backend/types"
 )
 
 func JsonResponse(w http.ResponseWriter, status int, data interface{}) {
