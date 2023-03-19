@@ -10,8 +10,11 @@ watch:
 ent-generate:
 	go generate ./ent
 
-ent-create: # arguments  [entity name]
-	go run -mod=mod entgo.io/ent/cmd/ent new
+ent-create:
+	go run -mod=mod entgo.io/ent/cmd/ent new $(entity)
+
+atlas-create:
+	go run -mod=mod ent/migrate/main.go $(entity)
 
 gql-generate:
 	go run github.com/99designs/gqlgen generate
