@@ -1,6 +1,6 @@
 package graph
 
-import "github.com/stadio-app/go-backend/app"
+import "github.com/stadio-app/stadio-backend/app"
 
 // This file will not be regenerated automatically.
 //

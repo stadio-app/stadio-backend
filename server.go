@@ -10,9 +10,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
-	"github.com/stadio-app/go-backend/app"
-	"github.com/stadio-app/go-backend/graph"
-	"github.com/stadio-app/go-backend/utils"
+	"github.com/stadio-app/stadio-backend/app"
+	"github.com/stadio-app/stadio-backend/graph"
+	"github.com/stadio-app/stadio-backend/utils"
 )
 
 const defaultPort = "8080"
@@ -30,7 +30,7 @@ func main() {
 	port_str := fmt.Sprintf(":%s", app.Port)
 
 	router := chi.NewRouter()
-	router.Handle("/playground", playground.Handler("GraphQL playground", "/graphql"))
+	router.Handle("/playground", playground.Handler("GraphQL Playground", "/graphql"))
 	// oauth routes
 	router.Group(func(r chi.Router) {
 		r.Use(app.GothMiddleware())
@@ -48,7 +48,7 @@ func main() {
 		r.Handle("/graphql", gql_server)
 	})
 
-	log.Printf("Server running on http://localhost:%s/playground\n", app.Port)
+	log.Printf("🚀 Server running http://localhost:%s/playground\n", app.Port)
 	if err := http.ListenAndServe(port_str, router); err != nil {
 		log.Fatal(err)
 	}

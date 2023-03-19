@@ -4,7 +4,7 @@ import (
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/google"
 	"github.com/markbates/goth/providers/twitter"
-	"github.com/stadio-app/go-backend/types"
+	"github.com/stadio-app/stadio-backend/types"
 )
 
 func SetupOauthProviders(tokens types.Tokens) {

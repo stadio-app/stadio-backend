@@ -41,7 +41,7 @@ type Location implements Node {
 An object with an ID.
 Follows the [Relay Global Object Identification Specification](https://relay.dev/graphql/objectidentification.htm)
 """
-interface Node @goModel(model: "github.com/stadio-app/go-backend/ent.Noder") {
+interface Node @goModel(model: "github.com/stadio-app/stadio-backend/ent.Noder") {
   """The id of the object."""
   id: ID!
 }

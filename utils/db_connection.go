@@ -6,8 +6,8 @@ import (
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
-	"github.com/stadio-app/go-backend/ent"
-	"github.com/stadio-app/go-backend/types"
+	"github.com/stadio-app/stadio-backend/ent"
+	"github.com/stadio-app/stadio-backend/types"
 )
 
 func PostgresDnsBuilder(config types.DbConnectionOptions) string {

@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/go-playground/validator"
-	"github.com/stadio-app/go-backend/services"
-	"github.com/stadio-app/go-backend/types"
-	"github.com/stadio-app/go-backend/utils"
+	"github.com/stadio-app/stadio-backend/services"
+	"github.com/stadio-app/stadio-backend/types"
+	"github.com/stadio-app/stadio-backend/utils"
 )
 
 type AppBase struct {
