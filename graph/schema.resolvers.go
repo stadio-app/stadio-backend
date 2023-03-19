@@ -8,10 +8,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stadio-app/go-backend/ent"
-	"github.com/stadio-app/go-backend/graph/model"
-	"github.com/stadio-app/go-backend/types"
-	"github.com/stadio-app/go-backend/utils"
+	"github.com/stadio-app/stadio-backend/ent"
+	"github.com/stadio-app/stadio-backend/graph/model"
+	"github.com/stadio-app/stadio-backend/types"
+	"github.com/stadio-app/stadio-backend/utils"
 )
 
 // CreateOwner is the resolver for the createOwner field.

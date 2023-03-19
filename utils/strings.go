@@ -3,7 +3,7 @@ package utils
 import (
 	"strings"
 
-	"github.com/stadio-app/go-backend/types"
+	"github.com/stadio-app/stadio-backend/types"
 )
 
 func CreateFullName(name types.FullName) string {

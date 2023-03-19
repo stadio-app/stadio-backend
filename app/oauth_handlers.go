@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/markbates/goth/gothic"
-	"github.com/stadio-app/go-backend/graph/model"
-	"github.com/stadio-app/go-backend/utils"
+	"github.com/stadio-app/stadio-backend/graph/model"
+	"github.com/stadio-app/stadio-backend/utils"
 )
 
 func (app AppBase) OAuthSignIn(w http.ResponseWriter, r *http.Request) {

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"github.com/go-playground/validator"
-	"github.com/stadio-app/go-backend/ent"
+	"github.com/stadio-app/stadio-backend/ent"
 )
 
 type AuthKeyType string

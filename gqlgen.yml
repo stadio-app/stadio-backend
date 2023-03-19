@@ -42,7 +42,7 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
- - "github.com/stadio-app/go-backend/ent"
+ - "github.com/stadio-app/stadio-backend/ent"
 
 # This section declares type mapping between the GraphQL and go type systems
 #
@@ -69,4 +69,4 @@ models:
       - github.com/99designs/gqlgen/graphql.Uint
   # ID:
   #   model:
-  #     - github.com/stadio-app/go-backend/ent/schema/uuidgql.UUID
+  #     - github.com/stadio-app/stadio-backend/ent/schema/uuidgql.UUID

@@ -10,9 +10,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
-	"github.com/stadio-app/go-backend/app"
-	"github.com/stadio-app/go-backend/graph"
-	"github.com/stadio-app/go-backend/utils"
+	"github.com/stadio-app/stadio-backend/app"
+	"github.com/stadio-app/stadio-backend/graph"
+	"github.com/stadio-app/stadio-backend/utils"
 )
 
 const defaultPort = "8080"

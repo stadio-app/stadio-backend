@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stadio-app/go-backend/ent"
+	"github.com/stadio-app/stadio-backend/ent"
 )
 
 // Node is the resolver for the node field.
