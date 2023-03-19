@@ -24,13 +24,13 @@ func main() {
     }
     // Migrate diff options.
     opts := []schema.MigrateOption{
-        schema.WithDir(dir),                         // provide migration directory
-        schema.WithMigrationMode(schema.ModeReplay), // provide migration mode
-        schema.WithDialect(dialect.Postgres),           // Ent dialect to use
+        schema.WithDir(dir),
+        schema.WithMigrationMode(schema.ModeReplay),
+        schema.WithDialect(dialect.Postgres),
         schema.WithFormatter(atlas.DefaultFormatter),
     }
     if len(os.Args) != 2 {
-        log.Fatalln("migration name is required. Use: 'go run -mod=mod ent/migrate/main.go <name>'")
+        log.Fatalln("migration name is required. Use: 'make atlas-create entity=<name>'")
     }
     // Generate migrations using Atlas support for MySQL (note the Ent dialect option passed above).
     err = migrate.NamedDiff(ctx, utils.PostgresDNS(), os.Args[1], opts...)
