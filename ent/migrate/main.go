@@ -14,7 +14,7 @@ import (
 	"entgo.io/ent/dialect/sql/schema"
 	"entgo.io/ent/entc/integration/migrate/entv2/migrate"
 	_ "github.com/lib/pq"
-	"github.com/stadio-app/go-backend/utils"
+	"github.com/stadio-app/stadio-backend/utils"
 )
 
 func main() {
