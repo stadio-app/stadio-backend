@@ -5,8 +5,6 @@ import (
 	"fmt"
 
 	"entgo.io/ent/dialect"
-	entsql "entgo.io/ent/dialect/sql"
-	"github.com/stadio-app/stadio-backend/ent"
 	"github.com/stadio-app/stadio-backend/types"
 )
 
@@ -40,7 +38,7 @@ func PostgresDNS() string {
 
 func DbConnection() *sql.DB {
 	dns := PostgresDNS()
-	db_conn, err := sql.Open("postgres", dns)
+	db_conn, err := sql.Open(dialect.Postgres, dns)
 	if err != nil {
 		panic(err)
 	}
@@ -49,9 +47,4 @@ func DbConnection() *sql.DB {
 		panic(err)
 	}
 	return db_conn
-}
-
-func CreateEntClient(db_conn *sql.DB) *ent.Client {
-	driver := entsql.OpenDB(dialect.Postgres, db_conn)
-	return ent.NewClient(ent.Driver(driver))
 }
