@@ -10,7 +10,7 @@ ent-create:
 
 # Atlas (DB migration manager)
 atlas-create:
-	go run -mod=mod ent/migrate/main.go $(entity)
+	go run -mod=mod ent/migrate/migratec.go $(entity)
 
 # GraphQL
 gql-generate:

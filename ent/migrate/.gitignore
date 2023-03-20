@@ -3,4 +3,4 @@
 !.gitignore
 !migrations/*.sql
 !migrations/*.sum
-!main.go
+!migratec.go
