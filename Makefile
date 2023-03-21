@@ -11,6 +11,8 @@ ent-create:
 # Atlas (DB migration manager)
 atlas-create:
 	go run -mod=mod ent/migrate/migratec.go $(entity)
+atlas-validate:
+	atlas migrate validate --dir file://ent/migrate/migrations
 
 # GraphQL
 gql-generate:
