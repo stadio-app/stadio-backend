@@ -27,7 +27,7 @@ func main() {
     // Migrate diff options.
     opts := []schema.MigrateOption{
         schema.WithDir(dir),
-        schema.WithMigrationMode(schema.ModeReplay),
+        schema.WithMigrationMode(schema.ModeInspect),
         schema.WithDialect(dialect.Postgres),
         schema.WithFormatter(atlas.DefaultFormatter),
     }

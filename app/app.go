@@ -2,6 +2,9 @@ package app
 
 import (
 	"database/sql"
+	"log"
+	"os"
+	"os/exec"
 	"reflect"
 	"strings"
 
@@ -34,7 +37,24 @@ func New(db_conn *sql.DB, port string) *AppBase {
 		panic(tokens_err)
 	}
 	app.Tokens = &tokens
-	return app.NewBaseHandler()
+	return app.Migrate().NewBaseHandler()
+}
+
+func (app *AppBase) Migrate() *AppBase {
+	log.Println("Running migration... 📦")
+	atlas_cmd := exec.Command(
+		"atlas", 
+		"migrate", 
+		"apply", 
+		"--dir", "file://ent/migrate/migrations",
+		"--url", utils.PostgresDNS(),
+	)
+	atlas_cmd.Stdout, atlas_cmd.Stderr = os.Stdout, os.Stderr
+    err := atlas_cmd.Run()
+	if err != nil {
+		panic(err)
+	}
+	return app
 }
 
 func (app *AppBase) NewBaseHandler() *AppBase {
