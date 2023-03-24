@@ -1,13 +1,10 @@
 package app
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/markbates/goth/gothic"
-	"github.com/stadio-app/stadio-backend/ent/user"
-	"github.com/stadio-app/stadio-backend/graph/model"
 	"github.com/stadio-app/stadio-backend/types"
 	"github.com/stadio-app/stadio-backend/utils"
 )
@@ -36,43 +33,12 @@ func (app AppBase) AuthMiddleware() FuncHandler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			auth_header := r.Header.Get(types.AuthHeader)
-			jwt_token, err := utils.GetBearerToken(auth_header)
+			ctx, err := app.BearerAuthentication(r.Context(), auth_header)
 			if err != nil {
 				utils.ErrorResponse(w, http.StatusUnauthorized, "unauthorized")
 				return
 			}
-			jwt_claims, err := utils.GetJwtClaims(jwt_token, app.Tokens.JwtKey)
-			if err != nil {
-				utils.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-				return
-			}
-
-			raw_id, ok := jwt_claims["id"].(float64)
-			if !ok {
-				utils.ErrorResponse(w, http.StatusUnauthorized, "could not parse id")
-				return
-			}
-			id := int64(raw_id)
-			email := jwt_claims["email"].(string)
-			user, err := app.EntityManager.User.
-				Query().
-				Where(user.And(
-					user.ID(id),
-					user.Email(email),
-				)).
-				First(r.Context())
-			if err != nil {
-				utils.ErrorResponse(w, http.StatusUnauthorized, "unauthorized")
-				return
-			}
-			r = r.WithContext(context.WithValue(
-				r.Context(), 
-				types.AuthKey, 
-				model.AuthState{
-					User: user,
-					Token: jwt_token,
-				},
-			))
+			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
 	}
