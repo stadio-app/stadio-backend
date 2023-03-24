@@ -3,6 +3,7 @@ package types
 import (
 	"database/sql"
 
+	entsql "entgo.io/ent/dialect/sql"
 	"github.com/go-playground/validator"
 	"github.com/stadio-app/stadio-backend/ent"
 )
@@ -15,6 +16,7 @@ type AppContext struct {
 	DbConn *sql.DB
 	Tokens *Tokens
 	Validator *validator.Validate
+	EntityDriver *entsql.Driver
 	EntityManager *ent.Client
 	Port string
 }
@@ -26,7 +28,6 @@ type DbConnectionOptions struct {
 	DbName string
 	Port string
 	SslMode bool
-	DisableLogger bool
 }
 
 type FullName struct {

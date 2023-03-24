@@ -1,0 +1,6 @@
+*.go
+
+!.gitignore
+!migrations/*.sql
+!migrations/*.sum
+!migratec.go
