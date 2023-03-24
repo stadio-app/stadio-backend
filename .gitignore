@@ -9,6 +9,5 @@ ent/*
 
 # GraphQL
 graph/*
-!*resolver.go
+!*.resolvers.go
 !*.graphql
-!*.graphqls
