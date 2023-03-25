@@ -10,7 +10,10 @@ import (
 
 type AuthKeyType string
 const AuthKey AuthKeyType = "auth"
-const AuthHeader string = "Authorization"
+
+const Authorization string = "Authorization"
+type AuthHeaderType string
+const AuthHeader AuthHeaderType = "Authorization"
 
 type AppContext struct {
 	DbConn *sql.DB

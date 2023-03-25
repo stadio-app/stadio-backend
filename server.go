@@ -1,17 +1,20 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
 	"github.com/stadio-app/stadio-backend/app"
 	"github.com/stadio-app/stadio-backend/graph"
+	"github.com/stadio-app/stadio-backend/types"
 	"github.com/stadio-app/stadio-backend/utils"
 )
 
@@ -39,12 +42,22 @@ func main() {
 	})
 	// secure routes
 	router.Group(func(r chi.Router) {
-		gql_server := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{
+		c := graph.Config{
 			Resolvers: &graph.Resolver{
 				AppBase: app,
 			},
-		}))
-		r.Use(app.AuthMiddleware())
+		}
+		c.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
+			var err error
+			auth_header := ctx.Value(types.AuthHeader).(string)
+			ctx, err = app.BearerAuthentication(ctx, auth_header)
+			if err != nil {
+				return nil, fmt.Errorf("unauthorized")
+			}
+			return next(ctx)
+		}
+		gql_server := handler.NewDefaultServer(graph.NewExecutableSchema(c))
+		r.Use(app.BaseMiddleware())
 		r.Handle("/graphql", gql_server)
 	})
 
