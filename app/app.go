@@ -50,7 +50,7 @@ func (app *AppBase) Migrate() *AppBase {
 		"--url", utils.PostgresDNS(),
 	)
 	atlas_cmd.Stdout, atlas_cmd.Stderr = os.Stdout, os.Stderr
-    err := atlas_cmd.Run()
+	err := atlas_cmd.Run()
 	if err != nil {
 		panic(err)
 	}
