@@ -34,13 +34,15 @@ func main() {
 
 	router := chi.NewRouter()
 	router.Handle("/playground", playground.Handler("GraphQL Playground", "/graphql"))
-	// oauth routes
+	
+	// OAuth routes "/auth"
 	router.Group(func(r chi.Router) {
 		r.Use(app.GothMiddleware())
 		r.HandleFunc("/auth/{provider}", app.OAuthSignIn)
 		r.HandleFunc("/auth/{provider}/callback", app.OAuthCallback)
 	})
-	// secure routes
+
+	// GraphQL endpoint "/graphql"
 	router.Group(func(r chi.Router) {
 		c := graph.Config{
 			Resolvers: &graph.Resolver{
