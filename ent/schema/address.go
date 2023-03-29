@@ -11,17 +11,20 @@ type Address struct {
 	ent.Schema
 }
 
+func (Address) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+	}
+}
+
 // Fields of the Address.
 func (Address) Fields() []ent.Field {
-	return append(
-		[]ent.Field{
-			field.Float("latitude"),
-			field.Float("longitude"),
-			field.Text("maps_link"),
-			field.String("full_address"),
-		},
-		BaseSchema()...
-	)
+	return []ent.Field{
+		field.Float("latitude"),
+		field.Float("longitude"),
+		field.Text("maps_link"),
+		field.String("full_address"),
+	}
 }
 
 // Edges of the Address.

@@ -5,16 +5,23 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/schema/field"
+	"entgo.io/ent/schema/mixin"
 )
 
-func BaseSchema() []ent.Field {
+type BaseMixin struct {
+	mixin.Schema
+}
+
+func (BaseMixin) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int64("id").
 			Unique().
 			Immutable(),
 		field.Time("created_at").
+			Immutable().
 			Default(time.Now),
 		field.Time("updated_at").
-			Default(time.Now),
+			Default(time.Now).
+			UpdateDefault(time.Now),
 	}
 }
