@@ -11,21 +11,24 @@ type Participant struct {
 	ent.Schema
 }
 
+func (Participant) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+	}
+}
+
 // Fields of the Participant.
 func (Participant) Fields() []ent.Field {
-	return append(
-		[]ent.Field{
-			field.String("nickname").
-				Optional(),
-			field.Bool("admin").
-				Default(false),
-			field.Bool("participates").
-				Default(true),
-			field.String("skill_level").
-				Optional(),
-		},
-		BaseSchema()...,
-	)
+	return []ent.Field{
+		field.String("nickname").
+			Optional(),
+		field.Bool("admin").
+			Default(false),
+		field.Bool("participates").
+			Default(true),
+		field.String("skill_level").
+			Optional(),
+	}
 }
 
 // Edges of the Participant.

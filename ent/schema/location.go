@@ -11,15 +11,18 @@ type Location struct {
 	ent.Schema
 }
 
+func (Location) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+	}
+}
+
 // Fields of the Location.
 func (Location) Fields() []ent.Field {
-	return append(
-		[]ent.Field{
-			field.String("name"),
-			field.String("type"), // TODO: Define enum
-		},
-		BaseSchema()...,
-	)
+	return []ent.Field{
+		field.String("name"),
+		field.String("type"), // TODO: Define enum
+	}
 }
 
 // Edges of the Location.

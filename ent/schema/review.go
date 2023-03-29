@@ -11,15 +11,18 @@ type Review struct {
 	ent.Schema
 }
 
+func (Review) Mixin() []ent.Mixin {
+	return []ent.Mixin{
+		BaseMixin{},
+	}
+}
+
 // Fields of the Review.
 func (Review) Fields() []ent.Field {
-	return append(
-		[]ent.Field{
-			field.Float("rating"),
-			field.Text("message"),
-		},
-		BaseSchema()...,
-	)
+	return []ent.Field{
+		field.Float("rating"),
+		field.Text("message"),
+	}
 }
 
 // Edges of the Review.
