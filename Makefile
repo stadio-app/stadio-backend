@@ -13,6 +13,8 @@ atlas-create:
 	go run -mod=mod ent/migrate/migratec.go $(entity)
 atlas-validate:
 	atlas migrate validate --dir file://ent/migrate/migrations
+atlas-new-manual-migration:
+	atlas migrate new --dir file://ent/migrate/migrations $(entity)
 
 # GraphQL
 gql-generate:
