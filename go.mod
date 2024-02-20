@@ -5,13 +5,13 @@ go 1.21
 require (
 	github.com/99designs/gqlgen v0.17.44
 	github.com/go-chi/chi/v5 v5.0.12
+	github.com/go-jet/jet/v2 v2.10.1
 	github.com/vektah/gqlparser/v2 v2.5.11
 )
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
-	github.com/go-jet/jet/v2 v2.10.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect

@@ -1,0 +1,12 @@
+type User {
+    id: ID! @goTag(key:"sql", value:"primary_key")
+    createdAt: Time!
+    updatedAt: Time!
+    email: String!
+    phoneNumber: String
+    name: String!
+    avatar: String
+    birthDate: Time
+    bio: String
+    active: Boolean
+}
