@@ -10,6 +10,10 @@ gql-generate:
 create-migration:
 	go run github.com/ayaanqui/go-migration-tool --directory "./database/migrations" create-migration $(fileName)
 
+# go-jet/jet
+jet:
+	go run github.com/go-jet/jet/v2/cmd/jet -dsn=postgresql://postgres:postgres@localhost:5431/postgres?sslmode=disable -path=./database/jet
+
 # Server
 run:
 	go run server.go
