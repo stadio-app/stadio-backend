@@ -1,5 +1,7 @@
 server
 
+tmp
+
 # Ent
 ent/*
 !ent/schema
@@ -11,3 +13,4 @@ ent/*
 graph/*
 !*.resolvers.go
 !*.graphql
+!graph/resolver

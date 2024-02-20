@@ -1,0 +1,8 @@
+extend type Query {
+    sayHello(name: String!, message: String, showMessage: Boolean): Hello!
+}
+
+type Hello {
+    name: String!
+    message: String!
+}
