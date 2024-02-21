@@ -2,55 +2,54 @@ package services
 
 import (
 	"context"
-	"fmt"
+	"database/sql"
 
-	"github.com/go-jet/jet/v2/postgres"
+	"github.com/go-jet/jet/v2/qrm"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
+	"github.com/stadio-app/stadio-backend/utils"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func (service Service) CreateInternalUser(ctx context.Context, input gmodel.CreateAccountInput) (gmodel.User, error) {
-	if service.UserEmailExists(ctx, input.Email) {
-		return gmodel.User{}, fmt.Errorf("email already exists")
-	}
-	hashed_password, hash_err := service.HashPassword(input.Password)
-	if hash_err != nil {
-		return gmodel.User{}, hash_err
-	}
+const EMAIL_VERIFICATION_CODE_LEN = 10
 
-	query := table.User.INSERT(
-		table.User.Email,
-		table.User.Name,
-		table.User.Password,
-		table.User.AuthPlatform,
+// Given an existing user (optional)
+func (service Service) CreateAuthState(ctx context.Context, user gmodel.User, ip_address *string) (model.AuthState, error) {
+	query := table.AuthState.INSERT(
+		table.AuthState.UserID,
+		table.AuthState.IPAddress,
 	).VALUES(
-		input.Email,
-		input.Name,
-		hashed_password,
-		model.UserAuthPlatformType_Internal,
-	).RETURNING(table.User.AllColumns)
+		user.ID,
+		ip_address,
+	).RETURNING(table.AuthState.AllColumns)
 
-	var user gmodel.User
-	err := query.QueryContext(ctx, service.DB, &user)
-	return user, err
+	var auth_state model.AuthState
+	err := query.QueryContext(ctx, service.DB, &auth_state)
+	return auth_state, err
 }
 
-// Returns `false` if user email does not exist. Otherwise `true`
-func (service Service) UserEmailExists(ctx context.Context, email string) bool {
-	query := table.User.
-		SELECT(table.User.Email).
-		FROM(table.User).
-		WHERE(
-			table.User.Email.EQ(postgres.String(email)),
-		).LIMIT(1)
-	var dest model.User
-	err := query.QueryContext(ctx, service.DB, &dest)
-	if err != nil || dest.Email == "" {
-		return false
+func (service Service) CreateEmailVerification(ctx context.Context, user gmodel.User, tx *sql.Tx) (model.EmailVerification, error) {
+	var db qrm.Queryable = service.DB
+	if tx != nil {
+		db = tx
 	}
-	return true
+	code, code_err := utils.GenerateRandomUrlEncodedString(EMAIL_VERIFICATION_CODE_LEN)
+	if code_err != nil {
+		return model.EmailVerification{}, code_err
+	}
+
+	query := table.EmailVerification.INSERT(
+		table.EmailVerification.UserID,
+		table.EmailVerification.Code,
+	).VALUES(
+		user.ID,
+		code,
+	).RETURNING(table.EmailVerification.AllColumns)
+
+	var email_verification model.EmailVerification
+	err := query.QueryContext(ctx, db, &email_verification)
+	return email_verification, err
 }
 
 func (Service) HashPassword(password string) (string, error) {
