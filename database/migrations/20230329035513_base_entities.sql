@@ -1,15 +1,20 @@
 -- Create "user" table
+CREATE TYPE "user_auth_platform_type" AS ENUM (
+  'INTERNAL', 'APPLE', 'GOOGLE'
+);
 CREATE TABLE "user" (
   "id" BIGSERIAL UNIQUE PRIMARY KEY, 
   "created_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(), 
   "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(), 
   "email" VARCHAR(255) UNIQUE NOT NULL, 
-  "phone_number" VARCHAR(15) UNIQUE NOT NULL, 
+  "phone_number" VARCHAR(15) UNIQUE, 
   "name" VARCHAR(255) NOT NULL, 
-  "avatar" TEXT NULL, 
-  "birth_date" DATE NULL, 
-  "bio" TEXT NULL, 
-  "active" BOOLEAN NOT NULL DEFAULT FALSE 
+  "password" TEXT,
+  "avatar" TEXT, 
+  "birth_date" DATE, 
+  "bio" TEXT, 
+  "active" BOOLEAN NOT NULL DEFAULT FALSE,
+  "auth_platform" "user_auth_platform_type" NOT NULL DEFAULT 'INTERNAL'
 );
 
 -- Create "owner" table

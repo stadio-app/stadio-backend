@@ -12,14 +12,16 @@ import (
 )
 
 type User struct {
-	ID          int64 `sql:"primary_key"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Email       string
-	PhoneNumber string
-	Name        string
-	Avatar      *string
-	BirthDate   *time.Time
-	Bio         *string
-	Active      bool
+	ID           int64 `sql:"primary_key"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	Email        string
+	PhoneNumber  *string
+	Name         string
+	Password     *string
+	Avatar       *string
+	BirthDate    *time.Time
+	Bio          *string
+	Active       bool
+	AuthPlatform UserAuthPlatformType
 }

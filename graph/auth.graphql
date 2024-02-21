@@ -1,8 +1,0 @@
-extend type Query {
-    signInGoogle(accessToken: String!): Auth!
-}
-
-type Auth {
-    token: String!
-    user: User!
-}

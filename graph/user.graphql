@@ -1,12 +1,35 @@
+extend type Mutation {
+  createAccount(input: CreateAccountInput!): User!
+}
+
+input CreateAccountInput {
+  email: String!
+  phoneNumber: String
+  name: String!
+  password: String!
+}
+
+enum AuthPlatformType {
+  INTERNAL
+  APPLE
+  GOOGLE
+}
+
 type User {
-    id: ID! @goTag(key:"sql", value:"primary_key")
-    createdAt: Time!
-    updatedAt: Time!
-    email: String!
-    phoneNumber: String
-    name: String!
-    avatar: String
-    birthDate: Time
-    bio: String
-    active: Boolean
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  email: String!
+  phoneNumber: String
+  name: String!
+  avatar: String
+  birthDate: Time
+  bio: String
+  active: Boolean
+  authPlatform: AuthPlatformType
+}
+
+type Auth {
+  token: String!
+  user: User!
 }

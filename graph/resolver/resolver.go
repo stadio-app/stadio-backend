@@ -1,6 +1,9 @@
 package gresolver
 
-import "github.com/stadio-app/stadio-backend/types"
+import (
+	"github.com/stadio-app/stadio-backend/services"
+	"github.com/stadio-app/stadio-backend/types"
+)
 
 // This file will not be regenerated automatically.
 //
@@ -8,4 +11,5 @@ import "github.com/stadio-app/stadio-backend/types"
 
 type Resolver struct{
 	AppContext types.ServerBase
+	Service services.Service
 }

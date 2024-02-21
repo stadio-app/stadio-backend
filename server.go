@@ -16,6 +16,7 @@ import (
 	"github.com/stadio-app/stadio-backend/database"
 	"github.com/stadio-app/stadio-backend/graph"
 	gresolver "github.com/stadio-app/stadio-backend/graph/resolver"
+	"github.com/stadio-app/stadio-backend/services"
 	"github.com/stadio-app/stadio-backend/types"
 )
 
@@ -34,6 +35,11 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 	})
 	db_migration.RunMigration()
 
+	service := services.Service{
+		DB: server.DB,
+		StructValidator: server.StructValidator,
+	}
+
 	// TODO: only show in dev environment
 	server.Router.Handle("/playground", playground.Handler("GraphQL Playground", "/graphql"))
 
@@ -41,6 +47,7 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 		c := graph.Config{
 			Resolvers: &gresolver.Resolver{
 				AppContext: server,
+				Service: service,
 			},
 		}
 		graphql_handler := handler.NewDefaultServer(graph.NewExecutableSchema(c))
