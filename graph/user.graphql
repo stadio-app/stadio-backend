@@ -2,6 +2,10 @@ extend type Mutation {
   createAccount(input: CreateAccountInput!): User!
 }
 
+extend type Query {
+    login(email: String!, password: String!): Auth!
+}
+
 input CreateAccountInput {
   email: String!
   phoneNumber: String
@@ -27,6 +31,7 @@ type User {
   bio: String
   active: Boolean
   authPlatform: AuthPlatformType
+  authStateId: ID! @goTag(key: "alias", value: "auth_state.id")
 }
 
 type Auth {

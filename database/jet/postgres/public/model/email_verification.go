@@ -12,7 +12,7 @@ import (
 )
 
 type EmailVerification struct {
-	ID        int32 `sql:"primary_key"`
+	ID        int64 `sql:"primary_key"`
 	Code      string
 	UserID    int64
 	CreatedAt time.Time

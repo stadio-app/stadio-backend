@@ -3,8 +3,10 @@ package services
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"github.com/go-jet/jet/v2/qrm"
+	"github.com/golang-jwt/jwt"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -60,4 +62,22 @@ func (Service) HashPassword(password string) (string, error) {
 func (Service) VerifyPasswordHash(password string, hash string) bool {
     err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
     return err == nil
+}
+
+// Generates a JWT with claims, signed with key
+func (s *Service) GenerateJWT(key string, user *gmodel.User) (string, error) {
+	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"id": user.ID,
+		"name": user.Name,
+		"email": user.Email,
+		"authPlatform": user.AuthPlatform.String(),
+		"authStateId": user.AuthStateID,
+		"iat": time.Now().Unix(),
+		"eat": time.Now().Add(time.Hour * 24 * 30).Unix(),
+	})
+	token, err := jwt.SignedString([]byte(key))
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }

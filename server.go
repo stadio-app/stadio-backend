@@ -18,6 +18,7 @@ import (
 	gresolver "github.com/stadio-app/stadio-backend/graph/resolver"
 	"github.com/stadio-app/stadio-backend/services"
 	"github.com/stadio-app/stadio-backend/types"
+	"github.com/stadio-app/stadio-backend/utils"
 )
 
 func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
@@ -35,9 +36,16 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 	})
 	db_migration.RunMigration()
 
+	var tokens types.Tokens
+	if err := utils.FileMapper("./tokens.json", &tokens); err != nil {
+		panic(err)
+	}
+
+	server.Tokens = tokens
 	service := services.Service{
 		DB: server.DB,
 		StructValidator: server.StructValidator,
+		Tokens: tokens,
 	}
 
 	// TODO: only show in dev environment

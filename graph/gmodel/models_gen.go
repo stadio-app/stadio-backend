@@ -39,6 +39,7 @@ type User struct {
 	Bio          *string           `json:"bio,omitempty"`
 	Active       *bool             `json:"active,omitempty"`
 	AuthPlatform *AuthPlatformType `json:"authPlatform,omitempty"`
+	AuthStateID  int64             `json:"authStateId" alias:"auth_state.id"`
 }
 
 type AuthPlatformType string

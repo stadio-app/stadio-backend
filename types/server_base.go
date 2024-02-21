@@ -14,4 +14,5 @@ type ServerBase struct {
 	StructValidator *validator.Validate
 	MigrationDirectory string
 	Port string
+	Tokens Tokens
 }

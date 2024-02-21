@@ -58,6 +58,63 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 	return user, nil
 }
 
+func (service Service) LoginInternal(ctx context.Context, email string, password string) (gmodel.Auth, error) {
+	query := table.User.
+		SELECT(table.User.AllColumns).
+		WHERE(table.User.Email.EQ(postgres.String(email))).
+		LIMIT(1)
+	var verify_user model.User
+	if err := query.QueryContext(ctx, service.DB, &verify_user); err != nil {
+		return gmodel.Auth{}, fmt.Errorf("incorrect email or password")
+	}
+
+	if !verify_user.Active {
+		return gmodel.Auth{}, fmt.Errorf("please verify your email")
+	}
+	if verify_user.AuthPlatform != model.UserAuthPlatformType_Internal || verify_user.Password == nil {
+		return gmodel.Auth{}, fmt.Errorf("login platform is %s", verify_user.AuthPlatform.String())
+	}
+	if !service.VerifyPasswordHash(password, *verify_user.Password) {
+		return gmodel.Auth{}, fmt.Errorf("incorrect email or password")
+	}
+
+	auth_state, auth_state_err := service.CreateAuthState(ctx, gmodel.User{
+		ID: verify_user.ID,
+	}, nil)
+	if auth_state_err != nil {
+		return gmodel.Auth{}, fmt.Errorf("could not create auth state")
+	}
+
+	query = table.User.
+		SELECT(
+			table.User.AllColumns,
+			table.AuthState.ID,
+		).
+		FROM(
+			table.User.
+				LEFT_JOIN(
+					table.AuthState, 
+					table.AuthState.ID.EQ(postgres.Int64(auth_state.ID)),
+				),
+		).
+		WHERE(table.User.ID.EQ(postgres.Int64(verify_user.ID))).
+		LIMIT(1)
+	var user gmodel.User
+	if err := query.QueryContext(ctx, service.DB, &user); err != nil {
+		return gmodel.Auth{}, fmt.Errorf("internal error")
+	}
+
+	// Generate JWT
+	jwt, err := service.GenerateJWT(service.Tokens.JwtKey, &user)
+	if err != nil {
+		return gmodel.Auth{}, fmt.Errorf("could not generate JWT")
+	}
+	return gmodel.Auth{
+		Token: jwt,
+		User: &user,
+	}, nil
+}
+
 // Returns `false` if user email does not exist. Otherwise `true`
 func (service Service) UserEmailExists(ctx context.Context, email string) bool {
 	query := table.User.

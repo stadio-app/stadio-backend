@@ -21,7 +21,17 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, input gmodel.Creat
 	return &new_user, nil
 }
 
+// Login is the resolver for the login field.
+func (r *queryResolver) Login(ctx context.Context, email string, password string) (*gmodel.Auth, error) {
+	auth, err := r.Service.LoginInternal(ctx, email, password)
+	return &auth, err
+}
+
 // Mutation returns graph.MutationResolver implementation.
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
 
+// Query returns graph.QueryResolver implementation.
+func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
+
 type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }
