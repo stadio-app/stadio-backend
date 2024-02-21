@@ -8,9 +8,3 @@ ent/*
 !ent/entc.go
 !ent/generate.go
 !ent/migrate
-
-# GraphQL
-graph/*
-!*.resolvers.go
-!*.graphql
-!graph/resolver
