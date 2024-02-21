@@ -11,9 +11,9 @@ import (
 	"github.com/go-jet/jet/v2/postgres"
 )
 
-var Users = newUsersTable("public", "users", "")
+var User = newUserTable("public", "user", "")
 
-type usersTable struct {
+type userTable struct {
 	postgres.Table
 
 	// Columns
@@ -24,7 +24,7 @@ type usersTable struct {
 	PhoneNumber postgres.ColumnString
 	Name        postgres.ColumnString
 	Avatar      postgres.ColumnString
-	BirthDate   postgres.ColumnTimestampz
+	BirthDate   postgres.ColumnDate
 	Bio         postgres.ColumnString
 	Active      postgres.ColumnBool
 
@@ -32,40 +32,40 @@ type usersTable struct {
 	MutableColumns postgres.ColumnList
 }
 
-type UsersTable struct {
-	usersTable
+type UserTable struct {
+	userTable
 
-	EXCLUDED usersTable
+	EXCLUDED userTable
 }
 
-// AS creates new UsersTable with assigned alias
-func (a UsersTable) AS(alias string) *UsersTable {
-	return newUsersTable(a.SchemaName(), a.TableName(), alias)
+// AS creates new UserTable with assigned alias
+func (a UserTable) AS(alias string) *UserTable {
+	return newUserTable(a.SchemaName(), a.TableName(), alias)
 }
 
-// Schema creates new UsersTable with assigned schema name
-func (a UsersTable) FromSchema(schemaName string) *UsersTable {
-	return newUsersTable(schemaName, a.TableName(), a.Alias())
+// Schema creates new UserTable with assigned schema name
+func (a UserTable) FromSchema(schemaName string) *UserTable {
+	return newUserTable(schemaName, a.TableName(), a.Alias())
 }
 
-// WithPrefix creates new UsersTable with assigned table prefix
-func (a UsersTable) WithPrefix(prefix string) *UsersTable {
-	return newUsersTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
+// WithPrefix creates new UserTable with assigned table prefix
+func (a UserTable) WithPrefix(prefix string) *UserTable {
+	return newUserTable(a.SchemaName(), prefix+a.TableName(), a.TableName())
 }
 
-// WithSuffix creates new UsersTable with assigned table suffix
-func (a UsersTable) WithSuffix(suffix string) *UsersTable {
-	return newUsersTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
+// WithSuffix creates new UserTable with assigned table suffix
+func (a UserTable) WithSuffix(suffix string) *UserTable {
+	return newUserTable(a.SchemaName(), a.TableName()+suffix, a.TableName())
 }
 
-func newUsersTable(schemaName, tableName, alias string) *UsersTable {
-	return &UsersTable{
-		usersTable: newUsersTableImpl(schemaName, tableName, alias),
-		EXCLUDED:   newUsersTableImpl("", "excluded", ""),
+func newUserTable(schemaName, tableName, alias string) *UserTable {
+	return &UserTable{
+		userTable: newUserTableImpl(schemaName, tableName, alias),
+		EXCLUDED:  newUserTableImpl("", "excluded", ""),
 	}
 }
 
-func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
+func newUserTableImpl(schemaName, tableName, alias string) userTable {
 	var (
 		IDColumn          = postgres.IntegerColumn("id")
 		CreatedAtColumn   = postgres.TimestampzColumn("created_at")
@@ -74,14 +74,14 @@ func newUsersTableImpl(schemaName, tableName, alias string) usersTable {
 		PhoneNumberColumn = postgres.StringColumn("phone_number")
 		NameColumn        = postgres.StringColumn("name")
 		AvatarColumn      = postgres.StringColumn("avatar")
-		BirthDateColumn   = postgres.TimestampzColumn("birth_date")
+		BirthDateColumn   = postgres.DateColumn("birth_date")
 		BioColumn         = postgres.StringColumn("bio")
 		ActiveColumn      = postgres.BoolColumn("active")
 		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, EmailColumn, PhoneNumberColumn, NameColumn, AvatarColumn, BirthDateColumn, BioColumn, ActiveColumn}
 		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, EmailColumn, PhoneNumberColumn, NameColumn, AvatarColumn, BirthDateColumn, BioColumn, ActiveColumn}
 	)
 
-	return usersTable{
+	return userTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns

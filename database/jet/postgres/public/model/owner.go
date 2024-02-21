@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type Owners struct {
+type Owner struct {
 	ID         int64 `sql:"primary_key"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
@@ -19,7 +19,6 @@ type Owners struct {
 	MiddleName *string
 	LastName   string
 	FullName   string
-	IDURL      string
 	Verified   bool
-	UserOwner  int64
+	UserID     int64
 }

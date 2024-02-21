@@ -11,15 +11,17 @@ import (
 	"time"
 )
 
-type Users struct {
+type Location struct {
 	ID          int64 `sql:"primary_key"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
-	Email       string
-	PhoneNumber *string
 	Name        string
-	Avatar      *string
-	BirthDate   *time.Time
-	Bio         *string
-	Active      bool
+	Description *string
+	Type        string
+	OwnerID     *int64
+	AddressID   int64
+	Deleted     *bool
+	Closed      *LocationStatus
+	CreatedBy   *int64
+	UpdatedBy   *int64
 }
