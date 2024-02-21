@@ -3,13 +3,16 @@ package services
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"time"
 
+	"github.com/go-jet/jet/v2/postgres"
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/golang-jwt/jwt"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
+	"github.com/stadio-app/stadio-backend/types"
 	"github.com/stadio-app/stadio-backend/utils"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -65,7 +68,7 @@ func (Service) VerifyPasswordHash(password string, hash string) bool {
 }
 
 // Generates a JWT with claims, signed with key
-func (s *Service) GenerateJWT(key string, user *gmodel.User) (string, error) {
+func (Service) GenerateJWT(key string, user *gmodel.User) (string, error) {
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id": user.ID,
 		"name": user.Name,
@@ -80,4 +83,48 @@ func (s *Service) GenerateJWT(key string, user *gmodel.User) (string, error) {
 		return "", err
 	}
 	return token, nil
+}
+
+func (service Service) VerifyJwt(ctx context.Context, authorization types.AuthorizationKeyType) (gmodel.User, error) {
+	jwt_raw, err := authorization.GetToken()
+	if err != nil {
+		return gmodel.User{}, err
+	}
+
+	claims, err := utils.GetJwtClaims(jwt_raw, service.Tokens.JwtKey)
+	if err != nil {
+		return gmodel.User{}, err
+	}
+	expiration_unix := int64(claims["eat"].(float64))
+	if time.Now().Unix() > expiration_unix {
+		return gmodel.User{}, fmt.Errorf("token expired")
+	}
+
+	authStateId := int64(claims["authStateId"].(float64))
+	userId := int64(claims["id"].(float64))
+	email := claims["email"].(string)
+	query := table.User.
+		SELECT(
+			table.User.AllColumns,
+			table.AuthState.ID,
+		).
+		FROM(table.User.LEFT_JOIN(
+			table.AuthState, 
+			table.AuthState.ID.EQ(postgres.Int64(authStateId)),
+		)).
+		WHERE(
+			table.User.ID.
+				EQ(postgres.Int64(userId)).
+				AND(table.User.Email.EQ(postgres.String(email))),
+		).
+		LIMIT(1)
+	var user gmodel.User
+	if err := query.QueryContext(ctx, service.DB, &user); err != nil {
+		return gmodel.User{}, fmt.Errorf("one or more invalid claim values")
+	}
+	return user, nil
+}
+
+func (Service) GetAuthUserFromContext(ctx context.Context) gmodel.User {
+	return ctx.Value(types.AuthUserKey).(gmodel.User)
 }

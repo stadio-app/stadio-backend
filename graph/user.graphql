@@ -4,6 +4,7 @@ extend type Mutation {
 
 extend type Query {
     login(email: String!, password: String!): Auth!
+    me: User! @isAuthenticated
 }
 
 input CreateAccountInput {

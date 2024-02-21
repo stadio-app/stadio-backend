@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/ayaanqui/go-migration-tool/migration_tool"
@@ -58,7 +60,32 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 				Service: service,
 			},
 		}
+		c.Directives.IsAuthenticated = func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+			authorization, ok := ctx.Value(types.AuthorizationKey).(types.AuthorizationKeyType)
+			if !ok {
+				return nil, fmt.Errorf("authorization header type error")
+			}
+			user, err := service.VerifyJwt(ctx, authorization)
+			if err != nil {
+				return nil, fmt.Errorf("unauthorized")
+			}
+			ctx = context.WithValue(ctx, types.AuthUserKey, user)
+			return next(ctx)
+		}
 		graphql_handler := handler.NewDefaultServer(graph.NewExecutableSchema(c))
+
+		r.Use(func(next http.Handler) http.Handler {
+			return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				authorization := r.Header.Get("Authorization")
+				r = r.WithContext(context.WithValue(
+					r.Context(), 
+					types.AuthorizationKey, 
+					types.AuthorizationKeyType(authorization),
+				))
+				w.Header().Add("Content-Type", "application/json")
+				next.ServeHTTP(w, r)
+			})
+		})
 		r.Handle("/graphql", graphql_handler)
 	})
 	return &server
