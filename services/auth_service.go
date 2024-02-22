@@ -110,12 +110,13 @@ func (service Service) VerifyJwt(ctx context.Context, authorization types.Author
 		).
 		FROM(table.User.LEFT_JOIN(
 			table.AuthState, 
-			table.AuthState.ID.EQ(postgres.Int64(authStateId)),
+			table.User.ID.EQ(table.AuthState.UserID),
 		)).
 		WHERE(
 			table.User.ID.
 				EQ(postgres.Int64(userId)).
-				AND(table.User.Email.EQ(postgres.String(email))),
+				AND(table.User.Email.EQ(postgres.String(email))).
+				AND(table.AuthState.ID.EQ(postgres.Int64(authStateId))),
 		).
 		LIMIT(1)
 	var user gmodel.User

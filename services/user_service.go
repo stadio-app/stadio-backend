@@ -94,10 +94,14 @@ func (service Service) LoginInternal(ctx context.Context, email string, password
 			table.User.
 				LEFT_JOIN(
 					table.AuthState, 
-					table.AuthState.ID.EQ(postgres.Int64(auth_state.ID)),
+					table.User.ID.EQ(table.AuthState.UserID),
 				),
 		).
-		WHERE(table.User.ID.EQ(postgres.Int64(verify_user.ID))).
+		WHERE(
+			table.User.ID.
+				EQ(postgres.Int64(verify_user.ID)).
+				AND(table.AuthState.ID.EQ(postgres.Int64(auth_state.ID))),
+		).
 		LIMIT(1)
 	var user gmodel.User
 	if err := query.QueryContext(ctx, service.DB, &user); err != nil {
