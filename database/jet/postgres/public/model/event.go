@@ -21,4 +21,6 @@ type Event struct {
 	StartDate   time.Time
 	EndDate     time.Time
 	LocationID  *int64
+	CreatedByID *int64
+	UpdatedByID *int64
 }

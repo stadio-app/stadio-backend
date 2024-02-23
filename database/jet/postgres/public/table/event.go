@@ -26,6 +26,8 @@ type eventTable struct {
 	StartDate   postgres.ColumnTimestampz
 	EndDate     postgres.ColumnTimestampz
 	LocationID  postgres.ColumnInteger
+	CreatedByID postgres.ColumnInteger
+	UpdatedByID postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -75,8 +77,10 @@ func newEventTableImpl(schemaName, tableName, alias string) eventTable {
 		StartDateColumn   = postgres.TimestampzColumn("start_date")
 		EndDateColumn     = postgres.TimestampzColumn("end_date")
 		LocationIDColumn  = postgres.IntegerColumn("location_id")
-		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, StartDateColumn, EndDateColumn, LocationIDColumn}
-		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, StartDateColumn, EndDateColumn, LocationIDColumn}
+		CreatedByIDColumn = postgres.IntegerColumn("created_by_id")
+		UpdatedByIDColumn = postgres.IntegerColumn("updated_by_id")
+		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, StartDateColumn, EndDateColumn, LocationIDColumn, CreatedByIDColumn, UpdatedByIDColumn}
+		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, StartDateColumn, EndDateColumn, LocationIDColumn, CreatedByIDColumn, UpdatedByIDColumn}
 	)
 
 	return eventTable{
@@ -92,6 +96,8 @@ func newEventTableImpl(schemaName, tableName, alias string) eventTable {
 		StartDate:   StartDateColumn,
 		EndDate:     EndDateColumn,
 		LocationID:  LocationIDColumn,
+		CreatedByID: CreatedByIDColumn,
+		UpdatedByID: UpdatedByIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

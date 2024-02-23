@@ -26,7 +26,7 @@ type locationTable struct {
 	OwnerID     postgres.ColumnInteger
 	AddressID   postgres.ColumnInteger
 	Deleted     postgres.ColumnBool
-	Closed      postgres.ColumnString
+	Status      postgres.ColumnString
 	CreatedBy   postgres.ColumnInteger
 	UpdatedBy   postgres.ColumnInteger
 
@@ -78,11 +78,11 @@ func newLocationTableImpl(schemaName, tableName, alias string) locationTable {
 		OwnerIDColumn     = postgres.IntegerColumn("owner_id")
 		AddressIDColumn   = postgres.IntegerColumn("address_id")
 		DeletedColumn     = postgres.BoolColumn("deleted")
-		ClosedColumn      = postgres.StringColumn("closed")
+		StatusColumn      = postgres.StringColumn("status")
 		CreatedByColumn   = postgres.IntegerColumn("created_by")
 		UpdatedByColumn   = postgres.IntegerColumn("updated_by")
-		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, OwnerIDColumn, AddressIDColumn, DeletedColumn, ClosedColumn, CreatedByColumn, UpdatedByColumn}
-		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, OwnerIDColumn, AddressIDColumn, DeletedColumn, ClosedColumn, CreatedByColumn, UpdatedByColumn}
+		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, OwnerIDColumn, AddressIDColumn, DeletedColumn, StatusColumn, CreatedByColumn, UpdatedByColumn}
+		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, OwnerIDColumn, AddressIDColumn, DeletedColumn, StatusColumn, CreatedByColumn, UpdatedByColumn}
 	)
 
 	return locationTable{
@@ -98,7 +98,7 @@ func newLocationTableImpl(schemaName, tableName, alias string) locationTable {
 		OwnerID:     OwnerIDColumn,
 		AddressID:   AddressIDColumn,
 		Deleted:     DeletedColumn,
-		Closed:      ClosedColumn,
+		Status:      StatusColumn,
 		CreatedBy:   CreatedByColumn,
 		UpdatedBy:   UpdatedByColumn,
 

@@ -21,7 +21,7 @@ type Location struct {
 	OwnerID     *int64
 	AddressID   int64
 	Deleted     *bool
-	Closed      *LocationStatus
+	Status      *LocationStatus
 	CreatedBy   *int64
 	UpdatedBy   *int64
 }
