@@ -8,10 +8,10 @@ extend type Query {
 }
 
 input CreateAccountInput {
-  email: String!
-  phoneNumber: String
-  name: String!
-  password: String!
+  email: String! @goTag(key: "validate", value: "required,email")
+  phoneNumber: String @goTag(key: "validate", value: "omitempty,e164") # e164 phone number format ("+[country code] [area code] [subscriber number]")
+  name: String! @goTag(key: "validate", value: "required")
+  password: String! @goTag(key: "validate", value: "required")
 }
 
 enum AuthPlatformType {
@@ -33,6 +33,16 @@ type User {
   active: Boolean
   authPlatform: AuthPlatformType
   authStateId: ID! @goTag(key: "alias", value: "auth_state.id")
+}
+
+type UserShallow {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  avatar: String
+  bio: String
+  active: Boolean
 }
 
 type Auth {

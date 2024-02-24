@@ -3,7 +3,7 @@ docker-container:
 	docker compose -f ./docker-compose.yml up
 
 # GraphQL
-gql-generate:
+gql:
 	go run github.com/99designs/gqlgen generate
 
 # DB migrations

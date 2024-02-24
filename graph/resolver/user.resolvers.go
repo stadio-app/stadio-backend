@@ -14,6 +14,11 @@ import (
 
 // CreateAccount is the resolver for the createAccount field.
 func (r *mutationResolver) CreateAccount(ctx context.Context, input gmodel.CreateAccountInput) (*gmodel.User, error) {
+	validation_err := r.AppContext.StructValidator.StructCtx(ctx, input)
+	if validation_err != nil {
+		return nil, validation_err
+	}
+
 	new_user, err := r.Service.CreateInternalUser(ctx, input)
 	if err != nil {
 		return nil, fmt.Errorf("could not create user. %s", err.Error())
@@ -33,11 +38,7 @@ func (r *queryResolver) Me(ctx context.Context) (*gmodel.User, error) {
 	return &auth_user, nil
 }
 
-// Mutation returns graph.MutationResolver implementation.
-func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
-
 // Query returns graph.QueryResolver implementation.
 func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
-type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
