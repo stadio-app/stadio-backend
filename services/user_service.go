@@ -127,7 +127,9 @@ func (service Service) UserEmailExists(ctx context.Context, email string) bool {
 		WHERE(
 			table.User.Email.EQ(postgres.String(email)),
 		).LIMIT(1)
-	var dest model.User
+	var dest struct{
+		Email string
+	}
 	err := query.QueryContext(ctx, service.DB, &dest)
 	if err != nil || dest.Email == "" {
 		return false
