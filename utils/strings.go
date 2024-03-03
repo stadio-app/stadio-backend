@@ -1,17 +1,16 @@
 package utils
 
 import (
-	"strings"
-
-	"github.com/stadio-app/stadio-backend/types"
+	"crypto/rand"
+	"encoding/base64"
 )
 
-func CreateFullName(name types.FullName) string {
-	full_name := []string{}
-	full_name = append(full_name, name.FirstName)
-	if name.MiddleName != nil {
-		full_name = append(full_name, *name.MiddleName)
+// Generate random string URL encoded
+func GenerateRandomUrlEncodedString(length int) (string, error) {
+	buffer := make([]byte, length)
+	_, err := rand.Read(buffer)
+	if err != nil {
+		return "", err
 	}
-	full_name = append(full_name, name.LastName)
-	return strings.Join(full_name, " ")
+	return base64.URLEncoding.EncodeToString(buffer)[:length], nil
 }

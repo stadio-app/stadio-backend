@@ -1,16 +1,51 @@
-scalar Time
+extend type Mutation {
+  createAccount(input: CreateAccountInput!): User!
+}
+
 extend type Query {
-    users: [User!]! @isAuthenticated
-    user(id: ID!): User! @isAuthenticated
+    login(email: String!, password: String!): Auth!
+    me: User! @isAuthenticated
 }
 
-input UserInput {
-    email: String!
-    name: String!
-    avatarUrl: String
+input CreateAccountInput {
+  email: String! @goTag(key: "validate", value: "required,email")
+  phoneNumber: String @goTag(key: "validate", value: "omitempty,e164") # e164 phone number format ("+[country code] [area code] [subscriber number]")
+  name: String! @goTag(key: "validate", value: "required")
+  password: String! @goTag(key: "validate", value: "required")
 }
 
-type AuthState {
-    user: User!
-    token: String!
+enum AuthPlatformType {
+  INTERNAL
+  APPLE
+  GOOGLE
+}
+
+type User {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  email: String!
+  phoneNumber: String
+  name: String!
+  avatar: String
+  birthDate: Time
+  bio: String
+  active: Boolean
+  authPlatform: AuthPlatformType
+  authStateId: ID! @goTag(key: "alias", value: "auth_state.id")
+}
+
+type UserShallow {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  avatar: String
+  bio: String
+  active: Boolean
+}
+
+type Auth {
+  token: String!
+  user: User!
 }

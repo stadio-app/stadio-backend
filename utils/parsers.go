@@ -1,19 +1,16 @@
 package utils
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"strings"
+	"os"
 
-	"github.com/stadio-app/stadio-backend/graph/model"
-	"github.com/stadio-app/stadio-backend/types"
+	"github.com/golang-jwt/jwt"
 )
 
 // Given a JSON file, map the contents into any struct dest
-func FileMapper(filename string, dest interface{}) error {
-	file, err := ioutil.ReadFile(filename)
+func FileMapper[T any](filename string, dest T) error {
+	file, err := os.ReadFile(filename)
 	if err != nil {
 		return fmt.Errorf("%s not found", filename)
 	}
@@ -23,27 +20,22 @@ func FileMapper(filename string, dest interface{}) error {
 	return nil
 }
 
-func ParseTokens() (types.Tokens, error) {
-	var tokens types.Tokens
-	err := FileMapper("tokens.json", &tokens)
-	return tokens, err
-}
-
-// Given a bearer token ("Bearer <TOKEN>") returns the token or an error if parsing was unsuccessful
-func GetBearerToken(authorization string) (string, error) {
-	parsed_authorization := strings.Split(authorization, " ")
-	if parsed_authorization[0] != "Bearer" || len(parsed_authorization) < 2 {
-		return "", fmt.Errorf("could not parse bearer token")
+// Given a raw jwt token and an encryption key return the mapped jwt claims or an error
+func GetJwtClaims(jwt_token string, key string) (jwt.MapClaims, error) {
+	token, token_err := jwt.Parse(jwt_token, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("invalid signing method")
+		}
+		return []byte(key), nil
+	})
+	if token_err != nil {
+		return nil, fmt.Errorf("could not parse jwt token")
 	}
-	token := strings.TrimSpace(parsed_authorization[1])
-	if token == "" {
-		return "", fmt.Errorf("token empty")
+	
+	// Get claims stored in parsed JWT token
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, fmt.Errorf("could not fetch jwt claims")
 	}
-	return token, nil
-}
-
-// Given a context, find and return the auth struct using the types.AuthKey key
-func ParseAuthContext(context context.Context) model.AuthState {
-	auth := context.Value(types.AuthKey).(model.AuthState)
-	return auth
+	return claims, nil
 }

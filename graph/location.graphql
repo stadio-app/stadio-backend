@@ -1,0 +1,29 @@
+extend type Mutation {
+  createLocation(input: CreateLocation!): Location! @isAuthenticated
+}
+
+input CreateLocation {
+  name: String! @goTag(key: "validate", value: "required")
+  description: String
+  type: String! @goTag(key: "validate", value: "required")
+  address: CreateAddress! @goTag(key: "validate", value: "required")
+}
+
+type Location {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  description: String
+  type: String!
+  ownerId: ID
+  owner: Owner
+  addressId: ID!
+  address: Address
+  deleted: Boolean!
+  status: String!
+  createdById: ID
+  createdBy: User
+  updatedById: ID
+  updatedBy: User
+}

@@ -3,25 +3,23 @@ package services
 import (
 	"database/sql"
 
-	"github.com/go-playground/validator"
-	"github.com/stadio-app/stadio-backend/ent"
+	"github.com/go-jet/jet/v2/qrm"
+	"github.com/go-playground/validator/v10"
+	"github.com/stadio-app/stadio-backend/types"
 )
 
-type ServiceConfig struct {
-	DbConn *sql.DB
-	EntityManager *ent.Client
-	Validator *validator.Validate
-}
-
 type Service struct {
-	UserService UserService
-	// list of services UserService UserService
+	DB *sql.DB
+	TX *sql.Tx
+	StructValidator *validator.Validate
+	Tokens *types.Tokens
 }
 
-func New(config ServiceConfig) Service {
-	service := Service{}
-	service.UserService = UserService{
-		ServiceConfig: config,
+// Returns a transaction if present.
+// Otherwise returns the Database connection instance as qrm.Queryable
+func (service *Service) DbOrTxQueryable() qrm.Queryable {
+	if service.TX != nil {
+		return service.TX
 	}
-	return service
+	return service.DB
 }

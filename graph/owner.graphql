@@ -1,10 +1,12 @@
-extend type Mutation {
-    createOwner(input: OwnerInput!): Owner! @isAuthenticated
-}
-
-input OwnerInput {
-    firstName: String!
-    middleName: String
-    lastName: String!
-    idURL: String!
+type Owner {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  firstName: String!
+  middleName: String
+  lastName: String!
+  fullName: String!
+  verified: Boolean!
+  userId: ID!
+  user: UserShallow
 }
