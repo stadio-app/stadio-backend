@@ -6,7 +6,6 @@ package gresolver
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/stadio-app/stadio-backend/graph"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -14,7 +13,13 @@ import (
 
 // CreateLocation is the resolver for the createLocation field.
 func (r *mutationResolver) CreateLocation(ctx context.Context, input gmodel.CreateLocation) (*gmodel.Location, error) {
-	panic(fmt.Errorf("not implemented: CreateLocation - createLocation"))
+	validation_err := r.AppContext.StructValidator.StructCtx(ctx, input)
+	if validation_err != nil {
+		return nil, validation_err
+	}
+	user := r.Service.GetAuthUserFromContext(ctx)
+	location, err := r.Service.CreateLocation(ctx, &user, input)
+	return &location, err
 }
 
 // Mutation returns graph.MutationResolver implementation.

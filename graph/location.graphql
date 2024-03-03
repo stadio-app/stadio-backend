@@ -1,5 +1,5 @@
 extend type Mutation {
-  createLocation(input: CreateLocation!): Location!
+  createLocation(input: CreateLocation!): Location! @isAuthenticated
 }
 
 input CreateLocation {
