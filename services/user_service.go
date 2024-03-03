@@ -45,7 +45,8 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 		tx.Rollback()
 		return gmodel.User{}, fmt.Errorf("user entry could not be created")
 	}
-	if _, err := service.CreateEmailVerification(ctx, user, tx); err != nil {
+	service.TX = tx
+	if _, err := service.CreateEmailVerification(ctx, user); err != nil {
 		tx.Rollback()
 		return gmodel.User{}, err
 	}
@@ -59,12 +60,13 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 }
 
 func (service Service) LoginInternal(ctx context.Context, email string, password string) (gmodel.Auth, error) {
+	db := service.DbOrTxQueryable()	
 	query := table.User.
 		SELECT(table.User.AllColumns).
 		WHERE(table.User.Email.EQ(postgres.String(email))).
 		LIMIT(1)
 	var verify_user model.User
-	if err := query.QueryContext(ctx, service.DB, &verify_user); err != nil {
+	if err := query.QueryContext(ctx, db, &verify_user); err != nil {
 		return gmodel.Auth{}, fmt.Errorf("incorrect email or password")
 	}
 
@@ -104,7 +106,7 @@ func (service Service) LoginInternal(ctx context.Context, email string, password
 		).
 		LIMIT(1)
 	var user gmodel.User
-	if err := query.QueryContext(ctx, service.DB, &user); err != nil {
+	if err := query.QueryContext(ctx, db, &user); err != nil {
 		return gmodel.Auth{}, fmt.Errorf("internal error")
 	}
 
@@ -130,7 +132,7 @@ func (service Service) UserEmailExists(ctx context.Context, email string) bool {
 	var dest struct{
 		Email string
 	}
-	err := query.QueryContext(ctx, service.DB, &dest)
+	err := query.QueryContext(ctx, service.DbOrTxQueryable(), &dest)
 	if err != nil || dest.Email == "" {
 		return false
 	}

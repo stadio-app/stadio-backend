@@ -43,11 +43,11 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 		panic(err)
 	}
 
-	server.Tokens = tokens
+	server.Tokens = &tokens
 	service := services.Service{
 		DB: server.DB,
 		StructValidator: server.StructValidator,
-		Tokens: tokens,
+		Tokens: &tokens,
 	}
 
 	// TODO: only show in dev environment

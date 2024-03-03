@@ -2,12 +2,10 @@ package services
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
-	"github.com/go-jet/jet/v2/qrm"
 	"github.com/golang-jwt/jwt"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
@@ -19,7 +17,7 @@ import (
 
 const EMAIL_VERIFICATION_CODE_LEN = 10
 
-// Given an existing user (optional)
+// Given an existing user, create an auth_state row
 func (service Service) CreateAuthState(ctx context.Context, user gmodel.User, ip_address *string) (model.AuthState, error) {
 	query := table.AuthState.INSERT(
 		table.AuthState.UserID,
@@ -30,15 +28,11 @@ func (service Service) CreateAuthState(ctx context.Context, user gmodel.User, ip
 	).RETURNING(table.AuthState.AllColumns)
 
 	var auth_state model.AuthState
-	err := query.QueryContext(ctx, service.DB, &auth_state)
+	err := query.QueryContext(ctx, service.DbOrTxQueryable(), &auth_state)
 	return auth_state, err
 }
 
-func (service Service) CreateEmailVerification(ctx context.Context, user gmodel.User, tx *sql.Tx) (model.EmailVerification, error) {
-	var db qrm.Queryable = service.DB
-	if tx != nil {
-		db = tx
-	}
+func (service Service) CreateEmailVerification(ctx context.Context, user gmodel.User) (model.EmailVerification, error) {
 	code, code_err := utils.GenerateRandomUrlEncodedString(EMAIL_VERIFICATION_CODE_LEN)
 	if code_err != nil {
 		return model.EmailVerification{}, code_err
@@ -53,7 +47,7 @@ func (service Service) CreateEmailVerification(ctx context.Context, user gmodel.
 	).RETURNING(table.EmailVerification.AllColumns)
 
 	var email_verification model.EmailVerification
-	err := query.QueryContext(ctx, db, &email_verification)
+	err := query.QueryContext(ctx, service.DbOrTxQueryable(), &email_verification)
 	return email_verification, err
 }
 
@@ -120,7 +114,7 @@ func (service Service) VerifyJwt(ctx context.Context, authorization types.Author
 		).
 		LIMIT(1)
 	var user gmodel.User
-	if err := query.QueryContext(ctx, service.DB, &user); err != nil {
+	if err := query.QueryContext(ctx, service.DbOrTxQueryable(), &user); err != nil {
 		return gmodel.User{}, fmt.Errorf("one or more invalid claim values")
 	}
 	return user, nil

@@ -12,7 +12,7 @@ type Service struct {
 	DB *sql.DB
 	TX *sql.Tx
 	StructValidator *validator.Validate
-	Tokens types.Tokens
+	Tokens *types.Tokens
 }
 
 // Returns a transaction if present.
