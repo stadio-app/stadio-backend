@@ -45,11 +45,37 @@ type CreateAddress struct {
 	CountryCode string  `json:"countryCode" validate:"iso3166_1_alpha2"`
 }
 
+type CreateEvent struct {
+	Name        string    `json:"name"`
+	Description *string   `json:"description,omitempty"`
+	Type        string    `json:"type"`
+	StartDate   time.Time `json:"startDate"`
+	EndDate     time.Time `json:"endDate"`
+	LocationID  int64     `json:"locationId"`
+}
+
 type CreateLocation struct {
 	Name        string         `json:"name" validate:"required"`
 	Description *string        `json:"description,omitempty"`
 	Type        string         `json:"type" validate:"required"`
 	Address     *CreateAddress `json:"address" validate:"required"`
+}
+
+type Event struct {
+	ID          int64     `json:"id" sql:"primary_key"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description,omitempty"`
+	Type        string    `json:"type"`
+	StartDate   time.Time `json:"startDate"`
+	EndDate     time.Time `json:"endDate"`
+	LocationID  int64     `json:"locationId"`
+	Location    *Location `json:"location,omitempty"`
+	CreatedByID *int64    `json:"createdById,omitempty"`
+	CreatedBy   *User     `json:"createdBy,omitempty"`
+	UpdatedByID *int64    `json:"updatedById,omitempty"`
+	UpdatedBy   *User     `json:"updatedBy,omitempty"`
 }
 
 type Location struct {

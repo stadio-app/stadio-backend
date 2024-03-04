@@ -1,0 +1,29 @@
+extend type Mutation {
+  createEvent(input: CreateEvent!): Event! @isAuthenticated
+}
+
+input CreateEvent {
+  name: String!
+  description: String
+  type: String!
+  startDate: Time!
+  endDate: Time!
+  locationId: ID!
+}
+
+type Event {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  description: String
+  type: String!
+  startDate: Time!
+  endDate: Time!
+  locationId: ID!
+  location: Location
+  createdById: ID
+  createdBy: User
+  updatedById: ID
+  updatedBy: User
+}
