@@ -20,7 +20,6 @@ type Address struct {
 	MapsLink    string
 	FullAddress string
 	CountryCode CountryCodeAlpha2
-	Country     string
 	CreatedBy   *int64
 	UpdatedBy   *int64
 }

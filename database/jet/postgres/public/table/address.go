@@ -25,7 +25,6 @@ type addressTable struct {
 	MapsLink    postgres.ColumnString
 	FullAddress postgres.ColumnString
 	CountryCode postgres.ColumnString
-	Country     postgres.ColumnString
 	CreatedBy   postgres.ColumnInteger
 	UpdatedBy   postgres.ColumnInteger
 
@@ -76,11 +75,10 @@ func newAddressTableImpl(schemaName, tableName, alias string) addressTable {
 		MapsLinkColumn    = postgres.StringColumn("maps_link")
 		FullAddressColumn = postgres.StringColumn("full_address")
 		CountryCodeColumn = postgres.StringColumn("country_code")
-		CountryColumn     = postgres.StringColumn("country")
 		CreatedByColumn   = postgres.IntegerColumn("created_by")
 		UpdatedByColumn   = postgres.IntegerColumn("updated_by")
-		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CountryColumn, CreatedByColumn, UpdatedByColumn}
-		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CountryColumn, CreatedByColumn, UpdatedByColumn}
+		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByColumn, UpdatedByColumn}
+		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByColumn, UpdatedByColumn}
 	)
 
 	return addressTable{
@@ -95,7 +93,6 @@ func newAddressTableImpl(schemaName, tableName, alias string) addressTable {
 		MapsLink:    MapsLinkColumn,
 		FullAddress: FullAddressColumn,
 		CountryCode: CountryCodeColumn,
-		Country:     CountryColumn,
 		CreatedBy:   CreatedByColumn,
 		UpdatedBy:   UpdatedByColumn,
 

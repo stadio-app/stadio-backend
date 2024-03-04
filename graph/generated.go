@@ -1241,14 +1241,11 @@ func (ec *executionContext) _Address_country(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(*string)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Address_country(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6070,9 +6067,6 @@ func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "country":
 			out.Values[i] = ec._Address_country(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "createdById":
 			out.Values[i] = ec._Address_createdById(ctx, field, obj)
 		case "createdBy":

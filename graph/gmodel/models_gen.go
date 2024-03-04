@@ -18,7 +18,7 @@ type Address struct {
 	MapsLink    string       `json:"mapsLink"`
 	FullAddress string       `json:"fullAddress"`
 	CountryCode string       `json:"countryCode"`
-	Country     string       `json:"country"`
+	Country     *string      `json:"country,omitempty" alias:"country.name"`
 	CreatedByID *int64       `json:"createdById,omitempty"`
 	CreatedBy   *UserShallow `json:"createdBy,omitempty"`
 	UpdatedByID *int64       `json:"updatedById,omitempty"`

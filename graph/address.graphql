@@ -15,7 +15,7 @@ type Address {
   mapsLink: String!
   fullAddress: String!
   countryCode: String!
-  country: String!
+  country: String @goTag(key: "alias", value: "country.name")
   createdById: ID
   createdBy: UserShallow
   updatedById: ID
