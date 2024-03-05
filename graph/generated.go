@@ -640,6 +640,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateAccountInput,
 		ec.unmarshalInputCreateAddress,
 		ec.unmarshalInputCreateLocation,
+		ec.unmarshalInputCreateLocationSchedule,
 	)
 	first := true
 
@@ -5968,7 +5969,7 @@ func (ec *executionContext) unmarshalInputCreateLocation(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "description", "type", "address"}
+	fieldsInOrder := [...]string{"name", "description", "type", "address", "schedule"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6003,6 +6004,68 @@ func (ec *executionContext) unmarshalInputCreateLocation(ctx context.Context, ob
 				return it, err
 			}
 			it.Address = data
+		case "schedule":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("schedule"))
+			data, err := ec.unmarshalNCreateLocationSchedule2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreateLocationScheduleᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Schedule = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateLocationSchedule(ctx context.Context, obj interface{}) (gmodel.CreateLocationSchedule, error) {
+	var it gmodel.CreateLocationSchedule
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"day", "on", "from", "to", "available"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "day":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("day"))
+			data, err := ec.unmarshalNWeekDay2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐWeekDay(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Day = data
+		case "on":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("on"))
+			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.On = data
+		case "from":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("from"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.From = data
+		case "to":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("to"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.To = data
+		case "available":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("available"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Available = data
 		}
 	}
 
@@ -6972,6 +7035,28 @@ func (ec *executionContext) unmarshalNCreateLocation2githubᚗcomᚋstadioᚑapp
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateLocationSchedule2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreateLocationScheduleᚄ(ctx context.Context, v interface{}) ([]*gmodel.CreateLocationSchedule, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*gmodel.CreateLocationSchedule, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNCreateLocationSchedule2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreateLocationSchedule(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNCreateLocationSchedule2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreateLocationSchedule(ctx context.Context, v interface{}) (*gmodel.CreateLocationSchedule, error) {
+	res, err := ec.unmarshalInputCreateLocationSchedule(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
 	res, err := graphql.UnmarshalFloatContext(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -6994,6 +7079,21 @@ func (ec *executionContext) unmarshalNID2int64(ctx context.Context, v interface{
 
 func (ec *executionContext) marshalNID2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
 	res := graphql.MarshalInt64(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -7058,6 +7158,16 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadio
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNWeekDay2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐWeekDay(ctx context.Context, v interface{}) (gmodel.WeekDay, error) {
+	var res gmodel.WeekDay
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNWeekDay2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐWeekDay(ctx context.Context, sel ast.SelectionSet, v gmodel.WeekDay) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

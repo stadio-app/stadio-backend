@@ -46,10 +46,19 @@ type CreateAddress struct {
 }
 
 type CreateLocation struct {
-	Name        string         `json:"name" validate:"required"`
-	Description *string        `json:"description,omitempty"`
-	Type        string         `json:"type" validate:"required"`
-	Address     *CreateAddress `json:"address" validate:"required"`
+	Name        string                    `json:"name" validate:"required"`
+	Description *string                   `json:"description,omitempty"`
+	Type        string                    `json:"type" validate:"required"`
+	Address     *CreateAddress            `json:"address" validate:"required"`
+	Schedule    []*CreateLocationSchedule `json:"schedule"`
+}
+
+type CreateLocationSchedule struct {
+	Day       WeekDay   `json:"day" validate:"required"`
+	On        time.Time `json:"on"`
+	From      int       `json:"from" validate:"required"`
+	To        int       `json:"to" validate:"required,gte=0,lt=24"`
+	Available bool      `json:"available" validate:"required,gte=0,lt=24"`
 }
 
 type Location struct {
@@ -155,5 +164,56 @@ func (e *AuthPlatformType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AuthPlatformType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type WeekDay string
+
+const (
+	WeekDaySunday    WeekDay = "SUNDAY"
+	WeekDayMonday    WeekDay = "MONDAY"
+	WeekDayTuesday   WeekDay = "TUESDAY"
+	WeekDayWednesday WeekDay = "WEDNESDAY"
+	WeekDayThursday  WeekDay = "THURSDAY"
+	WeekDayFriday    WeekDay = "FRIDAY"
+	WeekDaySaturday  WeekDay = "SATURDAY"
+)
+
+var AllWeekDay = []WeekDay{
+	WeekDaySunday,
+	WeekDayMonday,
+	WeekDayTuesday,
+	WeekDayWednesday,
+	WeekDayThursday,
+	WeekDayFriday,
+	WeekDaySaturday,
+}
+
+func (e WeekDay) IsValid() bool {
+	switch e {
+	case WeekDaySunday, WeekDayMonday, WeekDayTuesday, WeekDayWednesday, WeekDayThursday, WeekDayFriday, WeekDaySaturday:
+		return true
+	}
+	return false
+}
+
+func (e WeekDay) String() string {
+	return string(e)
+}
+
+func (e *WeekDay) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WeekDay(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WeekDay", str)
+	}
+	return nil
+}
+
+func (e WeekDay) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

@@ -7,6 +7,25 @@ input CreateLocation {
   description: String
   type: String! @goTag(key: "validate", value: "required")
   address: CreateAddress! @goTag(key: "validate", value: "required")
+  schedule: [CreateLocationSchedule!]!
+}
+
+enum WeekDay {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+input CreateLocationSchedule {
+  day: WeekDay! @goTag(key: "validate", value: "required")
+  on: Time!
+  from: Int! @goTag(key: "validate", value: "required")
+  to: Int! @goTag(key: "validate", value: "required,gte=0,lt=24")
+  available: Boolean! @goTag(key: "validate", value: "required,gte=0,lt=24")
 }
 
 type Location {
