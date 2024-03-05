@@ -31,12 +31,14 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 		table.User.Password,
 		table.User.AuthPlatform,
 		table.User.Active,
+		table.User.PhoneNumber,
 	).VALUES(
 		input.Email,
 		input.Name,
 		hashed_password,
 		model.UserAuthPlatformType_Internal,
 		false,
+		input.PhoneNumber,
 	).RETURNING(table.User.AllColumns)
 
 	var user gmodel.User
