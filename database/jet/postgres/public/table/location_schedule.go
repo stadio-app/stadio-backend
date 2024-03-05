@@ -22,6 +22,7 @@ type locationScheduleTable struct {
 	UpdatedAt  postgres.ColumnTimestampz
 	LocationID postgres.ColumnInteger
 	Day        postgres.ColumnString
+	On         postgres.ColumnTimestampz
 	From       postgres.ColumnInteger
 	To         postgres.ColumnInteger
 	Available  postgres.ColumnBool
@@ -70,11 +71,12 @@ func newLocationScheduleTableImpl(schemaName, tableName, alias string) locationS
 		UpdatedAtColumn  = postgres.TimestampzColumn("updated_at")
 		LocationIDColumn = postgres.IntegerColumn("location_id")
 		DayColumn        = postgres.StringColumn("day")
+		OnColumn         = postgres.TimestampzColumn("on")
 		FromColumn       = postgres.IntegerColumn("from")
 		ToColumn         = postgres.IntegerColumn("to")
 		AvailableColumn  = postgres.BoolColumn("available")
-		allColumns       = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LocationIDColumn, DayColumn, FromColumn, ToColumn, AvailableColumn}
-		mutableColumns   = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LocationIDColumn, DayColumn, FromColumn, ToColumn, AvailableColumn}
+		allColumns       = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LocationIDColumn, DayColumn, OnColumn, FromColumn, ToColumn, AvailableColumn}
+		mutableColumns   = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LocationIDColumn, DayColumn, OnColumn, FromColumn, ToColumn, AvailableColumn}
 	)
 
 	return locationScheduleTable{
@@ -86,6 +88,7 @@ func newLocationScheduleTableImpl(schemaName, tableName, alias string) locationS
 		UpdatedAt:  UpdatedAtColumn,
 		LocationID: LocationIDColumn,
 		Day:        DayColumn,
+		On:         OnColumn,
 		From:       FromColumn,
 		To:         ToColumn,
 		Available:  AvailableColumn,

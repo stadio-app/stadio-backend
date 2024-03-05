@@ -17,6 +17,7 @@ type LocationSchedule struct {
 	UpdatedAt  time.Time
 	LocationID *int64
 	Day        WeekDay
+	On         *time.Time
 	From       *int32
 	To         *int32
 	Available  *bool
