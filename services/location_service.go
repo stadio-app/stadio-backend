@@ -49,20 +49,19 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	location.UpdatedBy = user
 
 	// location schedule
-	location_schedule := make([]gmodel.LocationSchedule, len(input.Schedule))
+	location_schedules := make([]gmodel.LocationSchedule, len(input.Schedule))
 	for i, schedule_input := range input.Schedule {
 		new_location_schedule, err := service.CreateLocationSchedule(ctx, location.ID, *schedule_input)
 		if err != nil {
 			tx.Rollback()
 			return gmodel.Location{}, fmt.Errorf("could not create location schedule. %s", err.Error())
 		}
-		location_schedule[i] = new_location_schedule
+		location_schedules[i] = new_location_schedule
 	}
-	location_schedule_ptrs := make([]*gmodel.LocationSchedule, len(location_schedule))
-	for i, location_schedule := range location_schedule {
-		location_schedule_ptrs[i] = &location_schedule
+	location.LocationSchedule = make([]*gmodel.LocationSchedule, len(location_schedules))
+	for i := range location_schedules {
+		location.LocationSchedule[i] = &location_schedules[i]
 	}
-	location.LocationSchedule = location_schedule_ptrs
 
 	if err := tx.Commit(); err != nil {
 		tx.Rollback()
