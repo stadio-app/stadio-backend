@@ -48,19 +48,11 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	location.CreatedBy = user
 	location.UpdatedBy = user
 
-	// location schedule
-	location_schedules := make([]gmodel.LocationSchedule, len(input.Schedule))
-	for i, schedule_input := range input.Schedule {
-		new_location_schedule, err := service.CreateLocationSchedule(ctx, location.ID, *schedule_input)
-		if err != nil {
-			tx.Rollback()
-			return gmodel.Location{}, fmt.Errorf("could not create location schedule. %s", err.Error())
-		}
-		location_schedules[i] = new_location_schedule
-	}
-	location.LocationSchedule = make([]*gmodel.LocationSchedule, len(location_schedules))
-	for i := range location_schedules {
-		location.LocationSchedule[i] = &location_schedules[i]
+	// add location schedules
+	location.LocationSchedule, err = service.BulkCreateLocationSchedule(ctx, location.ID, input.Schedule)
+	if err != nil {
+		tx.Rollback()
+		return gmodel.Location{}, err
 	}
 
 	if err := tx.Commit(); err != nil {
@@ -70,11 +62,39 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	return location, nil
 }
 
-func (service Service) CreateLocationSchedule(ctx context.Context, location_id int64, input gmodel.CreateLocationSchedule) (gmodel.LocationSchedule, error) {
+func (service Service) BulkCreateLocationSchedule(
+	ctx context.Context, 
+	location_id int64, 
+	input []*gmodel.CreateLocationSchedule,
+) ([]*gmodel.LocationSchedule, error) {
+	location_schedules := make([]gmodel.LocationSchedule, len(input))
+	for i, schedule_input := range input {
+		new_location_schedule, err := service.CreateLocationSchedule(ctx, location_id, *schedule_input)
+		if err != nil {
+			return nil, fmt.Errorf("could not create location schedule. %s", err.Error())
+		}
+		location_schedules[i] = new_location_schedule
+	}
+	location_schedule_ptrs := make([]*gmodel.LocationSchedule, len(location_schedules))
+	for i := range location_schedules {
+		location_schedule_ptrs[i] = &location_schedules[i]
+	}
+	return location_schedule_ptrs, nil
+}
+
+func (service Service) CreateLocationSchedule(
+	ctx context.Context, 
+	location_id int64, 
+	input gmodel.CreateLocationSchedule,
+) (gmodel.LocationSchedule, error) {
 	var week_day model.WeekDay
 	if week_day.Scan(input.Day.String()) != nil {
 		return gmodel.LocationSchedule{}, fmt.Errorf("parsing error with week day enum")
 	}
+	if input.From != nil && input.To == nil {
+		return gmodel.LocationSchedule{}, fmt.Errorf("schedule field 'to' is not defined")
+	}
+
 	db := service.DbOrTxQueryable()
 	query_builder := table.LocationSchedule.INSERT(
 		table.LocationSchedule.LocationID,

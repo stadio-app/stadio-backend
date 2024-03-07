@@ -24,7 +24,7 @@ input CreateLocationSchedule {
   day: WeekDay! @goTag(key: "validate", value: "required")
   on: Time
   from: Int @goTag(key: "validate", value: "gte=0,lt=24")
-  to: Int @goTag(key: "validate", value: "gte=0,lt=24,required_if=from")
+  to: Int @goTag(key: "validate", value: "gte=0,lt=24")
   available: Boolean! @goTag(key: "validate", value: "required")
 }
 

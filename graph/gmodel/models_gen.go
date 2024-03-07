@@ -57,7 +57,7 @@ type CreateLocationSchedule struct {
 	Day       WeekDay    `json:"day" validate:"required"`
 	On        *time.Time `json:"on,omitempty"`
 	From      *int       `json:"from,omitempty" validate:"gte=0,lt=24"`
-	To        *int       `json:"to,omitempty" validate:"gte=0,lt=24,required_if=from"`
+	To        *int       `json:"to,omitempty" validate:"gte=0,lt=24"`
 	Available bool       `json:"available" validate:"required"`
 }
 
