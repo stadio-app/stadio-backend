@@ -55,10 +55,19 @@ type CreateEvent struct {
 }
 
 type CreateLocation struct {
-	Name        string         `json:"name" validate:"required"`
-	Description *string        `json:"description,omitempty"`
-	Type        string         `json:"type" validate:"required"`
-	Address     *CreateAddress `json:"address" validate:"required"`
+	Name        string                    `json:"name" validate:"required"`
+	Description *string                   `json:"description,omitempty"`
+	Type        string                    `json:"type" validate:"required"`
+	Address     *CreateAddress            `json:"address" validate:"required"`
+	Schedule    []*CreateLocationSchedule `json:"schedule"`
+}
+
+type CreateLocationSchedule struct {
+	Day       WeekDay    `json:"day" validate:"required"`
+	On        *time.Time `json:"on,omitempty"`
+	From      *int       `json:"from,omitempty" validate:"gte=0,lt=24"`
+	To        *int       `json:"to,omitempty" validate:"gte=0,lt=24"`
+	Available bool       `json:"available" validate:"required"`
 }
 
 type Event struct {
@@ -79,22 +88,36 @@ type Event struct {
 }
 
 type Location struct {
-	ID          int64     `json:"id" sql:"primary_key"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	Name        string    `json:"name"`
-	Description *string   `json:"description,omitempty"`
-	Type        string    `json:"type"`
-	OwnerID     *int64    `json:"ownerId,omitempty"`
-	Owner       *Owner    `json:"owner,omitempty"`
-	AddressID   int64     `json:"addressId"`
-	Address     *Address  `json:"address,omitempty"`
-	Deleted     bool      `json:"deleted"`
-	Status      string    `json:"status"`
-	CreatedByID *int64    `json:"createdById,omitempty"`
-	CreatedBy   *User     `json:"createdBy,omitempty"`
-	UpdatedByID *int64    `json:"updatedById,omitempty"`
-	UpdatedBy   *User     `json:"updatedBy,omitempty"`
+	ID               int64               `json:"id" sql:"primary_key"`
+	CreatedAt        time.Time           `json:"createdAt"`
+	UpdatedAt        time.Time           `json:"updatedAt"`
+	Name             string              `json:"name"`
+	Description      *string             `json:"description,omitempty"`
+	Type             string              `json:"type"`
+	OwnerID          *int64              `json:"ownerId,omitempty"`
+	Owner            *Owner              `json:"owner,omitempty"`
+	AddressID        int64               `json:"addressId"`
+	Address          *Address            `json:"address,omitempty"`
+	Deleted          bool                `json:"deleted"`
+	Status           string              `json:"status"`
+	CreatedByID      *int64              `json:"createdById,omitempty"`
+	CreatedBy        *User               `json:"createdBy,omitempty"`
+	UpdatedByID      *int64              `json:"updatedById,omitempty"`
+	UpdatedBy        *User               `json:"updatedBy,omitempty"`
+	LocationSchedule []*LocationSchedule `json:"locationSchedule"`
+}
+
+type LocationSchedule struct {
+	ID         int64      `json:"id" sql:"primary_key"`
+	CreatedAt  time.Time  `json:"createdAt"`
+	UpdatedAt  time.Time  `json:"updatedAt"`
+	LocationID int64      `json:"locationId"`
+	Location   *Location  `json:"location,omitempty"`
+	Day        WeekDay    `json:"day"`
+	On         *time.Time `json:"on,omitempty"`
+	From       *int       `json:"from,omitempty"`
+	To         *int       `json:"to,omitempty"`
+	Available  bool       `json:"available"`
 }
 
 type Mutation struct {
@@ -181,5 +204,56 @@ func (e *AuthPlatformType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e AuthPlatformType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type WeekDay string
+
+const (
+	WeekDaySunday    WeekDay = "SUNDAY"
+	WeekDayMonday    WeekDay = "MONDAY"
+	WeekDayTuesday   WeekDay = "TUESDAY"
+	WeekDayWednesday WeekDay = "WEDNESDAY"
+	WeekDayThursday  WeekDay = "THURSDAY"
+	WeekDayFriday    WeekDay = "FRIDAY"
+	WeekDaySaturday  WeekDay = "SATURDAY"
+)
+
+var AllWeekDay = []WeekDay{
+	WeekDaySunday,
+	WeekDayMonday,
+	WeekDayTuesday,
+	WeekDayWednesday,
+	WeekDayThursday,
+	WeekDayFriday,
+	WeekDaySaturday,
+}
+
+func (e WeekDay) IsValid() bool {
+	switch e {
+	case WeekDaySunday, WeekDayMonday, WeekDayTuesday, WeekDayWednesday, WeekDayThursday, WeekDayFriday, WeekDaySaturday:
+		return true
+	}
+	return false
+}
+
+func (e WeekDay) String() string {
+	return string(e)
+}
+
+func (e *WeekDay) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = WeekDay(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid WeekDay", str)
+	}
+	return nil
+}
+
+func (e WeekDay) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }

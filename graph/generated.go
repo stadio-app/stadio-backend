@@ -88,22 +88,36 @@ type ComplexityRoot struct {
 	}
 
 	Location struct {
-		Address     func(childComplexity int) int
-		AddressID   func(childComplexity int) int
-		CreatedAt   func(childComplexity int) int
-		CreatedBy   func(childComplexity int) int
-		CreatedByID func(childComplexity int) int
-		Deleted     func(childComplexity int) int
-		Description func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Name        func(childComplexity int) int
-		Owner       func(childComplexity int) int
-		OwnerID     func(childComplexity int) int
-		Status      func(childComplexity int) int
-		Type        func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
-		UpdatedBy   func(childComplexity int) int
-		UpdatedByID func(childComplexity int) int
+		Address          func(childComplexity int) int
+		AddressID        func(childComplexity int) int
+		CreatedAt        func(childComplexity int) int
+		CreatedBy        func(childComplexity int) int
+		CreatedByID      func(childComplexity int) int
+		Deleted          func(childComplexity int) int
+		Description      func(childComplexity int) int
+		ID               func(childComplexity int) int
+		LocationSchedule func(childComplexity int) int
+		Name             func(childComplexity int) int
+		Owner            func(childComplexity int) int
+		OwnerID          func(childComplexity int) int
+		Status           func(childComplexity int) int
+		Type             func(childComplexity int) int
+		UpdatedAt        func(childComplexity int) int
+		UpdatedBy        func(childComplexity int) int
+		UpdatedByID      func(childComplexity int) int
+	}
+
+	LocationSchedule struct {
+		Available  func(childComplexity int) int
+		CreatedAt  func(childComplexity int) int
+		Day        func(childComplexity int) int
+		From       func(childComplexity int) int
+		ID         func(childComplexity int) int
+		Location   func(childComplexity int) int
+		LocationID func(childComplexity int) int
+		On         func(childComplexity int) int
+		To         func(childComplexity int) int
+		UpdatedAt  func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -444,6 +458,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Location.ID(childComplexity), true
 
+	case "Location.locationSchedule":
+		if e.complexity.Location.LocationSchedule == nil {
+			break
+		}
+
+		return e.complexity.Location.LocationSchedule(childComplexity), true
+
 	case "Location.name":
 		if e.complexity.Location.Name == nil {
 			break
@@ -499,6 +520,76 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Location.UpdatedByID(childComplexity), true
+
+	case "LocationSchedule.available":
+		if e.complexity.LocationSchedule.Available == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.Available(childComplexity), true
+
+	case "LocationSchedule.createdAt":
+		if e.complexity.LocationSchedule.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.CreatedAt(childComplexity), true
+
+	case "LocationSchedule.day":
+		if e.complexity.LocationSchedule.Day == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.Day(childComplexity), true
+
+	case "LocationSchedule.from":
+		if e.complexity.LocationSchedule.From == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.From(childComplexity), true
+
+	case "LocationSchedule.id":
+		if e.complexity.LocationSchedule.ID == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.ID(childComplexity), true
+
+	case "LocationSchedule.location":
+		if e.complexity.LocationSchedule.Location == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.Location(childComplexity), true
+
+	case "LocationSchedule.locationId":
+		if e.complexity.LocationSchedule.LocationID == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.LocationID(childComplexity), true
+
+	case "LocationSchedule.on":
+		if e.complexity.LocationSchedule.On == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.On(childComplexity), true
+
+	case "LocationSchedule.to":
+		if e.complexity.LocationSchedule.To == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.To(childComplexity), true
+
+	case "LocationSchedule.updatedAt":
+		if e.complexity.LocationSchedule.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.LocationSchedule.UpdatedAt(childComplexity), true
 
 	case "Mutation.createAccount":
 		if e.complexity.Mutation.CreateAccount == nil {
@@ -770,6 +861,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputCreateAddress,
 		ec.unmarshalInputCreateEvent,
 		ec.unmarshalInputCreateLocation,
+		ec.unmarshalInputCreateLocationSchedule,
 	)
 	first := true
 
@@ -2178,6 +2270,8 @@ func (ec *executionContext) fieldContext_Event_location(ctx context.Context, fie
 				return ec.fieldContext_Location_updatedById(ctx, field)
 			case "updatedBy":
 				return ec.fieldContext_Location_updatedBy(ctx, field)
+			case "locationSchedule":
+				return ec.fieldContext_Location_locationSchedule(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Location", field.Name)
 		},
@@ -3183,6 +3277,536 @@ func (ec *executionContext) fieldContext_Location_updatedBy(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Location_locationSchedule(ctx context.Context, field graphql.CollectedField, obj *gmodel.Location) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Location_locationSchedule(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LocationSchedule, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*gmodel.LocationSchedule)
+	fc.Result = res
+	return ec.marshalNLocationSchedule2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocationScheduleᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Location_locationSchedule(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Location",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_LocationSchedule_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_LocationSchedule_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_LocationSchedule_updatedAt(ctx, field)
+			case "locationId":
+				return ec.fieldContext_LocationSchedule_locationId(ctx, field)
+			case "location":
+				return ec.fieldContext_LocationSchedule_location(ctx, field)
+			case "day":
+				return ec.fieldContext_LocationSchedule_day(ctx, field)
+			case "on":
+				return ec.fieldContext_LocationSchedule_on(ctx, field)
+			case "from":
+				return ec.fieldContext_LocationSchedule_from(ctx, field)
+			case "to":
+				return ec.fieldContext_LocationSchedule_to(ctx, field)
+			case "available":
+				return ec.fieldContext_LocationSchedule_available(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LocationSchedule", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNID2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_createdAt(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_updatedAt(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_updatedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_updatedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_locationId(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_locationId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LocationID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNID2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_locationId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_location(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_location(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Location, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*gmodel.Location)
+	fc.Result = res
+	return ec.marshalOLocation2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_location(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Location_id(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Location_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Location_updatedAt(ctx, field)
+			case "name":
+				return ec.fieldContext_Location_name(ctx, field)
+			case "description":
+				return ec.fieldContext_Location_description(ctx, field)
+			case "type":
+				return ec.fieldContext_Location_type(ctx, field)
+			case "ownerId":
+				return ec.fieldContext_Location_ownerId(ctx, field)
+			case "owner":
+				return ec.fieldContext_Location_owner(ctx, field)
+			case "addressId":
+				return ec.fieldContext_Location_addressId(ctx, field)
+			case "address":
+				return ec.fieldContext_Location_address(ctx, field)
+			case "deleted":
+				return ec.fieldContext_Location_deleted(ctx, field)
+			case "status":
+				return ec.fieldContext_Location_status(ctx, field)
+			case "createdById":
+				return ec.fieldContext_Location_createdById(ctx, field)
+			case "createdBy":
+				return ec.fieldContext_Location_createdBy(ctx, field)
+			case "updatedById":
+				return ec.fieldContext_Location_updatedById(ctx, field)
+			case "updatedBy":
+				return ec.fieldContext_Location_updatedBy(ctx, field)
+			case "locationSchedule":
+				return ec.fieldContext_Location_locationSchedule(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Location", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_day(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_day(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Day, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(gmodel.WeekDay)
+	fc.Result = res
+	return ec.marshalNWeekDay2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐWeekDay(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_day(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type WeekDay does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_on(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_on(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.On, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_on(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_from(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_from(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.From, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_from(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_to(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_to(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.To, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_to(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationSchedule_available(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_available(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Available, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationSchedule_available(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationSchedule",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createEvent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createEvent(ctx, field)
 	if err != nil {
@@ -3379,6 +4003,8 @@ func (ec *executionContext) fieldContext_Mutation_createLocation(ctx context.Con
 				return ec.fieldContext_Location_updatedById(ctx, field)
 			case "updatedBy":
 				return ec.fieldContext_Location_updatedBy(ctx, field)
+			case "locationSchedule":
+				return ec.fieldContext_Location_locationSchedule(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Location", field.Name)
 		},
@@ -6962,7 +7588,7 @@ func (ec *executionContext) unmarshalInputCreateLocation(ctx context.Context, ob
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "description", "type", "address"}
+	fieldsInOrder := [...]string{"name", "description", "type", "address", "schedule"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -6997,6 +7623,68 @@ func (ec *executionContext) unmarshalInputCreateLocation(ctx context.Context, ob
 				return it, err
 			}
 			it.Address = data
+		case "schedule":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("schedule"))
+			data, err := ec.unmarshalNCreateLocationSchedule2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreateLocationScheduleᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Schedule = data
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputCreateLocationSchedule(ctx context.Context, obj interface{}) (gmodel.CreateLocationSchedule, error) {
+	var it gmodel.CreateLocationSchedule
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"day", "on", "from", "to", "available"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "day":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("day"))
+			data, err := ec.unmarshalNWeekDay2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐWeekDay(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Day = data
+		case "on":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("on"))
+			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.On = data
+		case "from":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("from"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.From = data
+		case "to":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("to"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.To = data
+		case "available":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("available"))
+			data, err := ec.unmarshalNBoolean2bool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Available = data
 		}
 	}
 
@@ -7292,6 +7980,83 @@ func (ec *executionContext) _Location(ctx context.Context, sel ast.SelectionSet,
 			out.Values[i] = ec._Location_updatedById(ctx, field, obj)
 		case "updatedBy":
 			out.Values[i] = ec._Location_updatedBy(ctx, field, obj)
+		case "locationSchedule":
+			out.Values[i] = ec._Location_locationSchedule(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var locationScheduleImplementors = []string{"LocationSchedule"}
+
+func (ec *executionContext) _LocationSchedule(ctx context.Context, sel ast.SelectionSet, obj *gmodel.LocationSchedule) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, locationScheduleImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LocationSchedule")
+		case "id":
+			out.Values[i] = ec._LocationSchedule_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._LocationSchedule_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._LocationSchedule_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "locationId":
+			out.Values[i] = ec._LocationSchedule_locationId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "location":
+			out.Values[i] = ec._LocationSchedule_location(ctx, field, obj)
+		case "day":
+			out.Values[i] = ec._LocationSchedule_day(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "on":
+			out.Values[i] = ec._LocationSchedule_on(ctx, field, obj)
+		case "from":
+			out.Values[i] = ec._LocationSchedule_from(ctx, field, obj)
+		case "to":
+			out.Values[i] = ec._LocationSchedule_to(ctx, field, obj)
+		case "available":
+			out.Values[i] = ec._LocationSchedule_available(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8061,6 +8826,28 @@ func (ec *executionContext) unmarshalNCreateLocation2githubᚗcomᚋstadioᚑapp
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCreateLocationSchedule2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreateLocationScheduleᚄ(ctx context.Context, v interface{}) ([]*gmodel.CreateLocationSchedule, error) {
+	var vSlice []interface{}
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*gmodel.CreateLocationSchedule, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNCreateLocationSchedule2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreateLocationSchedule(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNCreateLocationSchedule2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreateLocationSchedule(ctx context.Context, v interface{}) (*gmodel.CreateLocationSchedule, error) {
+	res, err := ec.unmarshalInputCreateLocationSchedule(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNEvent2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐEvent(ctx context.Context, sel ast.SelectionSet, v gmodel.Event) graphql.Marshaler {
 	return ec._Event(ctx, sel, &v)
 }
@@ -8119,6 +8906,60 @@ func (ec *executionContext) marshalNLocation2ᚖgithubᚗcomᚋstadioᚑappᚋst
 	return ec._Location(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNLocationSchedule2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocationScheduleᚄ(ctx context.Context, sel ast.SelectionSet, v []*gmodel.LocationSchedule) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLocationSchedule2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocationSchedule(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNLocationSchedule2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocationSchedule(ctx context.Context, sel ast.SelectionSet, v *gmodel.LocationSchedule) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LocationSchedule(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -8161,6 +9002,16 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadio
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNWeekDay2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐWeekDay(ctx context.Context, v interface{}) (gmodel.WeekDay, error) {
+	var res gmodel.WeekDay
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNWeekDay2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐWeekDay(ctx context.Context, sel ast.SelectionSet, v gmodel.WeekDay) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -8478,6 +9329,22 @@ func (ec *executionContext) marshalOID2ᚖint64(ctx context.Context, sel ast.Sel
 		return graphql.Null
 	}
 	res := graphql.MarshalInt64(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interface{}) (*int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalInt(*v)
 	return res
 }
 
