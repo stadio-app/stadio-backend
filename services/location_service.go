@@ -3,7 +3,10 @@ package services
 import (
 	"context"
 	"fmt"
+	"strings"
+	"time"
 
+	"github.com/go-jet/jet/v2/postgres"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -114,4 +117,64 @@ func (service Service) CreateLocationSchedule(
 		return gmodel.LocationSchedule{}, err
 	}
 	return location_schedule, nil
+}
+
+func (service Service) LocationIdExists(ctx context.Context, location_id int64) bool {
+	qb := table.Location.
+		SELECT(table.Location.ID).
+		FROM(table.Location).
+		WHERE(table.Location.ID.EQ(postgres.Int64(location_id))).
+		LIMIT(1)
+	var dest struct{ ID string }
+	return qb.QueryContext(ctx, service.DbOrTxQueryable(), &dest) == nil
+}
+
+func (service Service) FindLocationById(ctx context.Context, location_id int64) (gmodel.Location, error) {
+	qb := table.Location.
+		SELECT(
+			table.Location.AllColumns, 
+			table.LocationSchedule.AllColumns,
+		).
+		FROM(
+			table.Location.
+			INNER_JOIN(
+				table.LocationSchedule, 
+				table.LocationSchedule.LocationID.EQ(table.Location.ID),
+			),
+		).
+		WHERE(table.Location.ID.EQ(postgres.Int64(location_id)))
+	db := service.DbOrTxQueryable()
+	var location gmodel.Location
+	if err := qb.QueryContext(ctx, db, &location); err != nil {
+		return gmodel.Location{}, err
+	}
+	return location, nil
+}
+
+// Queries the DB to check if any entries exists in `location_schedule`
+// where the given date range is within the schedule date range.
+func (service Service) LocationScheduleAvailableBetween(ctx context.Context, location_id int64, from time.Time, to time.Time) bool {
+	from_dow := strings.ToUpper(from.Weekday().String())
+	from_hr := int32(from.Hour())
+	to_hr := int32(to.Hour())
+	qb := table.LocationSchedule.
+		SELECT(table.LocationSchedule.AllColumns).
+		FROM(table.LocationSchedule).
+		WHERE(
+			postgres.AND(
+				table.LocationSchedule.LocationID.EQ(postgres.Int(location_id)),
+				table.LocationSchedule.Day.EQ(postgres.NewEnumValue(from_dow)),
+				table.LocationSchedule.Available.IS_TRUE(),
+				postgres.AND(
+					postgres.Int32(from_hr).BETWEEN(table.LocationSchedule.From, table.LocationSchedule.To),
+					postgres.Int32(to_hr).BETWEEN(table.LocationSchedule.From, table.LocationSchedule.To),
+				),
+			),
+		)
+	var available_schedules []gmodel.LocationSchedule
+	db := service.DbOrTxQueryable()
+	if err := qb.QueryContext(ctx, db, &available_schedules); err != nil {
+		return false
+	}
+	return len(available_schedules) > 0
 }
