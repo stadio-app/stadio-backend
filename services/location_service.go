@@ -171,7 +171,7 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 				),
 			),
 		)
-	var available_schedules []struct{ ID int64 `sql:"primary_key" alias:"location_schedule.id"` }
+	var available_schedules []int64
 	db := service.DbOrTxQueryable()
 	if err := qb.QueryContext(ctx, db, &available_schedules); err != nil {
 		return false
