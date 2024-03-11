@@ -158,7 +158,7 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 	from_hr := int32(from.Hour())
 	to_hr := int32(to.Hour())
 	qb := table.LocationSchedule.
-		SELECT(table.LocationSchedule.AllColumns).
+		SELECT(table.LocationSchedule.ID).
 		FROM(table.LocationSchedule).
 		WHERE(
 			postgres.AND(
@@ -171,7 +171,7 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 				),
 			),
 		)
-	var available_schedules []gmodel.LocationSchedule
+	var available_schedules []struct{ ID int64 `sql:"primary_key" alias:"location_schedule.id"` }
 	db := service.DbOrTxQueryable()
 	if err := qb.QueryContext(ctx, db, &available_schedules); err != nil {
 		return false
