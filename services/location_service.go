@@ -48,8 +48,6 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 		return gmodel.Location{}, fmt.Errorf("could not create location")
 	}
 	location.Address = &address
-	location.CreatedBy = user
-	location.UpdatedBy = user
 
 	// add location schedules
 	location.LocationSchedule, err = service.BulkCreateLocationSchedule(ctx, location.ID, input.Schedule)

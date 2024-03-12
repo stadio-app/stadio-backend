@@ -27,9 +27,9 @@ type Event {
   locationId: ID!
   location: Location
   createdById: ID
-  createdBy: User
+  createdBy: CreatedByUser
   updatedById: ID
-  updatedBy: User
+  updatedBy: UpdatedByUser
   approved: Boolean!
 }
 

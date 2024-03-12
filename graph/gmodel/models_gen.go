@@ -10,19 +10,19 @@ import (
 )
 
 type Address struct {
-	ID          int64        `json:"id" sql:"primary_key"`
-	CreatedAt   time.Time    `json:"createdAt"`
-	UpdatedAt   time.Time    `json:"updatedAt"`
-	Latitude    float64      `json:"latitude"`
-	Longitude   float64      `json:"longitude"`
-	MapsLink    string       `json:"mapsLink"`
-	FullAddress string       `json:"fullAddress"`
-	CountryCode string       `json:"countryCode"`
-	Country     *string      `json:"country,omitempty" alias:"country.name"`
-	CreatedByID *int64       `json:"createdById,omitempty"`
-	CreatedBy   *UserShallow `json:"createdBy,omitempty"`
-	UpdatedByID *int64       `json:"updatedById,omitempty"`
-	UpdatedBy   *UserShallow `json:"updatedBy,omitempty"`
+	ID          int64          `json:"id" sql:"primary_key"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
+	Latitude    float64        `json:"latitude"`
+	Longitude   float64        `json:"longitude"`
+	MapsLink    string         `json:"mapsLink"`
+	FullAddress string         `json:"fullAddress"`
+	CountryCode string         `json:"countryCode"`
+	Country     *string        `json:"country,omitempty" alias:"country.name"`
+	CreatedByID *int64         `json:"createdById,omitempty"`
+	CreatedBy   *CreatedByUser `json:"createdBy,omitempty"`
+	UpdatedByID *int64         `json:"updatedById,omitempty"`
+	UpdatedBy   *UpdatedByUser `json:"updatedBy,omitempty"`
 }
 
 type Auth struct {
@@ -78,21 +78,21 @@ type CreatedByUser struct {
 }
 
 type Event struct {
-	ID          int64     `json:"id" sql:"primary_key"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
-	Name        string    `json:"name"`
-	Description *string   `json:"description,omitempty"`
-	Type        string    `json:"type"`
-	StartDate   time.Time `json:"startDate"`
-	EndDate     time.Time `json:"endDate"`
-	LocationID  int64     `json:"locationId"`
-	Location    *Location `json:"location,omitempty"`
-	CreatedByID *int64    `json:"createdById,omitempty"`
-	CreatedBy   *User     `json:"createdBy,omitempty"`
-	UpdatedByID *int64    `json:"updatedById,omitempty"`
-	UpdatedBy   *User     `json:"updatedBy,omitempty"`
-	Approved    bool      `json:"approved"`
+	ID          int64          `json:"id" sql:"primary_key"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
+	Name        string         `json:"name"`
+	Description *string        `json:"description,omitempty"`
+	Type        string         `json:"type"`
+	StartDate   time.Time      `json:"startDate"`
+	EndDate     time.Time      `json:"endDate"`
+	LocationID  int64          `json:"locationId"`
+	Location    *Location      `json:"location,omitempty"`
+	CreatedByID *int64         `json:"createdById,omitempty"`
+	CreatedBy   *CreatedByUser `json:"createdBy,omitempty"`
+	UpdatedByID *int64         `json:"updatedById,omitempty"`
+	UpdatedBy   *UpdatedByUser `json:"updatedBy,omitempty"`
+	Approved    bool           `json:"approved"`
 }
 
 type EventShallow struct {
@@ -124,9 +124,9 @@ type Location struct {
 	Deleted          bool                `json:"deleted"`
 	Status           string              `json:"status"`
 	CreatedByID      *int64              `json:"createdById,omitempty"`
-	CreatedBy        *User               `json:"createdBy,omitempty"`
+	CreatedBy        *CreatedByUser      `json:"createdBy,omitempty"`
 	UpdatedByID      *int64              `json:"updatedById,omitempty"`
-	UpdatedBy        *User               `json:"updatedBy,omitempty"`
+	UpdatedBy        *UpdatedByUser      `json:"updatedBy,omitempty"`
 	LocationSchedule []*LocationSchedule `json:"locationSchedule"`
 }
 

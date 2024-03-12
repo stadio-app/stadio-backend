@@ -42,9 +42,9 @@ type Location {
   deleted: Boolean!
   status: String!
   createdById: ID
-  createdBy: User
+  createdBy: CreatedByUser
   updatedById: ID
-  updatedBy: User
+  updatedBy: UpdatedByUser
   locationSchedule: [LocationSchedule!]!
 }
 

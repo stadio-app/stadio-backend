@@ -81,16 +81,22 @@ func (service Service) EventTimingCollides(ctx context.Context, location_id int6
 
 func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error) {
 	db := service.DbOrTxQueryable()
+	created_by_user_table := table.User.AS("created_by_user")
+	updated_by_user_table := table.User.AS("updated_by_user")
 	qb := table.Event.
 		SELECT(
 			table.Event.AllColumns,
 			table.Location.AllColumns,
 			table.Address.AllColumns,
+			created_by_user_table.AllColumns,
+			updated_by_user_table.AllColumns,
 		).
 		FROM(
 			table.Event.
 				INNER_JOIN(table.Location, table.Location.ID.EQ(table.Event.LocationID)).
-				INNER_JOIN(table.Address, table.Address.ID.EQ(table.Location.AddressID)),
+				INNER_JOIN(table.Address, table.Address.ID.EQ(table.Location.AddressID)).
+				LEFT_JOIN(created_by_user_table, created_by_user_table.ID.EQ(table.Event.CreatedByID)).
+				LEFT_JOIN(updated_by_user_table, updated_by_user_table.ID.EQ(table.Event.CreatedByID)),
 		).ORDER_BY(
 			table.Event.StartDate.DESC(),
 			table.Event.CreatedAt.DESC(),

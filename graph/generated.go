@@ -1725,9 +1725,9 @@ func (ec *executionContext) _Address_createdBy(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.UserShallow)
+	res := resTmp.(*gmodel.CreatedByUser)
 	fc.Result = res
-	return ec.marshalOUserShallow2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUserShallow(ctx, field.Selections, res)
+	return ec.marshalOCreatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreatedByUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Address_createdBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1739,15 +1739,15 @@ func (ec *executionContext) fieldContext_Address_createdBy(ctx context.Context, 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_UserShallow_id(ctx, field)
+				return ec.fieldContext_CreatedByUser_id(ctx, field)
 			case "name":
-				return ec.fieldContext_UserShallow_name(ctx, field)
+				return ec.fieldContext_CreatedByUser_name(ctx, field)
 			case "avatar":
-				return ec.fieldContext_UserShallow_avatar(ctx, field)
+				return ec.fieldContext_CreatedByUser_avatar(ctx, field)
 			case "active":
-				return ec.fieldContext_UserShallow_active(ctx, field)
+				return ec.fieldContext_CreatedByUser_active(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type UserShallow", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type CreatedByUser", field.Name)
 		},
 	}
 	return fc, nil
@@ -1817,9 +1817,9 @@ func (ec *executionContext) _Address_updatedBy(ctx context.Context, field graphq
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.UserShallow)
+	res := resTmp.(*gmodel.UpdatedByUser)
 	fc.Result = res
-	return ec.marshalOUserShallow2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUserShallow(ctx, field.Selections, res)
+	return ec.marshalOUpdatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUpdatedByUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Address_updatedBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1831,15 +1831,15 @@ func (ec *executionContext) fieldContext_Address_updatedBy(ctx context.Context, 
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_UserShallow_id(ctx, field)
+				return ec.fieldContext_UpdatedByUser_id(ctx, field)
 			case "name":
-				return ec.fieldContext_UserShallow_name(ctx, field)
+				return ec.fieldContext_UpdatedByUser_name(ctx, field)
 			case "avatar":
-				return ec.fieldContext_UserShallow_avatar(ctx, field)
+				return ec.fieldContext_UpdatedByUser_avatar(ctx, field)
 			case "active":
-				return ec.fieldContext_UserShallow_active(ctx, field)
+				return ec.fieldContext_UpdatedByUser_active(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type UserShallow", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UpdatedByUser", field.Name)
 		},
 	}
 	return fc, nil
@@ -2663,9 +2663,9 @@ func (ec *executionContext) _Event_createdBy(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.User)
+	res := resTmp.(*gmodel.CreatedByUser)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOCreatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreatedByUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_createdBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2677,31 +2677,15 @@ func (ec *executionContext) fieldContext_Event_createdBy(ctx context.Context, fi
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_User_updatedAt(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "phoneNumber":
-				return ec.fieldContext_User_phoneNumber(ctx, field)
+				return ec.fieldContext_CreatedByUser_id(ctx, field)
 			case "name":
-				return ec.fieldContext_User_name(ctx, field)
+				return ec.fieldContext_CreatedByUser_name(ctx, field)
 			case "avatar":
-				return ec.fieldContext_User_avatar(ctx, field)
-			case "birthDate":
-				return ec.fieldContext_User_birthDate(ctx, field)
-			case "bio":
-				return ec.fieldContext_User_bio(ctx, field)
+				return ec.fieldContext_CreatedByUser_avatar(ctx, field)
 			case "active":
-				return ec.fieldContext_User_active(ctx, field)
-			case "authPlatform":
-				return ec.fieldContext_User_authPlatform(ctx, field)
-			case "authStateId":
-				return ec.fieldContext_User_authStateId(ctx, field)
+				return ec.fieldContext_CreatedByUser_active(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type CreatedByUser", field.Name)
 		},
 	}
 	return fc, nil
@@ -2771,9 +2755,9 @@ func (ec *executionContext) _Event_updatedBy(ctx context.Context, field graphql.
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.User)
+	res := resTmp.(*gmodel.UpdatedByUser)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUpdatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUpdatedByUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Event_updatedBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -2785,31 +2769,15 @@ func (ec *executionContext) fieldContext_Event_updatedBy(ctx context.Context, fi
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_User_updatedAt(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "phoneNumber":
-				return ec.fieldContext_User_phoneNumber(ctx, field)
+				return ec.fieldContext_UpdatedByUser_id(ctx, field)
 			case "name":
-				return ec.fieldContext_User_name(ctx, field)
+				return ec.fieldContext_UpdatedByUser_name(ctx, field)
 			case "avatar":
-				return ec.fieldContext_User_avatar(ctx, field)
-			case "birthDate":
-				return ec.fieldContext_User_birthDate(ctx, field)
-			case "bio":
-				return ec.fieldContext_User_bio(ctx, field)
+				return ec.fieldContext_UpdatedByUser_avatar(ctx, field)
 			case "active":
-				return ec.fieldContext_User_active(ctx, field)
-			case "authPlatform":
-				return ec.fieldContext_User_authPlatform(ctx, field)
-			case "authStateId":
-				return ec.fieldContext_User_authStateId(ctx, field)
+				return ec.fieldContext_UpdatedByUser_active(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UpdatedByUser", field.Name)
 		},
 	}
 	return fc, nil
@@ -4008,9 +3976,9 @@ func (ec *executionContext) _Location_createdBy(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.User)
+	res := resTmp.(*gmodel.CreatedByUser)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOCreatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreatedByUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Location_createdBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4022,31 +3990,15 @@ func (ec *executionContext) fieldContext_Location_createdBy(ctx context.Context,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_User_updatedAt(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "phoneNumber":
-				return ec.fieldContext_User_phoneNumber(ctx, field)
+				return ec.fieldContext_CreatedByUser_id(ctx, field)
 			case "name":
-				return ec.fieldContext_User_name(ctx, field)
+				return ec.fieldContext_CreatedByUser_name(ctx, field)
 			case "avatar":
-				return ec.fieldContext_User_avatar(ctx, field)
-			case "birthDate":
-				return ec.fieldContext_User_birthDate(ctx, field)
-			case "bio":
-				return ec.fieldContext_User_bio(ctx, field)
+				return ec.fieldContext_CreatedByUser_avatar(ctx, field)
 			case "active":
-				return ec.fieldContext_User_active(ctx, field)
-			case "authPlatform":
-				return ec.fieldContext_User_authPlatform(ctx, field)
-			case "authStateId":
-				return ec.fieldContext_User_authStateId(ctx, field)
+				return ec.fieldContext_CreatedByUser_active(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type CreatedByUser", field.Name)
 		},
 	}
 	return fc, nil
@@ -4116,9 +4068,9 @@ func (ec *executionContext) _Location_updatedBy(ctx context.Context, field graph
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.User)
+	res := resTmp.(*gmodel.UpdatedByUser)
 	fc.Result = res
-	return ec.marshalOUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUser(ctx, field.Selections, res)
+	return ec.marshalOUpdatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUpdatedByUser(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Location_updatedBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4130,31 +4082,15 @@ func (ec *executionContext) fieldContext_Location_updatedBy(ctx context.Context,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "id":
-				return ec.fieldContext_User_id(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_User_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_User_updatedAt(ctx, field)
-			case "email":
-				return ec.fieldContext_User_email(ctx, field)
-			case "phoneNumber":
-				return ec.fieldContext_User_phoneNumber(ctx, field)
+				return ec.fieldContext_UpdatedByUser_id(ctx, field)
 			case "name":
-				return ec.fieldContext_User_name(ctx, field)
+				return ec.fieldContext_UpdatedByUser_name(ctx, field)
 			case "avatar":
-				return ec.fieldContext_User_avatar(ctx, field)
-			case "birthDate":
-				return ec.fieldContext_User_birthDate(ctx, field)
-			case "bio":
-				return ec.fieldContext_User_bio(ctx, field)
+				return ec.fieldContext_UpdatedByUser_avatar(ctx, field)
 			case "active":
-				return ec.fieldContext_User_active(ctx, field)
-			case "authPlatform":
-				return ec.fieldContext_User_authPlatform(ctx, field)
-			case "authStateId":
-				return ec.fieldContext_User_authStateId(ctx, field)
+				return ec.fieldContext_UpdatedByUser_active(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type UpdatedByUser", field.Name)
 		},
 	}
 	return fc, nil
@@ -10576,6 +10512,13 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
+func (ec *executionContext) marshalOCreatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreatedByUser(ctx context.Context, sel ast.SelectionSet, v *gmodel.CreatedByUser) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._CreatedByUser(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOID2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {
 	if v == nil {
 		return nil, nil
@@ -10692,11 +10635,11 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 	return res
 }
 
-func (ec *executionContext) marshalOUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *gmodel.User) graphql.Marshaler {
+func (ec *executionContext) marshalOUpdatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUpdatedByUser(ctx context.Context, sel ast.SelectionSet, v *gmodel.UpdatedByUser) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._User(ctx, sel, v)
+	return ec._UpdatedByUser(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOUserShallow2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUserShallow(ctx context.Context, sel ast.SelectionSet, v *gmodel.UserShallow) graphql.Marshaler {
