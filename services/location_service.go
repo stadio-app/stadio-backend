@@ -157,24 +157,36 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 	from_dow := strings.ToUpper(from.Weekday().String())
 	from_hr := int32(from.Hour())
 	to_hr := int32(to.Hour())
+
 	qb := table.LocationSchedule.
-		SELECT(table.LocationSchedule.ID).
+		SELECT(table.LocationSchedule.AllColumns).
 		FROM(table.LocationSchedule).
 		WHERE(
 			postgres.AND(
 				table.LocationSchedule.LocationID.EQ(postgres.Int(location_id)),
 				table.LocationSchedule.Day.EQ(postgres.NewEnumValue(from_dow)),
-				table.LocationSchedule.Available.IS_TRUE(),
 				postgres.AND(
 					postgres.Int32(from_hr).BETWEEN(table.LocationSchedule.From, table.LocationSchedule.To),
 					postgres.Int32(to_hr).BETWEEN(table.LocationSchedule.From, table.LocationSchedule.To),
 				),
 			),
-		)
-	var available_schedules []int64
+		).
+		ORDER_BY(table.LocationSchedule.CreatedAt.DESC())
+	var available_schedules []gmodel.LocationSchedule
 	db := service.DbOrTxQueryable()
 	if err := qb.QueryContext(ctx, db, &available_schedules); err != nil {
 		return false
 	}
-	return len(available_schedules) > 0
+
+	// check if selected schedules are available
+	for _, schedule := range available_schedules {
+		if schedule.On == nil {
+			return schedule.Available
+		}
+		// schedule.On is defined so return it's availability if date matches
+		if schedule.On.Format(time.DateOnly) == from.Format(time.DateOnly) {
+			return schedule.Available
+		}
+	}
+	return false
 }
