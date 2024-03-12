@@ -85,6 +85,22 @@ type Event struct {
 	CreatedBy   *User     `json:"createdBy,omitempty"`
 	UpdatedByID *int64    `json:"updatedById,omitempty"`
 	UpdatedBy   *User     `json:"updatedBy,omitempty"`
+	Approved    bool      `json:"approved"`
+}
+
+type EventShallow struct {
+	ID          int64     `json:"id" sql:"primary_key"`
+	CreatedAt   time.Time `json:"createdAt"`
+	UpdatedAt   time.Time `json:"updatedAt"`
+	Name        string    `json:"name"`
+	Description *string   `json:"description,omitempty"`
+	Type        string    `json:"type"`
+	StartDate   time.Time `json:"startDate"`
+	EndDate     time.Time `json:"endDate"`
+	LocationID  int64     `json:"locationId"`
+	CreatedByID *int64    `json:"createdById,omitempty"`
+	UpdatedByID *int64    `json:"updatedById,omitempty"`
+	Approved    bool      `json:"approved"`
 }
 
 type Location struct {

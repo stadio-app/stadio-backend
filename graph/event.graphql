@@ -1,5 +1,5 @@
 extend type Mutation {
-  createEvent(input: CreateEvent!): Event! @isAuthenticated
+  createEvent(input: CreateEvent!): EventShallow! @isAuthenticated
 }
 
 input CreateEvent {
@@ -26,4 +26,20 @@ type Event {
   createdBy: User
   updatedById: ID
   updatedBy: User
+  approved: Boolean!
+}
+
+type EventShallow {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  description: String
+  type: String!
+  startDate: Time!
+  endDate: Time!
+  locationId: ID!
+  createdById: ID
+  updatedById: ID
+  approved: Boolean!
 }

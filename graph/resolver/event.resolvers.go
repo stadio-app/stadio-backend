@@ -12,7 +12,7 @@ import (
 )
 
 // CreateEvent is the resolver for the createEvent field.
-func (r *mutationResolver) CreateEvent(ctx context.Context, input gmodel.CreateEvent) (*gmodel.Event, error) {
+func (r *mutationResolver) CreateEvent(ctx context.Context, input gmodel.CreateEvent) (*gmodel.EventShallow, error) {
 	event, err := r.Service.CreateEvent(ctx, r.Service.GetAuthUserFromContext(ctx), input)
 	return &event, err
 }

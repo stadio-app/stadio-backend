@@ -11,19 +11,19 @@ import (
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
 
-func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input gmodel.CreateEvent) (gmodel.Event, error) {
+func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input gmodel.CreateEvent) (gmodel.EventShallow, error) {
 	db := service.DbOrTxQueryable()
-	location, err := service.FindLocationById(ctx, input.LocationID)
-	if err != nil {
-		return gmodel.Event{}, fmt.Errorf("location id is invalid")
+	
+	if service.LocationIdExists(ctx, input.LocationID) {
+		return gmodel.EventShallow{}, fmt.Errorf("location id is invalid")
 	}
 
-	if !service.LocationScheduleAvailableBetween(ctx, location.ID, input.StartDate, input.EndDate) {
-		return gmodel.Event{}, fmt.Errorf("location is unavailable at the selected date range")
+	if !service.LocationScheduleAvailableBetween(ctx, input.LocationID, input.StartDate, input.EndDate) {
+		return gmodel.EventShallow{}, fmt.Errorf("location is unavailable at the selected date range")
 	}
 
-	if service.EventTimingCollides(ctx, location.ID, input.StartDate, input.EndDate) {
-		return gmodel.Event{}, fmt.Errorf("time slot already taken by another event")
+	if service.EventTimingCollides(ctx, input.LocationID, input.StartDate, input.EndDate) {
+		return gmodel.EventShallow{}, fmt.Errorf("time slot already taken by another event")
 	}
 
 	qb := table.Event.
@@ -38,7 +38,7 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 			table.Event.UpdatedByID,
 		).
 		VALUES(
-			location.ID,
+			input.LocationID,
 			input.Name,
 			input.Description,
 			input.Type,
@@ -47,13 +47,10 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 			user.ID,
 			user.ID,
 		).RETURNING(table.Event.AllColumns)
-	var new_event gmodel.Event
+	var new_event gmodel.EventShallow
 	if err := qb.QueryContext(ctx, db, &new_event); err != nil {
-		return gmodel.Event{}, err
+		return gmodel.EventShallow{}, err
 	}
-	new_event.CreatedBy = &user
-	new_event.UpdatedBy = &user
-	new_event.Location = &location
 	return new_event, nil
 }
 
@@ -65,10 +62,12 @@ func (service Service) EventTimingCollides(ctx context.Context, location_id int6
 			postgres.AND(
 				table.Event.LocationID.EQ(postgres.Int(location_id)),
 				postgres.OR(
+					// covers cases when from or to are contained inbound
 					postgres.OR(
 						postgres.TimestampzT(from).BETWEEN(table.Event.StartDate, table.Event.EndDate),
 						postgres.TimestampzT(to).BETWEEN(table.Event.StartDate, table.Event.EndDate),
 					),
+					// covers cases when from or to overlap db start or end dates
 					postgres.OR(
 						table.Event.StartDate.BETWEEN(postgres.TimestampzT(from), postgres.TimestampzT(to)),
 						table.Event.EndDate.BETWEEN(postgres.TimestampzT(from), postgres.TimestampzT(to)),
