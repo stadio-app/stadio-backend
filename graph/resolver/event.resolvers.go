@@ -6,7 +6,6 @@ package gresolver
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/stadio-app/stadio-backend/graph"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -14,7 +13,8 @@ import (
 
 // CreateEvent is the resolver for the createEvent field.
 func (r *mutationResolver) CreateEvent(ctx context.Context, input gmodel.CreateEvent) (*gmodel.Event, error) {
-	panic(fmt.Errorf("not implemented: CreateEvent - createEvent"))
+	event, err := r.Service.CreateEvent(ctx, r.Service.GetAuthUserFromContext(ctx), input)
+	return &event, err
 }
 
 // Mutation returns graph.MutationResolver implementation.
