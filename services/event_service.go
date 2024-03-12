@@ -88,6 +88,7 @@ func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error
 			table.Event.AllColumns,
 			table.Location.AllColumns,
 			table.Address.AllColumns,
+			table.Country.Name,
 			created_by_user_table.AllColumns,
 			updated_by_user_table.AllColumns,
 		).
@@ -95,6 +96,7 @@ func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error
 			table.Event.
 				INNER_JOIN(table.Location, table.Location.ID.EQ(table.Event.LocationID)).
 				INNER_JOIN(table.Address, table.Address.ID.EQ(table.Location.AddressID)).
+				INNER_JOIN(table.Country, table.Country.Code.EQ(table.Address.CountryCode)).
 				LEFT_JOIN(created_by_user_table, created_by_user_table.ID.EQ(table.Event.CreatedByID)).
 				LEFT_JOIN(updated_by_user_table, updated_by_user_table.ID.EQ(table.Event.CreatedByID)),
 		).ORDER_BY(
