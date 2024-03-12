@@ -31,8 +31,8 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 		table.Location.Description,
 		table.Location.Type,
 		table.Location.AddressID,
-		table.Location.CreatedBy,
-		table.Location.UpdatedBy,
+		table.Location.CreatedByID,
+		table.Location.UpdatedByID,
 	).VALUES(
 		input.Name,
 		input.Description,

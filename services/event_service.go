@@ -13,15 +13,12 @@ import (
 
 func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input gmodel.CreateEvent) (gmodel.EventShallow, error) {
 	db := service.DbOrTxQueryable()
-	
 	if service.LocationIdExists(ctx, input.LocationID) {
 		return gmodel.EventShallow{}, fmt.Errorf("location id is invalid")
 	}
-
 	if !service.LocationScheduleAvailableBetween(ctx, input.LocationID, input.StartDate, input.EndDate) {
 		return gmodel.EventShallow{}, fmt.Errorf("location is unavailable at the selected date range")
 	}
-
 	if service.EventTimingCollides(ctx, input.LocationID, input.StartDate, input.EndDate) {
 		return gmodel.EventShallow{}, fmt.Errorf("time slot already taken by another event")
 	}
@@ -83,4 +80,25 @@ func (service Service) EventTimingCollides(ctx context.Context, location_id int6
 	}
 	log.Println(conflicting_events)
 	return len(conflicting_events) != 0
+}
+
+func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error) {
+	db := service.DbOrTxQueryable()
+	qb := table.Event.
+		SELECT(table.Event.AllColumns).
+		FROM(
+			table.Event.
+				INNER_JOIN(table.Location, table.Location.ID.EQ(table.Event.LocationID)).
+				INNER_JOIN(table.Address, table.Address.ID.EQ(table.Location.AddressID)).
+				INNER_JOIN(table.User, table.Event.CreatedByID.EQ(table.User.ID)).
+				INNER_JOIN(table.User, table.Event.UpdatedByID.EQ(table.User.ID)),
+		).ORDER_BY(
+			table.Event.StartDate.DESC(),
+			table.Event.CreatedAt.DESC(),
+		)
+	var events []gmodel.Event
+	if err := qb.QueryContext(ctx, db, &events); err != nil {
+		return nil, err
+	}
+	return events, nil
 }
