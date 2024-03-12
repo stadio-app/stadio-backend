@@ -45,8 +45,8 @@ func (service Service) CreateAddress(ctx context.Context, user *gmodel.User, inp
 		table.Address.MapsLink,
 		table.Address.FullAddress,
 		table.Address.CountryCode,
-		table.Address.CreatedBy,
-		table.Address.UpdatedBy,
+		table.Address.CreatedByID,
+		table.Address.UpdatedByID,
 	).VALUES(
 		input.Latitude,
 		input.Longitude,

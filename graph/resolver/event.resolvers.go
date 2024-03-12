@@ -17,7 +17,24 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input gmodel.CreateE
 	return &event, err
 }
 
+// AllEvents is the resolver for the allEvents field.
+func (r *queryResolver) AllEvents(ctx context.Context) ([]*gmodel.Event, error) {
+	events, err := r.Service.FindAllEvents(ctx)
+	if err != nil {
+		return nil, err
+	}
+	event_ptrs := make([]*gmodel.Event, len(events))
+	for i := range events {
+		event_ptrs[i] = &events[i]
+	}
+	return event_ptrs, nil
+}
+
 // Mutation returns graph.MutationResolver implementation.
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
 
+// Query returns graph.QueryResolver implementation.
+func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
+
 type mutationResolver struct{ *Resolver }
+type queryResolver struct{ *Resolver }

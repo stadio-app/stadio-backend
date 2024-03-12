@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
@@ -13,7 +12,7 @@ import (
 
 func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input gmodel.CreateEvent) (gmodel.EventShallow, error) {
 	db := service.DbOrTxQueryable()
-	if service.LocationIdExists(ctx, input.LocationID) {
+	if !service.LocationIdExists(ctx, input.LocationID) {
 		return gmodel.EventShallow{}, fmt.Errorf("location id is invalid")
 	}
 	if !service.LocationScheduleAvailableBetween(ctx, input.LocationID, input.StartDate, input.EndDate) {
@@ -75,23 +74,23 @@ func (service Service) EventTimingCollides(ctx context.Context, location_id int6
 	var conflicting_events []int
 	db := service.DbOrTxQueryable()
 	if err := qb.QueryContext(ctx, db, &conflicting_events); err != nil {
-		log.Println(err)
 		return true
 	}
-	log.Println(conflicting_events)
 	return len(conflicting_events) != 0
 }
 
 func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error) {
 	db := service.DbOrTxQueryable()
 	qb := table.Event.
-		SELECT(table.Event.AllColumns).
+		SELECT(
+			table.Event.AllColumns,
+			table.Location.AllColumns,
+			table.Address.AllColumns,
+		).
 		FROM(
 			table.Event.
 				INNER_JOIN(table.Location, table.Location.ID.EQ(table.Event.LocationID)).
-				INNER_JOIN(table.Address, table.Address.ID.EQ(table.Location.AddressID)).
-				INNER_JOIN(table.User, table.Event.CreatedByID.EQ(table.User.ID)).
-				INNER_JOIN(table.User, table.Event.UpdatedByID.EQ(table.User.ID)),
+				INNER_JOIN(table.Address, table.Address.ID.EQ(table.Location.AddressID)),
 		).ORDER_BY(
 			table.Event.StartDate.DESC(),
 			table.Event.CreatedAt.DESC(),

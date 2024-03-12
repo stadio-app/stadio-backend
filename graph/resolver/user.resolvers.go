@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/stadio-app/stadio-backend/graph"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
 
@@ -37,8 +36,3 @@ func (r *queryResolver) Me(ctx context.Context) (*gmodel.User, error) {
 	auth_user := r.Service.GetAuthUserFromContext(ctx)
 	return &auth_user, nil
 }
-
-// Query returns graph.QueryResolver implementation.
-func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
-
-type queryResolver struct{ *Resolver }
