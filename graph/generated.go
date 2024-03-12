@@ -70,6 +70,13 @@ type ComplexityRoot struct {
 		User  func(childComplexity int) int
 	}
 
+	CreatedByUser struct {
+		Active func(childComplexity int) int
+		Avatar func(childComplexity int) int
+		ID     func(childComplexity int) int
+		Name   func(childComplexity int) int
+	}
+
 	Event struct {
 		Approved    func(childComplexity int) int
 		CreatedAt   func(childComplexity int) int
@@ -161,6 +168,13 @@ type ComplexityRoot struct {
 		Me        func(childComplexity int) int
 	}
 
+	UpdatedByUser struct {
+		Active func(childComplexity int) int
+		Avatar func(childComplexity int) int
+		ID     func(childComplexity int) int
+		Name   func(childComplexity int) int
+	}
+
 	User struct {
 		Active       func(childComplexity int) int
 		AuthPlatform func(childComplexity int) int
@@ -177,13 +191,10 @@ type ComplexityRoot struct {
 	}
 
 	UserShallow struct {
-		Active    func(childComplexity int) int
-		Avatar    func(childComplexity int) int
-		Bio       func(childComplexity int) int
-		CreatedAt func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Name      func(childComplexity int) int
-		UpdatedAt func(childComplexity int) int
+		Active func(childComplexity int) int
+		Avatar func(childComplexity int) int
+		ID     func(childComplexity int) int
+		Name   func(childComplexity int) int
 	}
 }
 
@@ -321,6 +332,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Auth.User(childComplexity), true
+
+	case "CreatedByUser.active":
+		if e.complexity.CreatedByUser.Active == nil {
+			break
+		}
+
+		return e.complexity.CreatedByUser.Active(childComplexity), true
+
+	case "CreatedByUser.avatar":
+		if e.complexity.CreatedByUser.Avatar == nil {
+			break
+		}
+
+		return e.complexity.CreatedByUser.Avatar(childComplexity), true
+
+	case "CreatedByUser.id":
+		if e.complexity.CreatedByUser.ID == nil {
+			break
+		}
+
+		return e.complexity.CreatedByUser.ID(childComplexity), true
+
+	case "CreatedByUser.name":
+		if e.complexity.CreatedByUser.Name == nil {
+			break
+		}
+
+		return e.complexity.CreatedByUser.Name(childComplexity), true
 
 	case "Event.approved":
 		if e.complexity.Event.Approved == nil {
@@ -832,6 +871,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Me(childComplexity), true
 
+	case "UpdatedByUser.active":
+		if e.complexity.UpdatedByUser.Active == nil {
+			break
+		}
+
+		return e.complexity.UpdatedByUser.Active(childComplexity), true
+
+	case "UpdatedByUser.avatar":
+		if e.complexity.UpdatedByUser.Avatar == nil {
+			break
+		}
+
+		return e.complexity.UpdatedByUser.Avatar(childComplexity), true
+
+	case "UpdatedByUser.id":
+		if e.complexity.UpdatedByUser.ID == nil {
+			break
+		}
+
+		return e.complexity.UpdatedByUser.ID(childComplexity), true
+
+	case "UpdatedByUser.name":
+		if e.complexity.UpdatedByUser.Name == nil {
+			break
+		}
+
+		return e.complexity.UpdatedByUser.Name(childComplexity), true
+
 	case "User.active":
 		if e.complexity.User.Active == nil {
 			break
@@ -930,20 +997,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserShallow.Avatar(childComplexity), true
 
-	case "UserShallow.bio":
-		if e.complexity.UserShallow.Bio == nil {
-			break
-		}
-
-		return e.complexity.UserShallow.Bio(childComplexity), true
-
-	case "UserShallow.createdAt":
-		if e.complexity.UserShallow.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.UserShallow.CreatedAt(childComplexity), true
-
 	case "UserShallow.id":
 		if e.complexity.UserShallow.ID == nil {
 			break
@@ -957,13 +1010,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserShallow.Name(childComplexity), true
-
-	case "UserShallow.updatedAt":
-		if e.complexity.UserShallow.UpdatedAt == nil {
-			break
-		}
-
-		return e.complexity.UserShallow.UpdatedAt(childComplexity), true
 
 	}
 	return 0, false
@@ -1694,16 +1740,10 @@ func (ec *executionContext) fieldContext_Address_createdBy(ctx context.Context, 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_UserShallow_id(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_UserShallow_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_UserShallow_updatedAt(ctx, field)
 			case "name":
 				return ec.fieldContext_UserShallow_name(ctx, field)
 			case "avatar":
 				return ec.fieldContext_UserShallow_avatar(ctx, field)
-			case "bio":
-				return ec.fieldContext_UserShallow_bio(ctx, field)
 			case "active":
 				return ec.fieldContext_UserShallow_active(ctx, field)
 			}
@@ -1792,16 +1832,10 @@ func (ec *executionContext) fieldContext_Address_updatedBy(ctx context.Context, 
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_UserShallow_id(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_UserShallow_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_UserShallow_updatedAt(ctx, field)
 			case "name":
 				return ec.fieldContext_UserShallow_name(ctx, field)
 			case "avatar":
 				return ec.fieldContext_UserShallow_avatar(ctx, field)
-			case "bio":
-				return ec.fieldContext_UserShallow_bio(ctx, field)
 			case "active":
 				return ec.fieldContext_UserShallow_active(ctx, field)
 			}
@@ -1920,6 +1954,176 @@ func (ec *executionContext) fieldContext_Auth_user(ctx context.Context, field gr
 				return ec.fieldContext_User_authStateId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CreatedByUser_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.CreatedByUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreatedByUser_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNID2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CreatedByUser_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CreatedByUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CreatedByUser_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.CreatedByUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreatedByUser_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CreatedByUser_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CreatedByUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CreatedByUser_avatar(ctx context.Context, field graphql.CollectedField, obj *gmodel.CreatedByUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreatedByUser_avatar(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Avatar, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CreatedByUser_avatar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CreatedByUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CreatedByUser_active(ctx context.Context, field graphql.CollectedField, obj *gmodel.CreatedByUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_CreatedByUser_active(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Active, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_CreatedByUser_active(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CreatedByUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5210,16 +5414,10 @@ func (ec *executionContext) fieldContext_Owner_user(ctx context.Context, field g
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_UserShallow_id(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_UserShallow_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_UserShallow_updatedAt(ctx, field)
 			case "name":
 				return ec.fieldContext_UserShallow_name(ctx, field)
 			case "avatar":
 				return ec.fieldContext_UserShallow_avatar(ctx, field)
-			case "bio":
-				return ec.fieldContext_UserShallow_bio(ctx, field)
 			case "active":
 				return ec.fieldContext_UserShallow_active(ctx, field)
 			}
@@ -5600,6 +5798,176 @@ func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, fie
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdatedByUser_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdatedByUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdatedByUser_id(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNID2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdatedByUser_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdatedByUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdatedByUser_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdatedByUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdatedByUser_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdatedByUser_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdatedByUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdatedByUser_avatar(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdatedByUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdatedByUser_avatar(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Avatar, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdatedByUser_avatar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdatedByUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UpdatedByUser_active(ctx context.Context, field graphql.CollectedField, obj *gmodel.UpdatedByUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UpdatedByUser_active(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Active, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UpdatedByUser_active(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UpdatedByUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -6159,94 +6527,6 @@ func (ec *executionContext) fieldContext_UserShallow_id(ctx context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _UserShallow_createdAt(ctx context.Context, field graphql.CollectedField, obj *gmodel.UserShallow) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserShallow_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserShallow_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserShallow",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UserShallow_updatedAt(ctx context.Context, field graphql.CollectedField, obj *gmodel.UserShallow) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserShallow_updatedAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UpdatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserShallow_updatedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserShallow",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _UserShallow_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.UserShallow) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserShallow_name(ctx, field)
 	if err != nil {
@@ -6320,47 +6600,6 @@ func (ec *executionContext) _UserShallow_avatar(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext_UserShallow_avatar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "UserShallow",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _UserShallow_bio(ctx context.Context, field graphql.CollectedField, obj *gmodel.UserShallow) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UserShallow_bio(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Bio, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_UserShallow_bio(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserShallow",
 		Field:      field,
@@ -8598,6 +8837,54 @@ func (ec *executionContext) _Auth(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
+var createdByUserImplementors = []string{"CreatedByUser"}
+
+func (ec *executionContext) _CreatedByUser(ctx context.Context, sel ast.SelectionSet, obj *gmodel.CreatedByUser) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, createdByUserImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CreatedByUser")
+		case "id":
+			out.Values[i] = ec._CreatedByUser_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._CreatedByUser_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "avatar":
+			out.Values[i] = ec._CreatedByUser_avatar(ctx, field, obj)
+		case "active":
+			out.Values[i] = ec._CreatedByUser_active(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var eventImplementors = []string{"Event"}
 
 func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, obj *gmodel.Event) graphql.Marshaler {
@@ -9198,6 +9485,54 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var updatedByUserImplementors = []string{"UpdatedByUser"}
+
+func (ec *executionContext) _UpdatedByUser(ctx context.Context, sel ast.SelectionSet, obj *gmodel.UpdatedByUser) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, updatedByUserImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("UpdatedByUser")
+		case "id":
+			out.Values[i] = ec._UpdatedByUser_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._UpdatedByUser_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "avatar":
+			out.Values[i] = ec._UpdatedByUser_avatar(ctx, field, obj)
+		case "active":
+			out.Values[i] = ec._UpdatedByUser_active(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var userImplementors = []string{"User"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *gmodel.User) graphql.Marshaler {
@@ -9290,16 +9625,6 @@ func (ec *executionContext) _UserShallow(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "createdAt":
-			out.Values[i] = ec._UserShallow_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "updatedAt":
-			out.Values[i] = ec._UserShallow_updatedAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "name":
 			out.Values[i] = ec._UserShallow_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9307,8 +9632,6 @@ func (ec *executionContext) _UserShallow(ctx context.Context, sel ast.SelectionS
 			}
 		case "avatar":
 			out.Values[i] = ec._UserShallow_avatar(ctx, field, obj)
-		case "bio":
-			out.Values[i] = ec._UserShallow_bio(ctx, field, obj)
 		case "active":
 			out.Values[i] = ec._UserShallow_active(ctx, field, obj)
 		default:

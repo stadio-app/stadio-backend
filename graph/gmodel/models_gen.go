@@ -70,6 +70,13 @@ type CreateLocationSchedule struct {
 	Available bool       `json:"available" validate:"required"`
 }
 
+type CreatedByUser struct {
+	ID     int64   `json:"id" sql:"primary_key" alias:"created_by_user.id"`
+	Name   string  `json:"name" alias:"created_by_user.name"`
+	Avatar *string `json:"avatar,omitempty" alias:"created_by_user.avatar"`
+	Active *bool   `json:"active,omitempty" alias:"created_by_user.active"`
+}
+
 type Event struct {
 	ID          int64     `json:"id" sql:"primary_key"`
 	CreatedAt   time.Time `json:"createdAt"`
@@ -155,6 +162,13 @@ type Owner struct {
 type Query struct {
 }
 
+type UpdatedByUser struct {
+	ID     int64   `json:"id" sql:"primary_key" alias:"updated_by_user.id"`
+	Name   string  `json:"name" alias:"updated_by_user.name"`
+	Avatar *string `json:"avatar,omitempty" alias:"updated_by_user.avatar"`
+	Active *bool   `json:"active,omitempty" alias:"updated_by_user.active"`
+}
+
 type User struct {
 	ID           int64             `json:"id" sql:"primary_key"`
 	CreatedAt    time.Time         `json:"createdAt"`
@@ -171,13 +185,10 @@ type User struct {
 }
 
 type UserShallow struct {
-	ID        int64     `json:"id" sql:"primary_key"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Name      string    `json:"name"`
-	Avatar    *string   `json:"avatar,omitempty"`
-	Bio       *string   `json:"bio,omitempty"`
-	Active    *bool     `json:"active,omitempty"`
+	ID     int64   `json:"id" sql:"primary_key" alias:"user.id"`
+	Name   string  `json:"name" alias:"user.name"`
+	Avatar *string `json:"avatar,omitempty" alias:"user.avatar"`
+	Active *bool   `json:"active,omitempty" alias:"user.active"`
 }
 
 type AuthPlatformType string

@@ -36,13 +36,30 @@ type User {
 }
 
 type UserShallow {
-  id: ID! @goTag(key: "sql", value: "primary_key")
-  createdAt: Time!
-  updatedAt: Time!
-  name: String!
-  avatar: String
-  bio: String
-  active: Boolean
+  id: ID!
+    @goTag(key: "sql", value: "primary_key")
+    @goTag(key: "alias", value: "user.id")
+  name: String! @goTag(key: "alias", value: "user.name")
+  avatar: String @goTag(key: "alias", value: "user.avatar")
+  active: Boolean @goTag(key: "alias", value: "user.active")
+}
+
+type CreatedByUser {
+  id: ID!
+    @goTag(key: "sql", value: "primary_key")
+    @goTag(key: "alias", value: "created_by_user.id")
+  name: String! @goTag(key: "alias", value: "created_by_user.name")
+  avatar: String @goTag(key: "alias", value: "created_by_user.avatar")
+  active: Boolean @goTag(key: "alias", value: "created_by_user.active")
+}
+
+type UpdatedByUser {
+  id: ID!
+    @goTag(key: "sql", value: "primary_key")
+    @goTag(key: "alias", value: "updated_by_user.id")
+  name: String! @goTag(key: "alias", value: "updated_by_user.name")
+  avatar: String @goTag(key: "alias", value: "updated_by_user.avatar")
+  active: Boolean @goTag(key: "alias", value: "updated_by_user.active")
 }
 
 type Auth {
