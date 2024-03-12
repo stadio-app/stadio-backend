@@ -25,8 +25,8 @@ type addressTable struct {
 	MapsLink    postgres.ColumnString
 	FullAddress postgres.ColumnString
 	CountryCode postgres.ColumnString
-	CreatedBy   postgres.ColumnInteger
-	UpdatedBy   postgres.ColumnInteger
+	CreatedByID postgres.ColumnInteger
+	UpdatedByID postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -75,10 +75,10 @@ func newAddressTableImpl(schemaName, tableName, alias string) addressTable {
 		MapsLinkColumn    = postgres.StringColumn("maps_link")
 		FullAddressColumn = postgres.StringColumn("full_address")
 		CountryCodeColumn = postgres.StringColumn("country_code")
-		CreatedByColumn   = postgres.IntegerColumn("created_by")
-		UpdatedByColumn   = postgres.IntegerColumn("updated_by")
-		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByColumn, UpdatedByColumn}
-		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByColumn, UpdatedByColumn}
+		CreatedByIDColumn = postgres.IntegerColumn("created_by_id")
+		UpdatedByIDColumn = postgres.IntegerColumn("updated_by_id")
+		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByIDColumn, UpdatedByIDColumn}
+		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByIDColumn, UpdatedByIDColumn}
 	)
 
 	return addressTable{
@@ -93,8 +93,8 @@ func newAddressTableImpl(schemaName, tableName, alias string) addressTable {
 		MapsLink:    MapsLinkColumn,
 		FullAddress: FullAddressColumn,
 		CountryCode: CountryCodeColumn,
-		CreatedBy:   CreatedByColumn,
-		UpdatedBy:   UpdatedByColumn,
+		CreatedByID: CreatedByIDColumn,
+		UpdatedByID: UpdatedByIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,
