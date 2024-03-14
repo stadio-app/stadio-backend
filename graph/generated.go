@@ -139,7 +139,7 @@ type ComplexityRoot struct {
 		Location   func(childComplexity int) int
 		LocationID func(childComplexity int) int
 		On         func(childComplexity int) int
-		To         func(childComplexity int) int
+		ToDuration func(childComplexity int) int
 		UpdatedAt  func(childComplexity int) int
 	}
 
@@ -725,12 +725,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LocationSchedule.On(childComplexity), true
 
-	case "LocationSchedule.to":
-		if e.complexity.LocationSchedule.To == nil {
+	case "LocationSchedule.toDuration":
+		if e.complexity.LocationSchedule.ToDuration == nil {
 			break
 		}
 
-		return e.complexity.LocationSchedule.To(childComplexity), true
+		return e.complexity.LocationSchedule.ToDuration(childComplexity), true
 
 	case "LocationSchedule.updatedAt":
 		if e.complexity.LocationSchedule.UpdatedAt == nil {
@@ -4151,8 +4151,8 @@ func (ec *executionContext) fieldContext_Location_locationSchedule(ctx context.C
 				return ec.fieldContext_LocationSchedule_on(ctx, field)
 			case "from":
 				return ec.fieldContext_LocationSchedule_from(ctx, field)
-			case "to":
-				return ec.fieldContext_LocationSchedule_to(ctx, field)
+			case "toDuration":
+				return ec.fieldContext_LocationSchedule_toDuration(ctx, field)
 			case "available":
 				return ec.fieldContext_LocationSchedule_available(ctx, field)
 			}
@@ -4523,9 +4523,9 @@ func (ec *executionContext) _LocationSchedule_from(ctx context.Context, field gr
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(*time.Time)
 	fc.Result = res
-	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_LocationSchedule_from(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -4535,14 +4535,14 @@ func (ec *executionContext) fieldContext_LocationSchedule_from(ctx context.Conte
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _LocationSchedule_to(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationSchedule_to(ctx, field)
+func (ec *executionContext) _LocationSchedule_toDuration(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationSchedule) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationSchedule_toDuration(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4555,7 +4555,7 @@ func (ec *executionContext) _LocationSchedule_to(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.To, nil
+		return obj.ToDuration, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4569,7 +4569,7 @@ func (ec *executionContext) _LocationSchedule_to(ctx context.Context, field grap
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_LocationSchedule_to(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_LocationSchedule_toDuration(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "LocationSchedule",
 		Field:      field,
@@ -9134,8 +9134,8 @@ func (ec *executionContext) _LocationSchedule(ctx context.Context, sel ast.Selec
 			out.Values[i] = ec._LocationSchedule_on(ctx, field, obj)
 		case "from":
 			out.Values[i] = ec._LocationSchedule_from(ctx, field, obj)
-		case "to":
-			out.Values[i] = ec._LocationSchedule_to(ctx, field, obj)
+		case "toDuration":
+			out.Values[i] = ec._LocationSchedule_toDuration(ctx, field, obj)
 		case "available":
 			out.Values[i] = ec._LocationSchedule_available(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

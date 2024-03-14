@@ -138,8 +138,8 @@ type LocationSchedule struct {
 	Location   *Location  `json:"location,omitempty"`
 	Day        WeekDay    `json:"day"`
 	On         *time.Time `json:"on,omitempty"`
-	From       *int       `json:"from,omitempty"`
-	To         *int       `json:"to,omitempty"`
+	From       *time.Time `json:"from,omitempty"`
+	ToDuration *int       `json:"toDuration,omitempty"`
 	Available  bool       `json:"available"`
 }
 

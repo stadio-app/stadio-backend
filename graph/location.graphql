@@ -56,7 +56,7 @@ type LocationSchedule {
   location: Location
   day: WeekDay!
   on: Time
-  from: Int
-  to: Int
+  from: Time
+  toDuration: Int
   available: Boolean!
 }

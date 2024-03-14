@@ -102,13 +102,13 @@ func (service Service) CreateLocationSchedule(
 		table.LocationSchedule.Day,
 		table.LocationSchedule.On,
 		table.LocationSchedule.From,
-		table.LocationSchedule.To,
+		table.LocationSchedule.ToDuration,
 	).VALUES(
 		location_id,
 		week_day,
 		input.On,
-		input.From,
-		input.To,
+		service.FromToTimeString(*input.From),
+		service.ToDuration(*input.From, *input.To),
 	).RETURNING(table.LocationSchedule.AllColumns)
 	var location_schedule gmodel.LocationSchedule
 	if err := query_builder.QueryContext(ctx, db, &location_schedule); err != nil {
@@ -153,8 +153,7 @@ func (service Service) FindLocationById(ctx context.Context, location_id int64) 
 // where the given date range is within the schedule date range.
 func (service Service) LocationScheduleAvailableBetween(ctx context.Context, location_id int64, from time.Time, to time.Time) bool {
 	from_dow := strings.ToUpper(from.Weekday().String())
-	from_hr := int32(from.Hour())
-	to_hr := int32(to.Hour())
+	to_duration := to.Sub(from).Hours()
 
 	qb := table.LocationSchedule.
 		SELECT(table.LocationSchedule.AllColumns).
@@ -164,8 +163,8 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 				table.LocationSchedule.LocationID.EQ(postgres.Int(location_id)),
 				table.LocationSchedule.Day.EQ(postgres.NewEnumValue(from_dow)),
 				postgres.AND(
-					postgres.Int32(from_hr).BETWEEN(table.LocationSchedule.From, table.LocationSchedule.To),
-					postgres.Int32(to_hr).BETWEEN(table.LocationSchedule.From, table.LocationSchedule.To),
+					postgres.TimeT(from).GT_EQ(table.LocationSchedule.From),
+					postgres.Int32(int32(to_duration)).LT_EQ(table.LocationSchedule.ToDuration),
 				),
 			),
 		).
@@ -187,4 +186,15 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 		}
 	}
 	return false
+}
+
+func (Service) FromToTimeString(from int) string {
+	return fmt.Sprintf("%d:00:00", from)
+}
+
+func (Service) ToDuration(from int, to int) int {
+	if from <= to {
+		return to - from
+	}
+	return (to + 24) - from
 }

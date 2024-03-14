@@ -22,9 +22,9 @@ type locationScheduleTable struct {
 	UpdatedAt  postgres.ColumnTimestampz
 	LocationID postgres.ColumnInteger
 	Day        postgres.ColumnString
-	On         postgres.ColumnDate
-	From       postgres.ColumnInteger
-	To         postgres.ColumnInteger
+	On         postgres.ColumnTimestampz
+	From       postgres.ColumnTime
+	ToDuration postgres.ColumnInteger
 	Available  postgres.ColumnBool
 
 	AllColumns     postgres.ColumnList
@@ -71,12 +71,12 @@ func newLocationScheduleTableImpl(schemaName, tableName, alias string) locationS
 		UpdatedAtColumn  = postgres.TimestampzColumn("updated_at")
 		LocationIDColumn = postgres.IntegerColumn("location_id")
 		DayColumn        = postgres.StringColumn("day")
-		OnColumn         = postgres.DateColumn("on")
-		FromColumn       = postgres.IntegerColumn("from")
-		ToColumn         = postgres.IntegerColumn("to")
+		OnColumn         = postgres.TimestampzColumn("on")
+		FromColumn       = postgres.TimeColumn("from")
+		ToDurationColumn = postgres.IntegerColumn("to_duration")
 		AvailableColumn  = postgres.BoolColumn("available")
-		allColumns       = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LocationIDColumn, DayColumn, OnColumn, FromColumn, ToColumn, AvailableColumn}
-		mutableColumns   = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LocationIDColumn, DayColumn, OnColumn, FromColumn, ToColumn, AvailableColumn}
+		allColumns       = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LocationIDColumn, DayColumn, OnColumn, FromColumn, ToDurationColumn, AvailableColumn}
+		mutableColumns   = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LocationIDColumn, DayColumn, OnColumn, FromColumn, ToDurationColumn, AvailableColumn}
 	)
 
 	return locationScheduleTable{
@@ -90,7 +90,7 @@ func newLocationScheduleTableImpl(schemaName, tableName, alias string) locationS
 		Day:        DayColumn,
 		On:         OnColumn,
 		From:       FromColumn,
-		To:         ToColumn,
+		ToDuration: ToDurationColumn,
 		Available:  AvailableColumn,
 
 		AllColumns:     allColumns,
