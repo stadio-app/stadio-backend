@@ -12,6 +12,7 @@ package table
 func UseSchema(schema string) {
 	Address = Address.FromSchema(schema)
 	AuthState = AuthState.FromSchema(schema)
+	Country = Country.FromSchema(schema)
 	EmailVerification = EmailVerification.FromSchema(schema)
 	Event = Event.FromSchema(schema)
 	Location = Location.FromSchema(schema)

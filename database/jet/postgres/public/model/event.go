@@ -23,4 +23,5 @@ type Event struct {
 	LocationID  *int64
 	CreatedByID *int64
 	UpdatedByID *int64
+	Approved    bool
 }

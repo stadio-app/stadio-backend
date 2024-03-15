@@ -22,6 +22,6 @@ type Location struct {
 	AddressID   int64
 	Deleted     *bool
 	Status      *LocationStatus
-	CreatedBy   *int64
-	UpdatedBy   *int64
+	CreatedByID *int64
+	UpdatedByID *int64
 }

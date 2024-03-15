@@ -27,8 +27,8 @@ type locationTable struct {
 	AddressID   postgres.ColumnInteger
 	Deleted     postgres.ColumnBool
 	Status      postgres.ColumnString
-	CreatedBy   postgres.ColumnInteger
-	UpdatedBy   postgres.ColumnInteger
+	CreatedByID postgres.ColumnInteger
+	UpdatedByID postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -79,10 +79,10 @@ func newLocationTableImpl(schemaName, tableName, alias string) locationTable {
 		AddressIDColumn   = postgres.IntegerColumn("address_id")
 		DeletedColumn     = postgres.BoolColumn("deleted")
 		StatusColumn      = postgres.StringColumn("status")
-		CreatedByColumn   = postgres.IntegerColumn("created_by")
-		UpdatedByColumn   = postgres.IntegerColumn("updated_by")
-		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, OwnerIDColumn, AddressIDColumn, DeletedColumn, StatusColumn, CreatedByColumn, UpdatedByColumn}
-		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, OwnerIDColumn, AddressIDColumn, DeletedColumn, StatusColumn, CreatedByColumn, UpdatedByColumn}
+		CreatedByIDColumn = postgres.IntegerColumn("created_by_id")
+		UpdatedByIDColumn = postgres.IntegerColumn("updated_by_id")
+		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, OwnerIDColumn, AddressIDColumn, DeletedColumn, StatusColumn, CreatedByIDColumn, UpdatedByIDColumn}
+		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, OwnerIDColumn, AddressIDColumn, DeletedColumn, StatusColumn, CreatedByIDColumn, UpdatedByIDColumn}
 	)
 
 	return locationTable{
@@ -99,8 +99,8 @@ func newLocationTableImpl(schemaName, tableName, alias string) locationTable {
 		AddressID:   AddressIDColumn,
 		Deleted:     DeletedColumn,
 		Status:      StatusColumn,
-		CreatedBy:   CreatedByColumn,
-		UpdatedBy:   UpdatedByColumn,
+		CreatedByID: CreatedByIDColumn,
+		UpdatedByID: UpdatedByIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

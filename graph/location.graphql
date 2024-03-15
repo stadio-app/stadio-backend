@@ -42,9 +42,9 @@ type Location {
   deleted: Boolean!
   status: String!
   createdById: ID
-  createdBy: User
+  createdBy: CreatedByUser
   updatedById: ID
-  updatedBy: User
+  updatedBy: UpdatedByUser
   locationSchedule: [LocationSchedule!]!
 }
 
@@ -56,7 +56,7 @@ type LocationSchedule {
   location: Location
   day: WeekDay!
   on: Time
-  from: Int
-  to: Int
+  from: Time
+  toDuration: Int
   available: Boolean!
 }

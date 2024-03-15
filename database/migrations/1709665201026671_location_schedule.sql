@@ -14,7 +14,7 @@ CREATE TABLE "location_schedule" (
   "updated_at" TIMESTAMPTZ NOT NULL DEFAULT NOW(), 
   "location_id" BIGINT REFERENCES "location"("id") ON DELETE CASCADE, 
   "day" "week_day" NOT NULL,
-  "on" TIMESTAMPTZ,
+  "on" DATE,
   "from" INTEGER, -- 24 hour time
   "to" INTEGER, -- 24 hour time
   "available" BOOLEAN DEFAULT FALSE

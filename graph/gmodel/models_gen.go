@@ -10,19 +10,19 @@ import (
 )
 
 type Address struct {
-	ID          int64        `json:"id" sql:"primary_key"`
-	CreatedAt   time.Time    `json:"createdAt"`
-	UpdatedAt   time.Time    `json:"updatedAt"`
-	Latitude    float64      `json:"latitude"`
-	Longitude   float64      `json:"longitude"`
-	MapsLink    string       `json:"mapsLink"`
-	FullAddress string       `json:"fullAddress"`
-	CountryCode string       `json:"countryCode"`
-	Country     string       `json:"country"`
-	CreatedByID *int64       `json:"createdById,omitempty"`
-	CreatedBy   *UserShallow `json:"createdBy,omitempty"`
-	UpdatedByID *int64       `json:"updatedById,omitempty"`
-	UpdatedBy   *UserShallow `json:"updatedBy,omitempty"`
+	ID          int64          `json:"id" sql:"primary_key"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
+	Latitude    float64        `json:"latitude"`
+	Longitude   float64        `json:"longitude"`
+	MapsLink    string         `json:"mapsLink"`
+	FullAddress string         `json:"fullAddress"`
+	CountryCode string         `json:"countryCode"`
+	Country     *string        `json:"country,omitempty" alias:"country.name"`
+	CreatedByID *int64         `json:"createdById,omitempty"`
+	CreatedBy   *CreatedByUser `json:"createdBy,omitempty"`
+	UpdatedByID *int64         `json:"updatedById,omitempty"`
+	UpdatedBy   *UpdatedByUser `json:"updatedBy,omitempty"`
 }
 
 type Auth struct {
@@ -45,6 +45,15 @@ type CreateAddress struct {
 	CountryCode string  `json:"countryCode" validate:"iso3166_1_alpha2"`
 }
 
+type CreateEvent struct {
+	Name        string    `json:"name"`
+	Description *string   `json:"description,omitempty"`
+	Type        string    `json:"type"`
+	StartDate   time.Time `json:"startDate"`
+	EndDate     time.Time `json:"endDate"`
+	LocationID  int64     `json:"locationId"`
+}
+
 type CreateLocation struct {
 	Name        string                    `json:"name" validate:"required"`
 	Description *string                   `json:"description,omitempty"`
@@ -61,6 +70,46 @@ type CreateLocationSchedule struct {
 	Available bool       `json:"available" validate:"required"`
 }
 
+type CreatedByUser struct {
+	ID     int64   `json:"id" sql:"primary_key" alias:"created_by_user.id"`
+	Name   string  `json:"name" alias:"created_by_user.name"`
+	Avatar *string `json:"avatar,omitempty" alias:"created_by_user.avatar"`
+	Active *bool   `json:"active,omitempty" alias:"created_by_user.active"`
+}
+
+type Event struct {
+	ID          int64          `json:"id" sql:"primary_key"`
+	CreatedAt   time.Time      `json:"createdAt"`
+	UpdatedAt   time.Time      `json:"updatedAt"`
+	Name        string         `json:"name"`
+	Description *string        `json:"description,omitempty"`
+	Type        string         `json:"type"`
+	StartDate   time.Time      `json:"startDate"`
+	EndDate     time.Time      `json:"endDate"`
+	LocationID  int64          `json:"locationId"`
+	Location    *Location      `json:"location,omitempty"`
+	CreatedByID *int64         `json:"createdById,omitempty"`
+	CreatedBy   *CreatedByUser `json:"createdBy,omitempty"`
+	UpdatedByID *int64         `json:"updatedById,omitempty"`
+	UpdatedBy   *UpdatedByUser `json:"updatedBy,omitempty"`
+	Approved    bool           `json:"approved"`
+}
+
+type EventShallow struct {
+	ID          int64     `json:"id" sql:"primary_key" alias:"event.id"`
+	CreatedAt   time.Time `json:"createdAt" alias:"event.created_at"`
+	UpdatedAt   time.Time `json:"updatedAt" alias:"event.updated_at"`
+	Name        string    `json:"name" alias:"event.name"`
+	Description *string   `json:"description,omitempty" alias:"event.description"`
+	Type        string    `json:"type" alias:"event.type"`
+	StartDate   time.Time `json:"startDate" alias:"event.start_date"`
+	EndDate     time.Time `json:"endDate" alias:"event.end_date"`
+	LocationID  int64     `json:"locationId" alias:"event.location_id"`
+	CreatedByID *int64    `json:"createdById,omitempty" alias:"event.created_by_id"`
+	UpdatedByID *int64    `json:"updatedById,omitempty" alias:"event.updated_by_id"`
+	Approved    bool      `json:"approved" alias:"event.approved"`
+}
+
 type Location struct {
 	ID               int64               `json:"id" sql:"primary_key"`
 	CreatedAt        time.Time           `json:"createdAt"`
@@ -75,9 +124,9 @@ type Location struct {
 	Deleted          bool                `json:"deleted"`
 	Status           string              `json:"status"`
 	CreatedByID      *int64              `json:"createdById,omitempty"`
-	CreatedBy        *User               `json:"createdBy,omitempty"`
+	CreatedBy        *CreatedByUser      `json:"createdBy,omitempty"`
 	UpdatedByID      *int64              `json:"updatedById,omitempty"`
-	UpdatedBy        *User               `json:"updatedBy,omitempty"`
+	UpdatedBy        *UpdatedByUser      `json:"updatedBy,omitempty"`
 	LocationSchedule []*LocationSchedule `json:"locationSchedule"`
 }
 
@@ -89,8 +138,8 @@ type LocationSchedule struct {
 	Location   *Location  `json:"location,omitempty"`
 	Day        WeekDay    `json:"day"`
 	On         *time.Time `json:"on,omitempty"`
-	From       *int       `json:"from,omitempty"`
-	To         *int       `json:"to,omitempty"`
+	From       *time.Time `json:"from,omitempty"`
+	ToDuration *int       `json:"toDuration,omitempty"`
 	Available  bool       `json:"available"`
 }
 
@@ -113,6 +162,13 @@ type Owner struct {
 type Query struct {
 }
 
+type UpdatedByUser struct {
+	ID     int64   `json:"id" sql:"primary_key" alias:"updated_by_user.id"`
+	Name   string  `json:"name" alias:"updated_by_user.name"`
+	Avatar *string `json:"avatar,omitempty" alias:"updated_by_user.avatar"`
+	Active *bool   `json:"active,omitempty" alias:"updated_by_user.active"`
+}
+
 type User struct {
 	ID           int64             `json:"id" sql:"primary_key"`
 	CreatedAt    time.Time         `json:"createdAt"`
@@ -129,13 +185,10 @@ type User struct {
 }
 
 type UserShallow struct {
-	ID        int64     `json:"id" sql:"primary_key"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-	Name      string    `json:"name"`
-	Avatar    *string   `json:"avatar,omitempty"`
-	Bio       *string   `json:"bio,omitempty"`
-	Active    *bool     `json:"active,omitempty"`
+	ID     int64   `json:"id" sql:"primary_key" alias:"user.id"`
+	Name   string  `json:"name" alias:"user.name"`
+	Avatar *string `json:"avatar,omitempty" alias:"user.avatar"`
+	Active *bool   `json:"active,omitempty" alias:"user.active"`
 }
 
 type AuthPlatformType string

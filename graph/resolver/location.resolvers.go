@@ -7,7 +7,6 @@ package gresolver
 import (
 	"context"
 
-	"github.com/stadio-app/stadio-backend/graph"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
 
@@ -21,8 +20,3 @@ func (r *mutationResolver) CreateLocation(ctx context.Context, input gmodel.Crea
 	location, err := r.Service.CreateLocation(ctx, &user, input)
 	return &location, err
 }
-
-// Mutation returns graph.MutationResolver implementation.
-func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
-
-type mutationResolver struct{ *Resolver }

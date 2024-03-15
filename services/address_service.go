@@ -39,27 +39,20 @@ func (service Service) CreateAddress(ctx context.Context, user *gmodel.User, inp
 		return gmodel.Address{}, fmt.Errorf("address at location already exists")
 	}
 
-	var country string
-	if country_code == model.CountryCodeAlpha2_Us {
-		country = "United States"
-	}
-
 	qb := table.Address.INSERT(
 		table.Address.Latitude,
 		table.Address.Longitude,
 		table.Address.MapsLink,
 		table.Address.FullAddress,
 		table.Address.CountryCode,
-		table.Address.Country,
-		table.Address.CreatedBy,
-		table.Address.UpdatedBy,
+		table.Address.CreatedByID,
+		table.Address.UpdatedByID,
 	).VALUES(
 		input.Latitude,
 		input.Longitude,
 		input.MapsLink,
 		input.FullAddress,
 		country_code,
-		country,
 		user.ID,
 		user.ID,
 	).RETURNING(table.Address.AllColumns)

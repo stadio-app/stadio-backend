@@ -1,0 +1,51 @@
+extend type Query {
+  allEvents: [Event!]! @isAuthenticated
+}
+
+extend type Mutation {
+  createEvent(input: CreateEvent!): EventShallow! @isAuthenticated
+}
+
+input CreateEvent {
+  name: String!
+  description: String
+  type: String!
+  startDate: Time!
+  endDate: Time!
+  locationId: ID!
+}
+
+type Event {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  name: String!
+  description: String
+  type: String!
+  startDate: Time!
+  endDate: Time!
+  locationId: ID!
+  location: Location
+  createdById: ID
+  createdBy: CreatedByUser
+  updatedById: ID
+  updatedBy: UpdatedByUser
+  approved: Boolean!
+}
+
+type EventShallow {
+  id: ID!
+    @goTag(key: "sql", value: "primary_key")
+    @goTag(key: "alias", value: "event.id")
+  createdAt: Time! @goTag(key: "alias", value: "event.created_at")
+  updatedAt: Time! @goTag(key: "alias", value: "event.updated_at")
+  name: String! @goTag(key: "alias", value: "event.name")
+  description: String @goTag(key: "alias", value: "event.description")
+  type: String! @goTag(key: "alias", value: "event.type")
+  startDate: Time! @goTag(key: "alias", value: "event.start_date")
+  endDate: Time! @goTag(key: "alias", value: "event.end_date")
+  locationId: ID! @goTag(key: "alias", value: "event.location_id")
+  createdById: ID @goTag(key: "alias", value: "event.created_by_id")
+  updatedById: ID @goTag(key: "alias", value: "event.updated_by_id")
+  approved: Boolean! @goTag(key: "alias", value: "event.approved")
+}
