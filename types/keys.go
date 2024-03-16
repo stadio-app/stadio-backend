@@ -18,4 +18,5 @@ func (value AuthorizationKeyType) GetToken() (string, error) {
 	return token, nil
 }
 
-const AuthUserKey string = "AUTH_USER"
+type AuthUserKeyType string
+const AuthUserKey AuthUserKeyType = "AUTH_USER"
