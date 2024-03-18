@@ -17,7 +17,10 @@ func TestUser(t *testing.T) {
 		Name: "User 1",
 		Password: "password123",
 	}
-	var user1_auth gmodel.Auth
+	var (
+		user1_auth gmodel.Auth
+		user1_auth2 gmodel.Auth
+	)
 	
 	t.Run("create user", func(t *testing.T) {
 		var err error
@@ -98,6 +101,8 @@ func TestUser(t *testing.T) {
 				if *user1_auth.User != user1 {
 					t.Fatal("returned user object does not match")
 				}
+
+				t.Parallel()
 				
 				t.Run("verify jwt", func(t *testing.T) {
 					claims, err := utils.GetJwtClaims(user1_auth.Token, app.Tokens.JwtKey)
@@ -126,6 +131,27 @@ func TestUser(t *testing.T) {
 
 					if auth_state.UserID != user1.ID {
 						t.Fatal("auth_state.user_id does not match")
+					}
+				})
+
+				t.Run("new login should create new auth_state entry", func(t *testing.T) {
+					user1_auth2, err = service.LoginInternal(ctx, user1_input.Email, user1_input.Password)
+					if err != nil {
+						t.Fatal("could not login", err.Error())
+					}
+					if user1_auth2.User.AuthStateID == user1_auth.User.AuthStateID {
+						t.Fatal("auth_state.id should not match")
+					}
+
+					var logins []int
+					qb := table.AuthState.SELECT(table.AuthState.ID).
+						FROM(table.AuthState).
+						WHERE(table.AuthState.UserID.EQ(postgres.Int(user1.ID)))
+					if err := qb.QueryContext(ctx, db, &logins); err != nil {
+						t.Fatal("could not query auth state for user", err.Error())
+					}
+					if len(logins) != 2 {
+						t.Fatal("auth_state for user should be 2")
 					}
 				})
 			})

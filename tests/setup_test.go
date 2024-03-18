@@ -20,10 +20,12 @@ import (
 	_ "github.com/lib/pq"
 )
 
-var db *sql.DB
-var app types.ServerBase
-var service services.Service
-var ctx context.Context
+var (
+	db *sql.DB
+	app types.ServerBase
+	service services.Service
+	ctx context.Context
+)
 
 func NewMockServer() {
 	chi_router := chi.NewRouter()
