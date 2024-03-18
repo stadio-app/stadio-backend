@@ -7,6 +7,7 @@ import (
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
+	"github.com/stadio-app/stadio-backend/utils"
 )
 
 func TestUser(t *testing.T) {
@@ -16,6 +17,7 @@ func TestUser(t *testing.T) {
 		Name: "User 1",
 		Password: "password123",
 	}
+	var user1_auth gmodel.Auth
 	
 	t.Run("create user", func(t *testing.T) {
 		var err error
@@ -23,10 +25,10 @@ func TestUser(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		if *user1.Active {
+		if user1.Active {
 			t.Fatal("User.Active should be set to false")
 		}
-		if *user1.AuthPlatform != gmodel.AuthPlatformTypeInternal {
+		if user1.AuthPlatform != gmodel.AuthPlatformTypeInternal {
 			t.Fatal("user auth platform should be internal")
 		}
 
@@ -67,4 +69,73 @@ func TestUser(t *testing.T) {
 		})
 	})
 
+	t.Run("login", func(t *testing.T) {
+		t.Run("correct input", func(t *testing.T) {
+			t.Run("inactive user", func(t *testing.T) {
+				_, err := service.LoginInternal(ctx, user1_input.Email, user1_input.Password)
+				if err == nil {
+					t.Fatal("should not login. user is still inactive")
+				}
+			})
+
+			t.Run("active user", func(t *testing.T) {
+				var err error
+				// activate user account first...
+				_, err = table.User.UPDATE(table.User.Active).
+					SET(postgres.Bool(true)).
+					WHERE(table.User.ID.EQ(postgres.Int(user1.ID))).
+					ExecContext(ctx, db)
+				if err != nil {
+					t.Fatal("could not update user active status", err.Error())
+				}
+				user1.Active = true
+
+				user1_auth, err = service.LoginInternal(ctx, user1_input.Email, user1_input.Password)
+				if err != nil {
+					t.Fatal("could not login", err.Error())
+				}
+				user1.AuthStateID = user1_auth.User.AuthStateID
+				if *user1_auth.User != user1 {
+					t.Fatal("returned user object does not match")
+				}
+				
+				t.Run("verify jwt", func(t *testing.T) {
+					claims, err := utils.GetJwtClaims(user1_auth.Token, app.Tokens.JwtKey)
+					if err != nil {
+						t.Fatal("invalid jwt", err.Error())
+					}
+
+					claims_user_id, ok := claims["id"].(float64)
+					if !ok {
+						t.Fatal("could not convert claims.id to float64")
+					}
+					if int64(claims_user_id) != user1.ID {
+						t.Fatal("jwt claim user.id does not match")
+					}
+				})
+
+				t.Run("check if auth_state entry exists", func(t *testing.T) {
+					var auth_state model.AuthState
+					qb := table.AuthState.SELECT(table.AuthState.AllColumns).
+						FROM(table.AuthState).
+						WHERE(table.AuthState.ID.EQ(postgres.Int(user1_auth.User.AuthStateID))).
+						LIMIT(1)
+					if err := qb.QueryContext(ctx, db, &auth_state); err != nil {
+						t.Fatal("could not find auth_state entry", err.Error())
+					}
+
+					if auth_state.UserID != user1.ID {
+						t.Fatal("auth_state.user_id does not match")
+					}
+				})
+			})
+		})
+
+		t.Run("incorrect input", func(t *testing.T) {
+			_, err := service.LoginInternal(ctx, user1_input.Email, "somerandompassword")
+			if err == nil {
+				t.Fatal("login should fail. password is incorrect")
+			}
+		})
+	})
 }
