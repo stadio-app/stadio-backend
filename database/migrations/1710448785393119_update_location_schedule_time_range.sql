@@ -13,4 +13,4 @@ SET "to_duration" =
     END;
 
 ALTER TABLE "location_schedule"
-ALTER COLUMN "from" TYPE TIME USING CONCAT("from", ':00:00')::TIME;
+ALTER COLUMN "from" TYPE TIME USING NULLIF(CONCAT("from", ':00:00'), '00:00:00')::TIME;
