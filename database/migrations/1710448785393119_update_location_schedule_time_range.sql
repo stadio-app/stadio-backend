@@ -6,12 +6,11 @@ ALTER TABLE "location_schedule"
 RENAME COLUMN "to" TO "to_duration";
 
 UPDATE "location_schedule"
-SET "to_duration" = "to_duration" - "from"
-WHERE "from" <= "to_duration";
-
-UPDATE "location_schedule"
-SET "to_duration" = ("to_duration" + 24) - "from"
-WHERE "from" > "to_duration";
+SET "to_duration" = 
+    CASE WHEN "from" <= "to_duration"
+        THEN "to_duration" - "from"
+        ELSE ("to_duration" + 24) - "from"
+    END;
 
 ALTER TABLE "location_schedule"
-ALTER COLUMN "from" TYPE TIME USING CONCAT("from", ':00:00')::TIME;
+ALTER COLUMN "from" TYPE TIME USING NULLIF(CONCAT("from", ':00:00'), '00:00:00')::TIME;
