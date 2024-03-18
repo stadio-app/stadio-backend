@@ -96,20 +96,34 @@ func (service Service) CreateLocationSchedule(
 		return gmodel.LocationSchedule{}, fmt.Errorf("schedule field 'to' is not defined")
 	}
 
+	ls_model := model.LocationSchedule{
+		LocationID: location_id,
+		Day: week_day,
+		Available: input.Available,
+		On: input.On,
+	}
+	if input.From != nil && input.To != nil {
+		from, err := time.Parse(time.TimeOnly, service.FromToTimeString(*input.From))
+		if err != nil {
+			return gmodel.LocationSchedule{}, fmt.Errorf("could not parse from date")
+		}
+		ls_model.From = &from
+		to := service.ToDuration(*input.From, *input.To)
+		ls_model.ToDuration = &to
+	}
+
 	db := service.DbOrTxQueryable()
-	query_builder := table.LocationSchedule.INSERT(
-		table.LocationSchedule.LocationID,
-		table.LocationSchedule.Day,
-		table.LocationSchedule.On,
-		table.LocationSchedule.From,
-		table.LocationSchedule.ToDuration,
-	).VALUES(
-		location_id,
-		week_day,
-		input.On,
-		service.FromToTimeString(*input.From),
-		service.ToDuration(*input.From, *input.To),
-	).RETURNING(table.LocationSchedule.AllColumns)
+	query_builder := table.LocationSchedule.
+		INSERT(
+			table.LocationSchedule.LocationID, 
+			table.LocationSchedule.Day,
+			table.LocationSchedule.Available,
+			table.LocationSchedule.On, 
+			table.LocationSchedule.From,
+			table.LocationSchedule.ToDuration,
+		).
+		MODEL(ls_model).
+		RETURNING(table.LocationSchedule.AllColumns)
 	var location_schedule gmodel.LocationSchedule
 	if err := query_builder.QueryContext(ctx, db, &location_schedule); err != nil {
 		return gmodel.LocationSchedule{}, err
@@ -192,9 +206,9 @@ func (Service) FromToTimeString(from int) string {
 	return fmt.Sprintf("%d:00:00", from)
 }
 
-func (Service) ToDuration(from int, to int) int {
+func (Service) ToDuration(from int, to int) int32 {
 	if from <= to {
-		return to - from
+		return int32(to - from)
 	}
-	return (to + 24) - from
+	return int32((to + 24) - from)
 }
