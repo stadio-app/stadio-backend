@@ -6314,11 +6314,14 @@ func (ec *executionContext) _User_active(ctx context.Context, field graphql.Coll
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*bool)
+	res := resTmp.(bool)
 	fc.Result = res
-	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_active(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -6355,11 +6358,14 @@ func (ec *executionContext) _User_authPlatform(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*gmodel.AuthPlatformType)
+	res := resTmp.(gmodel.AuthPlatformType)
 	fc.Result = res
-	return ec.marshalOAuthPlatformType2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAuthPlatformType(ctx, field.Selections, res)
+	return ec.marshalNAuthPlatformType2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAuthPlatformType(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_authPlatform(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9515,8 +9521,14 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._User_bio(ctx, field, obj)
 		case "active":
 			out.Values[i] = ec._User_active(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "authPlatform":
 			out.Values[i] = ec._User_authPlatform(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "authStateId":
 			out.Values[i] = ec._User_authStateId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9931,6 +9943,16 @@ func (ec *executionContext) marshalNAuth2ᚖgithubᚗcomᚋstadioᚑappᚋstadio
 		return graphql.Null
 	}
 	return ec._Auth(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNAuthPlatformType2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAuthPlatformType(ctx context.Context, v interface{}) (gmodel.AuthPlatformType, error) {
+	var res gmodel.AuthPlatformType
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNAuthPlatformType2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAuthPlatformType(ctx context.Context, sel ast.SelectionSet, v gmodel.AuthPlatformType) graphql.Marshaler {
+	return v
 }
 
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
@@ -10468,22 +10490,6 @@ func (ec *executionContext) marshalOAddress2ᚖgithubᚗcomᚋstadioᚑappᚋsta
 		return graphql.Null
 	}
 	return ec._Address(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOAuthPlatformType2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAuthPlatformType(ctx context.Context, v interface{}) (*gmodel.AuthPlatformType, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var res = new(gmodel.AuthPlatformType)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOAuthPlatformType2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAuthPlatformType(ctx context.Context, sel ast.SelectionSet, v *gmodel.AuthPlatformType) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return v
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interface{}) (bool, error) {
