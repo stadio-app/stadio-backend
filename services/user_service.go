@@ -45,7 +45,7 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 	err := query.QueryContext(ctx, tx, &user)
 	if err != nil {
 		tx.Rollback()
-		return gmodel.User{}, fmt.Errorf("user entry could not be created")
+		return gmodel.User{}, fmt.Errorf("user entry could not be created. %s", err.Error())
 	}
 	service.TX = tx
 	if _, err := service.CreateEmailVerification(ctx, user); err != nil {
@@ -126,17 +126,12 @@ func (service Service) LoginInternal(ctx context.Context, email string, password
 // Returns `false` if user email does not exist. Otherwise `true`
 func (service Service) UserEmailExists(ctx context.Context, email string) bool {
 	query := table.User.
-		SELECT(table.User.Email).
+		SELECT(table.User.Email.AS("email")).
 		FROM(table.User).
 		WHERE(
 			table.User.Email.EQ(postgres.String(email)),
 		).LIMIT(1)
-	var dest struct{
-		Email string
-	}
+	var dest struct{ Email string }
 	err := query.QueryContext(ctx, service.DbOrTxQueryable(), &dest)
-	if err != nil || dest.Email == "" {
-		return false
-	}
-	return true
+	return err == nil
 }
