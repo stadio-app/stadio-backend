@@ -9,5 +9,5 @@ package model
 
 type Country struct {
 	Code CountryCodeAlpha2 `sql:"primary_key"`
-	Name *string
+	Name string
 }

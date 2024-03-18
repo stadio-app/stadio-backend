@@ -15,10 +15,10 @@ type LocationSchedule struct {
 	ID         int64 `sql:"primary_key"`
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
-	LocationID *int64
+	LocationID int64
 	Day        WeekDay
 	On         *time.Time
 	From       *time.Time
 	ToDuration *int32
-	Available  *bool
+	Available  bool
 }
