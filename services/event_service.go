@@ -100,9 +100,11 @@ func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error
 				INNER_JOIN(table.Country, table.Country.Code.EQ(table.Address.CountryCode)).
 				LEFT_JOIN(created_by_user_table, created_by_user_table.ID.EQ(table.Event.CreatedByID)).
 				LEFT_JOIN(updated_by_user_table, updated_by_user_table.ID.EQ(table.Event.CreatedByID)),
-		).ORDER_BY(
-			table.Event.StartDate.DESC(),
-			table.Event.CreatedAt.DESC(),
+		).
+		WHERE(postgres.TimestampzT(time.Now()).LT(table.Event.StartDate)).
+		ORDER_BY(
+			table.Event.StartDate.ASC(),
+			table.Event.CreatedAt.ASC(),
 		)
 	var events []gmodel.Event
 	if err := qb.QueryContext(ctx, db, &events); err != nil {
