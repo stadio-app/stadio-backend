@@ -13,22 +13,6 @@ services:
       - '5431:5432'
     volumes: 
       - stadio-db:/var/lib/postgresql/data
-  
-  stadio-db-test:
-    image: postgres:14.1-alpine
-    restart: always
-    environment:
-      - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - POSTGRES_DB=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - '54312:5432'
-    volumes: 
-      - stadio-db-test:/var/lib/postgresql/data
 volumes:
   stadio-db:
-    driver: local
-  stadio-db-test:
     driver: local

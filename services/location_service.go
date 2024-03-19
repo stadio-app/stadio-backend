@@ -69,8 +69,8 @@ func (service Service) BulkCreateLocationSchedule(
 	input []*gmodel.CreateLocationSchedule,
 ) ([]*gmodel.LocationSchedule, error) {
 	location_schedules := make([]gmodel.LocationSchedule, len(input))
-	for i, schedule_input := range input {
-		new_location_schedule, err := service.CreateLocationSchedule(ctx, location_id, *schedule_input)
+	for i := range input {
+		new_location_schedule, err := service.CreateLocationSchedule(ctx, location_id, *input[i])
 		if err != nil {
 			return nil, fmt.Errorf("could not create location schedule. %s", err.Error())
 		}
@@ -96,20 +96,34 @@ func (service Service) CreateLocationSchedule(
 		return gmodel.LocationSchedule{}, fmt.Errorf("schedule field 'to' is not defined")
 	}
 
+	ls_model := model.LocationSchedule{
+		LocationID: location_id,
+		Day: week_day,
+		Available: input.Available,
+		On: input.On,
+	}
+	if input.From != nil && input.To != nil {
+		from, err := time.Parse(time.TimeOnly, service.FromToTimeString(*input.From))
+		if err != nil {
+			return gmodel.LocationSchedule{}, fmt.Errorf("could not parse from date")
+		}
+		ls_model.From = &from
+		to := service.ToDuration(*input.From, *input.To)
+		ls_model.ToDuration = &to
+	}
+
 	db := service.DbOrTxQueryable()
-	query_builder := table.LocationSchedule.INSERT(
-		table.LocationSchedule.LocationID,
-		table.LocationSchedule.Day,
-		table.LocationSchedule.On,
-		table.LocationSchedule.From,
-		table.LocationSchedule.ToDuration,
-	).VALUES(
-		location_id,
-		week_day,
-		input.On,
-		service.FromToTimeString(*input.From),
-		service.ToDuration(*input.From, *input.To),
-	).RETURNING(table.LocationSchedule.AllColumns)
+	query_builder := table.LocationSchedule.
+		INSERT(
+			table.LocationSchedule.LocationID, 
+			table.LocationSchedule.Day,
+			table.LocationSchedule.Available,
+			table.LocationSchedule.On, 
+			table.LocationSchedule.From,
+			table.LocationSchedule.ToDuration,
+		).
+		MODEL(ls_model).
+		RETURNING(table.LocationSchedule.AllColumns)
 	var location_schedule gmodel.LocationSchedule
 	if err := query_builder.QueryContext(ctx, db, &location_schedule); err != nil {
 		return gmodel.LocationSchedule{}, err
@@ -154,6 +168,9 @@ func (service Service) FindLocationById(ctx context.Context, location_id int64) 
 func (service Service) LocationScheduleAvailableBetween(ctx context.Context, location_id int64, from time.Time, to time.Time) bool {
 	from_dow := strings.ToUpper(from.Weekday().String())
 	to_duration := to.Sub(from).Hours()
+	if !from.Before(to) {
+		return false
+	}
 
 	qb := table.LocationSchedule.
 		SELECT(table.LocationSchedule.AllColumns).
@@ -177,6 +194,17 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 
 	// check if selected schedules are available
 	for _, schedule := range available_schedules {
+		// we have yet to figure out `to` is within range.
+		// so we will check if `to` < `schedule.From` + `schedule.ToDuration`
+		// Note: we MUST compare to with only it's time
+		if schedule.From != nil && schedule.ToDuration != nil {
+			schedule_to := (*schedule.From).Add(time.Hour * time.Duration(*schedule.ToDuration))
+			to_time_only, _ := time.Parse(time.TimeOnly, to.Format(time.TimeOnly))
+			if !to_time_only.Before(schedule_to) {
+				continue
+			}
+		}
+
 		if schedule.On == nil {
 			return schedule.Available
 		}
@@ -192,9 +220,9 @@ func (Service) FromToTimeString(from int) string {
 	return fmt.Sprintf("%d:00:00", from)
 }
 
-func (Service) ToDuration(from int, to int) int {
+func (Service) ToDuration(from int, to int) int32 {
 	if from <= to {
-		return to - from
+		return int32(to - from)
 	}
-	return (to + 24) - from
+	return int32((to + 24) - from)
 }

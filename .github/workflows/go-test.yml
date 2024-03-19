@@ -1,0 +1,19 @@
+name: Unit Tests
+on: push
+
+jobs:
+  # Label of the runner job
+  runner-job:
+    # You must use a Linux environment when using service containers or container jobs
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: set up go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.21
+      - name: build
+        run: make build
+      - name: run tests
+        run: make test

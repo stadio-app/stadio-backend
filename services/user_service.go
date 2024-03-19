@@ -25,27 +25,28 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 		return gmodel.User{}, tx_err
 	}
 
-	query := table.User.INSERT(
-		table.User.Email,
-		table.User.Name,
-		table.User.Password,
-		table.User.AuthPlatform,
-		table.User.Active,
-		table.User.PhoneNumber,
-	).VALUES(
-		input.Email,
-		input.Name,
-		hashed_password,
-		model.UserAuthPlatformType_Internal,
-		false,
-		input.PhoneNumber,
-	).RETURNING(table.User.AllColumns)
-
 	var user gmodel.User
-	err := query.QueryContext(ctx, tx, &user)
-	if err != nil {
+	qb := table.User.
+		INSERT(
+			table.User.Email,
+			table.User.Name,
+			table.User.Password,
+			table.User.AuthPlatform,
+			table.User.Active,
+			table.User.PhoneNumber,
+		).
+		MODEL(model.User{
+			Email: input.Email,
+			Name: input.Name,
+			Password: &hashed_password,
+			AuthPlatform: model.UserAuthPlatformType_Internal,
+			Active: false,
+			PhoneNumber: input.PhoneNumber,
+		}).
+		RETURNING(table.User.AllColumns)
+	if err := qb.QueryContext(ctx, tx, &user); err != nil {
 		tx.Rollback()
-		return gmodel.User{}, fmt.Errorf("user entry could not be created")
+		return gmodel.User{}, fmt.Errorf("user entry could not be created. %s", err.Error())
 	}
 	service.TX = tx
 	if _, err := service.CreateEmailVerification(ctx, user); err != nil {
@@ -90,23 +91,15 @@ func (service Service) LoginInternal(ctx context.Context, email string, password
 	}
 
 	query = table.User.
-		SELECT(
-			table.User.AllColumns,
-			table.AuthState.ID,
-		).
-		FROM(
-			table.User.
-				LEFT_JOIN(
-					table.AuthState, 
-					table.User.ID.EQ(table.AuthState.UserID),
-				),
-		).
-		WHERE(
-			table.User.ID.
-				EQ(postgres.Int64(verify_user.ID)).
-				AND(table.AuthState.ID.EQ(postgres.Int64(auth_state.ID))),
-		).
-		LIMIT(1)
+		SELECT(table.User.AllColumns, table.AuthState.ID).
+		FROM(table.User.LEFT_JOIN(
+			table.AuthState, 
+			table.User.ID.EQ(table.AuthState.UserID),
+		)).
+		WHERE(postgres.AND(
+			table.User.ID.EQ(postgres.Int(verify_user.ID)),
+			table.AuthState.ID.EQ(postgres.Int(auth_state.ID)),
+		)).LIMIT(1)
 	var user gmodel.User
 	if err := query.QueryContext(ctx, db, &user); err != nil {
 		return gmodel.Auth{}, fmt.Errorf("internal error")
@@ -126,17 +119,11 @@ func (service Service) LoginInternal(ctx context.Context, email string, password
 // Returns `false` if user email does not exist. Otherwise `true`
 func (service Service) UserEmailExists(ctx context.Context, email string) bool {
 	query := table.User.
-		SELECT(table.User.Email).
+		SELECT(table.User.Email.AS("email")).
 		FROM(table.User).
-		WHERE(
-			table.User.Email.EQ(postgres.String(email)),
-		).LIMIT(1)
-	var dest struct{
-		Email string
-	}
+		WHERE(table.User.Email.EQ(postgres.String(email))).
+		LIMIT(1)
+	var dest struct{ Email string }
 	err := query.QueryContext(ctx, service.DbOrTxQueryable(), &dest)
-	if err != nil || dest.Email == "" {
-		return false
-	}
-	return true
+	return err == nil
 }

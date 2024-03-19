@@ -20,8 +20,8 @@ type Location struct {
 	Type        string
 	OwnerID     *int64
 	AddressID   int64
-	Deleted     *bool
-	Status      *LocationStatus
+	Deleted     bool
+	Status      LocationStatus
 	CreatedByID *int64
 	UpdatedByID *int64
 }

@@ -30,8 +30,8 @@ type User {
   avatar: String
   birthDate: Time
   bio: String
-  active: Boolean
-  authPlatform: AuthPlatformType
+  active: Boolean!
+  authPlatform: AuthPlatformType!
   authStateId: ID! @goTag(key: "alias", value: "auth_state.id")
 }
 
