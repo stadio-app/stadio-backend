@@ -69,8 +69,8 @@ func (service Service) BulkCreateLocationSchedule(
 	input []*gmodel.CreateLocationSchedule,
 ) ([]*gmodel.LocationSchedule, error) {
 	location_schedules := make([]gmodel.LocationSchedule, len(input))
-	for i, schedule_input := range input {
-		new_location_schedule, err := service.CreateLocationSchedule(ctx, location_id, *schedule_input)
+	for i := range input {
+		new_location_schedule, err := service.CreateLocationSchedule(ctx, location_id, *input[i])
 		if err != nil {
 			return nil, fmt.Errorf("could not create location schedule. %s", err.Error())
 		}
@@ -168,6 +168,9 @@ func (service Service) FindLocationById(ctx context.Context, location_id int64) 
 func (service Service) LocationScheduleAvailableBetween(ctx context.Context, location_id int64, from time.Time, to time.Time) bool {
 	from_dow := strings.ToUpper(from.Weekday().String())
 	to_duration := to.Sub(from).Hours()
+	if !from.Before(to) {
+		return false
+	}
 
 	qb := table.LocationSchedule.
 		SELECT(table.LocationSchedule.AllColumns).
@@ -191,6 +194,17 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 
 	// check if selected schedules are available
 	for _, schedule := range available_schedules {
+		// we have yet to figure out `to` is within range.
+		// so we will check if `to` < `schedule.From` + `schedule.ToDuration`
+		// Note: we MUST compare to with only it's time
+		if schedule.From != nil && schedule.ToDuration != nil {
+			schedule_to := (*schedule.From).Add(time.Hour * time.Duration(*schedule.ToDuration))
+			to_time_only, _ := time.Parse(time.TimeOnly, to.Format(time.TimeOnly))
+			if !to_time_only.Before(schedule_to) {
+				continue
+			}
+		}
+
 		if schedule.On == nil {
 			return schedule.Available
 		}
