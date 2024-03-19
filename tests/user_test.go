@@ -60,6 +60,18 @@ func TestUser(t *testing.T) {
 			}
 		})
 
+		t.Run("should create email verification entry", func(t *testing.T) {
+			qb := table.EmailVerification.
+				SELECT(table.EmailVerification.AllColumns).
+				FROM(table.EmailVerification).
+				WHERE(table.EmailVerification.UserID.EQ(postgres.Int(user1.ID))).
+				LIMIT(1)
+			var email_verification model.EmailVerification
+			if err := qb.QueryContext(ctx, db, &email_verification); err != nil {
+				t.Fatal("email verification entry was not created.", err.Error())
+			}
+		})
+
 		t.Run("duplicate user", func(t *testing.T) {
 			_, err := service.CreateInternalUser(ctx, gmodel.CreateAccountInput{
 				Email: user1.Email,
