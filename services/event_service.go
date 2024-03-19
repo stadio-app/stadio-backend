@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
+	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
@@ -33,16 +34,16 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 			table.Event.CreatedByID,
 			table.Event.UpdatedByID,
 		).
-		VALUES(
-			input.LocationID,
-			input.Name,
-			input.Description,
-			input.Type,
-			input.StartDate,
-			input.EndDate,
-			user.ID,
-			user.ID,
-		).RETURNING(table.Event.AllColumns)
+		MODEL(model.Event{
+			LocationID: &input.LocationID,
+			Name: input.Name,
+			Description: input.Description,
+			Type: &input.Type,
+			StartDate: input.StartDate,
+			EndDate: input.EndDate,
+			CreatedByID: &user.ID,
+			UpdatedByID: &user.ID,
+		}).RETURNING(table.Event.AllColumns)
 	var new_event gmodel.EventShallow
 	if err := qb.QueryContext(ctx, db, &new_event); err != nil {
 		return gmodel.EventShallow{}, err

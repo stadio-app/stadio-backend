@@ -47,15 +47,15 @@ func (service Service) CreateAddress(ctx context.Context, user *gmodel.User, inp
 		table.Address.CountryCode,
 		table.Address.CreatedByID,
 		table.Address.UpdatedByID,
-	).VALUES(
-		input.Latitude,
-		input.Longitude,
-		input.MapsLink,
-		input.FullAddress,
-		country_code,
-		user.ID,
-		user.ID,
-	).RETURNING(table.Address.AllColumns)
+	).MODEL(model.Address{
+		Latitude: input.Latitude,
+		Longitude: input.Longitude,
+		MapsLink: input.MapsLink,
+		FullAddress: input.FullAddress,
+		CountryCode: country_code,
+		CreatedByID: &user.ID,
+		UpdatedByID: &user.ID,
+	}).RETURNING(table.Address.AllColumns)
 
 	db := service.DbOrTxQueryable()
 	var address gmodel.Address

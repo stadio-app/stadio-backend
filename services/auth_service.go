@@ -22,10 +22,10 @@ func (service Service) CreateAuthState(ctx context.Context, user gmodel.User, ip
 	query := table.AuthState.INSERT(
 		table.AuthState.UserID,
 		table.AuthState.IPAddress,
-	).VALUES(
-		user.ID,
-		ip_address,
-	).RETURNING(table.AuthState.AllColumns)
+	).MODEL(model.AuthState{
+		UserID: user.ID,
+		IPAddress: ip_address,
+	}).RETURNING(table.AuthState.AllColumns)
 
 	var auth_state model.AuthState
 	err := query.QueryContext(ctx, service.DbOrTxQueryable(), &auth_state)
@@ -41,10 +41,10 @@ func (service Service) CreateEmailVerification(ctx context.Context, user gmodel.
 	query := table.EmailVerification.INSERT(
 		table.EmailVerification.UserID,
 		table.EmailVerification.Code,
-	).VALUES(
-		user.ID,
-		code,
-	).RETURNING(table.EmailVerification.AllColumns)
+	).MODEL(model.EmailVerification{
+		UserID: user.ID,
+		Code: code,
+	}).RETURNING(table.EmailVerification.AllColumns)
 
 	var email_verification model.EmailVerification
 	err := query.QueryContext(ctx, service.DbOrTxQueryable(), &email_verification)

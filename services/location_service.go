@@ -33,14 +33,14 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 		table.Location.AddressID,
 		table.Location.CreatedByID,
 		table.Location.UpdatedByID,
-	).VALUES(
-		input.Name,
-		input.Description,
-		input.Type,
-		address.ID,
-		user.ID,
-		user.ID,
-	).RETURNING(table.Location.AllColumns)
+	).MODEL(model.Location{
+		Name: input.Name,
+		Description: input.Description,
+		Type: input.Type,
+		AddressID: address.ID,
+		CreatedByID: &user.ID,
+		UpdatedByID: &user.ID,
+	}).RETURNING(table.Location.AllColumns)
 	
 	var location gmodel.Location
 	if err := qb.QueryContext(ctx, tx, &location); err != nil {
