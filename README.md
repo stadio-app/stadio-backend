@@ -1,10 +1,5 @@
 # Stadio Backend
 
-## Clone repo
-```
-$ git@github.com:stadio-app/stadio-backend.git
-```
-
 ## Docker
 We run our development Postgres database in a Docker container, so make sure docker is installed (see [Docker desktop](https://docs.docker.com/desktop/)).
 
@@ -12,51 +7,32 @@ We run our development Postgres database in a Docker container, so make sure doc
 ```
 $ make docker-container
 ```
-This will also map the default `5432` port to a new `5433` port to avoid collisions. Check to see if the new postgres db is running on port `5433`.
+This will also map the default `5432` port to a new `5431` port to avoid collisions. Check to see if the new postgres db is running on port `5431`.
 
-## Atlas
-We currently use Atlas to handle DB migrations. Make sure you have atlas fully installed on your machine (see [Atlas installation docs](https://atlasgo.io/getting-started#installation)).
-
-## Run server
+## Start Server
 After completing all the steps from above, we can finally start our server.
 
 ```
 $ make run
 ```
 
-This command will simply generate all the entity files, graphql models, etc. Note that this will also make all the necessary migrations listed in `ent/migrate/migrations` (so make sure the docker container is still running!) and start the server on port `8080`.
+Assuming all the generated files remain the same, this will spin up a server on port `8080`, and will also perform all the migration as defined in `./database/migrations`.
+There should be at least 2 routes for development. `/playground` and `/graphql`. You can use the GraphQL Playground feature by navigating to http://localhost:8080/playground.
 
 In order to run the server in watch mode run `make watch` instead.
 
 
-## Entities
-When trying to add a new entity run
-```
-$ make ent-create entity=NameOfYourEntity
-```
-this will create a new file under `ent/schema` with the name of your entity. Read more about it [here](https://entgo.io/docs/schema-fields).
-After you've added all the fields for the new entity run
-```
-$ make generate
-```
-this will generate a bunch of files in the `ent` and `graph` directories.
+## Jet
+We use [go-jet/jet](https://github.com/go-jet/jet) to handle all database related queries, insertions, updates, and deletes. Jet uses an active DB connection to generate the appropriate models, and functions needed for the query builder. To run this, use the command `make jet`. Rerun this command after your migrations have been set (see Migrations section)
 
-Note that running `make run` will always do this before running the server or any migrations.
+## GraphQL
+We use [99designs/gqlgen](https://github.com/99designs/gqlgen) to handle all GraphQL related tasks. This library allows us to define all gql resolvers, directives, types, etc. and generates Go files to use or implement. To generate queries, mutations, types, etc. use the command `make gql`. This command must be run after any changes made to the `.graphql` files inside `./graph/`.
 
 ## Migrations
 For creating an entity migration run
 ```
-$ make atlas-create entity=name_of_your_migration
+$ make create-migration fileName=name_of_your_migration
 ```
-this will create a new file under `ent/migrate/migrations` with a timestamp, and also update the `atlas.sum` file. The generated migration file will contain all the changes that were made to the entities (You can change the migration file if there is something inaccurate too).
+This will create a new file under `./database/migrations` with a UNIX timestamp. Add your migration to the SQL file and run the server to set the migration.
 
 Also note that after applying the migration a new schema will be created named `atlas_schema_revisions` which will hold the `atlas_schema_revisions` table listing all the successful migrations.
-
-### Verification
-We can check if all the migration files are valid and were not added manually by running
-```
-$ make atlas-validate
-```
-
-### Applying migration
-There are two ways to apply these migrations, the first and the most simple way is to run the server using `make run`, `make watch` or `make build`. This will apply all the migrations. However, if you only want to apply the migration go with the second option as shown in the [Atlas docs](https://atlasgo.io/versioned/apply#existing-databases).
