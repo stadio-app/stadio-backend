@@ -9,7 +9,7 @@ import (
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
 
-func newint(i int) *int {
+func NewInt(i int) *int {
 	return &i
 }
 
@@ -31,7 +31,7 @@ func init_schedule(from int, to int, open_on_weekends bool) []*gmodel.CreateLoca
 		}
 	}
 	schedule_ptr := make([]*gmodel.CreateLocationSchedule, 7)
-	for i, _ := range schedule {
+	for i := range schedule {
 		schedule_ptr[i] = &schedule[i]
 	}
 	return schedule_ptr
@@ -185,8 +185,8 @@ func TestLocation(t *testing.T) {
 			_, err := service.CreateLocationSchedule(ctx, location.ID, gmodel.CreateLocationSchedule{
 				Day: gmodel.WeekDayFriday,
 				On: &custom_time,
-				From: newint(23),
-				To: newint(1),
+				From: NewInt(23),
+				To: NewInt(1),
 				Available: true,
 			})
 			if err != nil {
@@ -231,6 +231,42 @@ func TestLocation(t *testing.T) {
 					t.Fatal("event is outside the schedule")
 				}
 			})
+		})
+
+		t.Run("override existing schedule entry", func(t *testing.T) {
+			wednesday_date_only := "2024-05-01"
+			custom_time, _ := time.Parse(time.DateTime, fmt.Sprintf("%s 00:00:00", wednesday_date_only))
+			_, err := service.CreateLocationSchedule(ctx, location.ID, gmodel.CreateLocationSchedule{
+				Day: gmodel.WeekDayWednesday,
+				On: &custom_time,
+				Available: false,
+			})
+			if err != nil {
+				t.Fatal(err.Error())
+			}
+
+			_, err = service.CreateEvent(ctx, user, gmodel.CreateEvent{
+				Name: fmt.Sprintf("Event #7 for Location %d", location.ID),
+				Type: "Pool Party",
+				StartDate: custom_time.Add(time.Hour * 5),
+				EndDate: custom_time.Add(time.Hour * 6),
+				LocationID: location.ID,
+			})
+			if err == nil {
+				t.Fatal("location should be unavailable for the start date")
+			}
+
+			custom_time_2, _ := time.Parse(time.DateTime, "2024-05-08 15:00:00")
+			_, err = service.CreateEvent(ctx, user, gmodel.CreateEvent{
+				Name: fmt.Sprintf("Event #8 for Location %d", location.ID),
+				Type: "Pool Party",
+				StartDate: custom_time_2,
+				EndDate: custom_time_2.Add(time.Hour * 1),
+				LocationID: location.ID,
+			})
+			if err != nil {
+				t.Fatal("location should be available.", err.Error())
+			}
 		})
 	})
 }
