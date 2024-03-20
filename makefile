@@ -15,7 +15,7 @@ jet:
 	go run github.com/go-jet/jet/v2/cmd/jet -dsn=postgresql://postgres:postgres@localhost:5431/postgres?sslmode=disable -path=./database/jet
 
 test:
-	go test -timeout 30s -run ^*$ github.com/stadio-app/stadio-backend/tests
+	go test ./tests
 
 # Server
 run:
