@@ -22,4 +22,5 @@ type Address struct {
 	CountryCode CountryCodeAlpha2
 	CreatedByID *int64
 	UpdatedByID *int64
+	Coordinates string
 }
