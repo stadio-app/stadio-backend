@@ -1,17 +1,27 @@
 extend type Query {
-  allEvents: [Event!]! @isAuthenticated
+  allEvents(filter: AllEventsFilter!): [Event!]! @isAuthenticated
 }
 
 extend type Mutation {
   createEvent(input: CreateEvent!): EventShallow! @isAuthenticated
 }
 
+input AllEventsFilter {
+  radiusMeters: Int! @goTag(key: "validate", value: "required")
+  countryCode: String!
+    @goTag(key: "validate", value: "required,iso3166_1_alpha2")
+  latitude: Float! @goTag(key: "validate", value: "required,latitude")
+  longitude: Float! @goTag(key: "validate", value: "required,longitude")
+  startDate: Time! @goTag(key: "validate", value: "required,datetime")
+  endDate: Time! @goTag(key: "validate", value: "required,datetime")
+}
+
 input CreateEvent {
   name: String!
   description: String
   type: String!
-  startDate: Time!
-  endDate: Time!
+  startDate: Time! @goTag(key: "validate", value: "required,datetime")
+  endDate: Time! @goTag(key: "validate", value: "required,datetime")
   locationId: ID!
 }
 

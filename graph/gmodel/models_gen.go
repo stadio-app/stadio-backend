@@ -25,6 +25,15 @@ type Address struct {
 	UpdatedBy   *UpdatedByUser `json:"updatedBy,omitempty"`
 }
 
+type AllEventsFilter struct {
+	RadiusMeters int       `json:"radiusMeters" validate:"required"`
+	CountryCode  string    `json:"countryCode" validate:"required,iso3166_1_alpha2"`
+	Latitude     float64   `json:"latitude" validate:"required,latitude"`
+	Longitude    float64   `json:"longitude" validate:"required,longitude"`
+	StartDate    time.Time `json:"startDate" validate:"required,datetime"`
+	EndDate      time.Time `json:"endDate" validate:"required,datetime"`
+}
+
 type Auth struct {
 	Token string `json:"token"`
 	User  *User  `json:"user"`
@@ -49,8 +58,8 @@ type CreateEvent struct {
 	Name        string    `json:"name"`
 	Description *string   `json:"description,omitempty"`
 	Type        string    `json:"type"`
-	StartDate   time.Time `json:"startDate"`
-	EndDate     time.Time `json:"endDate"`
+	StartDate   time.Time `json:"startDate" validate:"required,datetime"`
+	EndDate     time.Time `json:"endDate" validate:"required,datetime"`
 	LocationID  int64     `json:"locationId"`
 }
 
