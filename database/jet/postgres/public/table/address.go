@@ -80,7 +80,7 @@ func newAddressTableImpl(schemaName, tableName, alias string) addressTable {
 		UpdatedByIDColumn = postgres.IntegerColumn("updated_by_id")
 		CoordinatesColumn = postgres.StringColumn("coordinates")
 		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByIDColumn, UpdatedByIDColumn, CoordinatesColumn}
-		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByIDColumn, UpdatedByIDColumn, CoordinatesColumn}
+		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByIDColumn, UpdatedByIDColumn}
 	)
 
 	return addressTable{
