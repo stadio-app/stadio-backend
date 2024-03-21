@@ -81,9 +81,12 @@ func (service Service) EventTimingCollides(ctx context.Context, location_id int6
 }
 
 func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]gmodel.Event, error) {
-	db := service.DbOrTxQueryable()
 	created_by_user_table := table.User.AS("created_by_user")
 	updated_by_user_table := table.User.AS("updated_by_user")
+	coordinates_col_name := fmt.Sprintf("%s.%s", table.Address.Coordinates.TableName(), table.Address.Coordinates.Name())
+	// dynamic column used to sort results by the calculated distance
+	distance_col_name := fmt.Sprintf("%s.%s", table.Address.Coordinates.TableName(), "distance")
+
 	qb := table.Event.
 		SELECT(
 			table.Event.AllColumns,
@@ -96,6 +99,14 @@ func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEvent
 			updated_by_user_table.ID,
 			updated_by_user_table.Name,
 			updated_by_user_table.Avatar,
+			postgres.RawString(
+				fmt.Sprintf(
+					"ST_Distance(%s, 'SRID=4326;POINT(%f %f)'::geometry)",
+					coordinates_col_name,
+					filter.Longitude,
+					filter.Latitude,
+				),
+			).AS(distance_col_name),
 		).
 		FROM(
 			table.Event.
@@ -112,8 +123,8 @@ func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEvent
 				table.Event.EndDate.LT_EQ(postgres.TimestampzT(filter.EndDate)),
 				postgres.RawBool(
 					fmt.Sprintf(
-						"st_dwithin(%s, 'POINT(%f %f)'::geometry, %d, TRUE)",
-						table.Address.Coordinates.TableName() + "." + table.Address.Coordinates.Name(),
+						"ST_DWithin(%s, 'POINT(%f %f)'::geometry, %d, TRUE)",
+						coordinates_col_name,
 						filter.Longitude,
 						filter.Latitude,
 						filter.RadiusMeters,
@@ -122,9 +133,11 @@ func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEvent
 			),
 		).
 		ORDER_BY(
+			postgres.FloatColumn(distance_col_name).ASC(),
 			table.Event.StartDate.ASC(),
 			table.Event.CreatedAt.ASC(),
 		)
+	db := service.DbOrTxQueryable()
 	var events []gmodel.Event
 	if err := qb.QueryContext(ctx, db, &events); err != nil {
 		return nil, err

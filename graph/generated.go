@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 		CreatedAt   func(childComplexity int) int
 		CreatedBy   func(childComplexity int) int
 		CreatedByID func(childComplexity int) int
+		Distance    func(childComplexity int) int
 		FullAddress func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Latitude    func(childComplexity int) int
@@ -262,6 +263,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Address.CreatedByID(childComplexity), true
+
+	case "Address.distance":
+		if e.complexity.Address.Distance == nil {
+			break
+		}
+
+		return e.complexity.Address.Distance(childComplexity), true
 
 	case "Address.fullAddress":
 		if e.complexity.Address.FullAddress == nil {
@@ -1497,6 +1505,47 @@ func (ec *executionContext) _Address_longitude(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext_Address_longitude(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Address",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Address_distance(ctx context.Context, field graphql.CollectedField, obj *gmodel.Address) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Address_distance(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Distance, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Address_distance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Address",
 		Field:      field,
@@ -3822,6 +3871,8 @@ func (ec *executionContext) fieldContext_Location_address(ctx context.Context, f
 				return ec.fieldContext_Address_latitude(ctx, field)
 			case "longitude":
 				return ec.fieldContext_Address_longitude(ctx, field)
+			case "distance":
+				return ec.fieldContext_Address_distance(ctx, field)
 			case "mapsLink":
 				return ec.fieldContext_Address_mapsLink(ctx, field)
 			case "fullAddress":
@@ -8781,6 +8832,8 @@ func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "distance":
+			out.Values[i] = ec._Address_distance(ctx, field, obj)
 		case "mapsLink":
 			out.Values[i] = ec._Address_mapsLink(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -10637,6 +10690,22 @@ func (ec *executionContext) marshalOCreatedByUser2ᚖgithubᚗcomᚋstadioᚑapp
 		return graphql.Null
 	}
 	return ec._CreatedByUser(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalFloatContext(*v)
+	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) unmarshalOID2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {

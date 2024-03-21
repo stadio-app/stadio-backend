@@ -15,6 +15,7 @@ type Address struct {
 	UpdatedAt   time.Time      `json:"updatedAt"`
 	Latitude    float64        `json:"latitude"`
 	Longitude   float64        `json:"longitude"`
+	Distance    *float64       `json:"distance,omitempty" alias:"address.distance"`
 	MapsLink    string         `json:"mapsLink"`
 	FullAddress string         `json:"fullAddress"`
 	CountryCode string         `json:"countryCode"`

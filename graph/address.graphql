@@ -12,6 +12,7 @@ type Address {
   updatedAt: Time!
   latitude: Float!
   longitude: Float!
+  distance: Float @goTag(key: "alias", value: "address.distance")
   mapsLink: String!
   fullAddress: String!
   countryCode: String!
