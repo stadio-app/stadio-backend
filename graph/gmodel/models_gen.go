@@ -15,6 +15,7 @@ type Address struct {
 	UpdatedAt   time.Time      `json:"updatedAt"`
 	Latitude    float64        `json:"latitude"`
 	Longitude   float64        `json:"longitude"`
+	Distance    *float64       `json:"distance,omitempty" alias:"address.distance"`
 	MapsLink    string         `json:"mapsLink"`
 	FullAddress string         `json:"fullAddress"`
 	CountryCode string         `json:"countryCode"`
@@ -23,6 +24,15 @@ type Address struct {
 	CreatedBy   *CreatedByUser `json:"createdBy,omitempty"`
 	UpdatedByID *int64         `json:"updatedById,omitempty"`
 	UpdatedBy   *UpdatedByUser `json:"updatedBy,omitempty"`
+}
+
+type AllEventsFilter struct {
+	RadiusMeters int       `json:"radiusMeters" validate:"required"`
+	CountryCode  string    `json:"countryCode" validate:"required,iso3166_1_alpha2"`
+	Latitude     float64   `json:"latitude" validate:"required,latitude"`
+	Longitude    float64   `json:"longitude" validate:"required,longitude"`
+	StartDate    time.Time `json:"startDate" validate:"required"`
+	EndDate      time.Time `json:"endDate" validate:"required"`
 }
 
 type Auth struct {
@@ -49,8 +59,8 @@ type CreateEvent struct {
 	Name        string    `json:"name"`
 	Description *string   `json:"description,omitempty"`
 	Type        string    `json:"type"`
-	StartDate   time.Time `json:"startDate"`
-	EndDate     time.Time `json:"endDate"`
+	StartDate   time.Time `json:"startDate" validate:"required,datetime"`
+	EndDate     time.Time `json:"endDate" validate:"required,datetime"`
 	LocationID  int64     `json:"locationId"`
 }
 

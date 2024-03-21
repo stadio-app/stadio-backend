@@ -55,6 +55,7 @@ type ComplexityRoot struct {
 		CreatedAt   func(childComplexity int) int
 		CreatedBy   func(childComplexity int) int
 		CreatedByID func(childComplexity int) int
+		Distance    func(childComplexity int) int
 		FullAddress func(childComplexity int) int
 		ID          func(childComplexity int) int
 		Latitude    func(childComplexity int) int
@@ -163,7 +164,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		AllEvents func(childComplexity int) int
+		AllEvents func(childComplexity int, filter gmodel.AllEventsFilter) int
 		Login     func(childComplexity int, email string, password string) int
 		Me        func(childComplexity int) int
 	}
@@ -204,7 +205,7 @@ type MutationResolver interface {
 	CreateAccount(ctx context.Context, input gmodel.CreateAccountInput) (*gmodel.User, error)
 }
 type QueryResolver interface {
-	AllEvents(ctx context.Context) ([]*gmodel.Event, error)
+	AllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]*gmodel.Event, error)
 	Login(ctx context.Context, email string, password string) (*gmodel.Auth, error)
 	Me(ctx context.Context) (*gmodel.User, error)
 }
@@ -262,6 +263,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Address.CreatedByID(childComplexity), true
+
+	case "Address.distance":
+		if e.complexity.Address.Distance == nil {
+			break
+		}
+
+		return e.complexity.Address.Distance(childComplexity), true
 
 	case "Address.fullAddress":
 		if e.complexity.Address.FullAddress == nil {
@@ -850,7 +858,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.Query.AllEvents(childComplexity), true
+		args, err := ec.field_Query_allEvents_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.AllEvents(childComplexity, args["filter"].(gmodel.AllEventsFilter)), true
 
 	case "Query.login":
 		if e.complexity.Query.Login == nil {
@@ -1019,6 +1032,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAllEventsFilter,
 		ec.unmarshalInputCreateAccountInput,
 		ec.unmarshalInputCreateAddress,
 		ec.unmarshalInputCreateEvent,
@@ -1203,6 +1217,21 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		}
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_allEvents_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 gmodel.AllEventsFilter
+	if tmp, ok := rawArgs["filter"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+		arg0, err = ec.unmarshalNAllEventsFilter2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAllEventsFilter(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["filter"] = arg0
 	return args, nil
 }
 
@@ -1476,6 +1505,47 @@ func (ec *executionContext) _Address_longitude(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext_Address_longitude(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Address",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Address_distance(ctx context.Context, field graphql.CollectedField, obj *gmodel.Address) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Address_distance(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Distance, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Address_distance(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Address",
 		Field:      field,
@@ -3801,6 +3871,8 @@ func (ec *executionContext) fieldContext_Location_address(ctx context.Context, f
 				return ec.fieldContext_Address_latitude(ctx, field)
 			case "longitude":
 				return ec.fieldContext_Address_longitude(ctx, field)
+			case "distance":
+				return ec.fieldContext_Address_distance(ctx, field)
 			case "mapsLink":
 				return ec.fieldContext_Address_mapsLink(ctx, field)
 			case "fullAddress":
@@ -5378,7 +5450,7 @@ func (ec *executionContext) _Query_allEvents(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().AllEvents(rctx)
+			return ec.resolvers.Query().AllEvents(rctx, fc.Args["filter"].(gmodel.AllEventsFilter))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.IsAuthenticated == nil {
@@ -5455,6 +5527,17 @@ func (ec *executionContext) fieldContext_Query_allEvents(ctx context.Context, fi
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Event", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_allEvents_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -8368,6 +8451,68 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAllEventsFilter(ctx context.Context, obj interface{}) (gmodel.AllEventsFilter, error) {
+	var it gmodel.AllEventsFilter
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"radiusMeters", "countryCode", "latitude", "longitude", "startDate", "endDate"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "radiusMeters":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("radiusMeters"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RadiusMeters = data
+		case "countryCode":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("countryCode"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CountryCode = data
+		case "latitude":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("latitude"))
+			data, err := ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Latitude = data
+		case "longitude":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("longitude"))
+			data, err := ec.unmarshalNFloat2float64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Longitude = data
+		case "startDate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("startDate"))
+			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.StartDate = data
+		case "endDate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("endDate"))
+			data, err := ec.unmarshalNTime2timeᚐTime(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.EndDate = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputCreateAccountInput(ctx context.Context, obj interface{}) (gmodel.CreateAccountInput, error) {
 	var it gmodel.CreateAccountInput
 	asMap := map[string]interface{}{}
@@ -8687,6 +8832,8 @@ func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "distance":
+			out.Values[i] = ec._Address_distance(ctx, field, obj)
 		case "mapsLink":
 			out.Values[i] = ec._Address_mapsLink(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9931,6 +10078,11 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) unmarshalNAllEventsFilter2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAllEventsFilter(ctx context.Context, v interface{}) (gmodel.AllEventsFilter, error) {
+	res, err := ec.unmarshalInputAllEventsFilter(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNAuth2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAuth(ctx context.Context, sel ast.SelectionSet, v gmodel.Auth) graphql.Marshaler {
 	return ec._Auth(ctx, sel, &v)
 }
@@ -10102,6 +10254,21 @@ func (ec *executionContext) unmarshalNID2int64(ctx context.Context, v interface{
 
 func (ec *executionContext) marshalNID2int64(ctx context.Context, sel ast.SelectionSet, v int64) graphql.Marshaler {
 	res := graphql.MarshalInt64(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -10523,6 +10690,22 @@ func (ec *executionContext) marshalOCreatedByUser2ᚖgithubᚗcomᚋstadioᚑapp
 		return graphql.Null
 	}
 	return ec._CreatedByUser(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalFloatContext(*v)
+	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) unmarshalOID2ᚖint64(ctx context.Context, v interface{}) (*int64, error) {

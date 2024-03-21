@@ -21,5 +21,6 @@ func UseSchema(schema string) {
 	Owner = Owner.FromSchema(schema)
 	Participant = Participant.FromSchema(schema)
 	Review = Review.FromSchema(schema)
+	SpatialRefSys = SpatialRefSys.FromSchema(schema)
 	User = User.FromSchema(schema)
 }

@@ -18,8 +18,12 @@ func (r *mutationResolver) CreateEvent(ctx context.Context, input gmodel.CreateE
 }
 
 // AllEvents is the resolver for the allEvents field.
-func (r *queryResolver) AllEvents(ctx context.Context) ([]*gmodel.Event, error) {
-	events, err := r.Service.FindAllEvents(ctx)
+func (r *queryResolver) AllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]*gmodel.Event, error) {
+	if err := r.Service.StructValidator.StructCtx(ctx, filter); err != nil {
+		return nil, err
+	}
+
+	events, err := r.Service.FindAllEvents(ctx, filter)
 	if err != nil {
 		return nil, err
 	}

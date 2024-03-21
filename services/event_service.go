@@ -80,18 +80,33 @@ func (service Service) EventTimingCollides(ctx context.Context, location_id int6
 	return len(conflicting_events) != 0
 }
 
-func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error) {
-	db := service.DbOrTxQueryable()
+func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]gmodel.Event, error) {
 	created_by_user_table := table.User.AS("created_by_user")
 	updated_by_user_table := table.User.AS("updated_by_user")
+	coordinates_col_name := fmt.Sprintf("%s.%s", table.Address.Coordinates.TableName(), table.Address.Coordinates.Name())
+	// dynamic column used to sort results by the calculated distance
+	distance_col_name := fmt.Sprintf("%s.%s", table.Address.Coordinates.TableName(), "distance")
+
 	qb := table.Event.
 		SELECT(
 			table.Event.AllColumns,
 			table.Location.AllColumns,
 			table.Address.AllColumns,
 			table.Country.Name,
-			created_by_user_table.AllColumns,
-			updated_by_user_table.AllColumns,
+			created_by_user_table.ID,
+			created_by_user_table.Name,
+			created_by_user_table.Avatar,
+			updated_by_user_table.ID,
+			updated_by_user_table.Name,
+			updated_by_user_table.Avatar,
+			postgres.RawString(
+				fmt.Sprintf(
+					"ST_Distance(%s, 'SRID=4326;POINT(%f %f)'::geometry)",
+					coordinates_col_name,
+					filter.Longitude,
+					filter.Latitude,
+				),
+			).AS(distance_col_name),
 		).
 		FROM(
 			table.Event.
@@ -101,11 +116,28 @@ func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error
 				LEFT_JOIN(created_by_user_table, created_by_user_table.ID.EQ(table.Event.CreatedByID)).
 				LEFT_JOIN(updated_by_user_table, updated_by_user_table.ID.EQ(table.Event.CreatedByID)),
 		).
-		WHERE(postgres.TimestampzT(time.Now()).LT(table.Event.StartDate)).
+		WHERE(
+			postgres.AND(
+				table.Address.CountryCode.EQ(postgres.NewEnumValue(filter.CountryCode)),
+				table.Event.StartDate.GT_EQ(postgres.TimestampzT(filter.StartDate)),
+				table.Event.EndDate.LT_EQ(postgres.TimestampzT(filter.EndDate)),
+				postgres.RawBool(
+					fmt.Sprintf(
+						"ST_DWithin(%s, 'POINT(%f %f)'::geometry, %d, TRUE)",
+						coordinates_col_name,
+						filter.Longitude,
+						filter.Latitude,
+						filter.RadiusMeters,
+					),
+				),
+			),
+		).
 		ORDER_BY(
+			postgres.FloatColumn(distance_col_name).ASC(),
 			table.Event.StartDate.ASC(),
 			table.Event.CreatedAt.ASC(),
 		)
+	db := service.DbOrTxQueryable()
 	var events []gmodel.Event
 	if err := qb.QueryContext(ctx, db, &events); err != nil {
 		return nil, err

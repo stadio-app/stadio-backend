@@ -69,8 +69,8 @@ func NewTestDb() {
 
 	// Build and run the given Dockerfile
 	resource, err := pool.RunWithOptions(&dockertest.RunOptions{
-		Repository: "postgres",
-		Tag:        "11",
+		Repository: "postgis/postgis",
+		Tag:        "14-3.4",
 		Env: []string{
 			"POSTGRES_PASSWORD=postgres",
 			"POSTGRES_USER=postgres",
