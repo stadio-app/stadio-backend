@@ -12,8 +12,8 @@ input AllEventsFilter {
     @goTag(key: "validate", value: "required,iso3166_1_alpha2")
   latitude: Float! @goTag(key: "validate", value: "required,latitude")
   longitude: Float! @goTag(key: "validate", value: "required,longitude")
-  startDate: Time! @goTag(key: "validate", value: "required,datetime")
-  endDate: Time! @goTag(key: "validate", value: "required,datetime")
+  startDate: Time! @goTag(key: "validate", value: "required")
+  endDate: Time! @goTag(key: "validate", value: "required")
 }
 
 input CreateEvent {

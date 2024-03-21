@@ -80,7 +80,7 @@ func (service Service) EventTimingCollides(ctx context.Context, location_id int6
 	return len(conflicting_events) != 0
 }
 
-func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error) {
+func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]gmodel.Event, error) {
 	db := service.DbOrTxQueryable()
 	created_by_user_table := table.User.AS("created_by_user")
 	updated_by_user_table := table.User.AS("updated_by_user")
@@ -90,8 +90,12 @@ func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error
 			table.Location.AllColumns,
 			table.Address.AllColumns,
 			table.Country.Name,
-			created_by_user_table.AllColumns,
-			updated_by_user_table.AllColumns,
+			created_by_user_table.ID,
+			created_by_user_table.Name,
+			created_by_user_table.Avatar,
+			updated_by_user_table.ID,
+			updated_by_user_table.Name,
+			updated_by_user_table.Avatar,
 		).
 		FROM(
 			table.Event.
@@ -101,7 +105,22 @@ func (service Service) FindAllEvents(ctx context.Context) ([]gmodel.Event, error
 				LEFT_JOIN(created_by_user_table, created_by_user_table.ID.EQ(table.Event.CreatedByID)).
 				LEFT_JOIN(updated_by_user_table, updated_by_user_table.ID.EQ(table.Event.CreatedByID)),
 		).
-		WHERE(postgres.TimestampzT(time.Now()).LT(table.Event.StartDate)).
+		WHERE(
+			postgres.AND(
+				table.Address.CountryCode.EQ(postgres.NewEnumValue(filter.CountryCode)),
+				table.Event.StartDate.GT_EQ(postgres.TimestampzT(filter.StartDate)),
+				table.Event.EndDate.LT_EQ(postgres.TimestampzT(filter.EndDate)),
+				postgres.RawBool(
+					fmt.Sprintf(
+						"st_dwithin(%s, 'POINT(%f %f)'::geometry, %d, TRUE)",
+						table.Address.Coordinates.TableName() + "." + table.Address.Coordinates.Name(),
+						filter.Longitude,
+						filter.Latitude,
+						filter.RadiusMeters,
+					),
+				),
+			),
+		).
 		ORDER_BY(
 			table.Event.StartDate.ASC(),
 			table.Event.CreatedAt.ASC(),

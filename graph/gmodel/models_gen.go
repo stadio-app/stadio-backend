@@ -30,8 +30,8 @@ type AllEventsFilter struct {
 	CountryCode  string    `json:"countryCode" validate:"required,iso3166_1_alpha2"`
 	Latitude     float64   `json:"latitude" validate:"required,latitude"`
 	Longitude    float64   `json:"longitude" validate:"required,longitude"`
-	StartDate    time.Time `json:"startDate" validate:"required,datetime"`
-	EndDate      time.Time `json:"endDate" validate:"required,datetime"`
+	StartDate    time.Time `json:"startDate" validate:"required"`
+	EndDate      time.Time `json:"endDate" validate:"required"`
 }
 
 type Auth struct {
