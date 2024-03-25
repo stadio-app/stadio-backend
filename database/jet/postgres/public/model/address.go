@@ -12,15 +12,17 @@ import (
 )
 
 type Address struct {
-	ID          int64 `sql:"primary_key"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Latitude    float64
-	Longitude   float64
-	MapsLink    string
-	FullAddress string
-	CountryCode CountryCodeAlpha2
-	CreatedByID *int64
-	UpdatedByID *int64
-	Coordinates string
+	ID                     int64 `sql:"primary_key"`
+	CreatedAt              time.Time
+	UpdatedAt              time.Time
+	Latitude               float64
+	Longitude              float64
+	MapsLink               string
+	FullAddress            string
+	CountryCode            CountryCodeAlpha2
+	CreatedByID            *int64
+	UpdatedByID            *int64
+	Coordinates            string
+	AdministrativeDivision string
+	City                   string
 }

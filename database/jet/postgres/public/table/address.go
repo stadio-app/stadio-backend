@@ -17,17 +17,19 @@ type addressTable struct {
 	postgres.Table
 
 	// Columns
-	ID          postgres.ColumnInteger
-	CreatedAt   postgres.ColumnTimestampz
-	UpdatedAt   postgres.ColumnTimestampz
-	Latitude    postgres.ColumnFloat
-	Longitude   postgres.ColumnFloat
-	MapsLink    postgres.ColumnString
-	FullAddress postgres.ColumnString
-	CountryCode postgres.ColumnString
-	CreatedByID postgres.ColumnInteger
-	UpdatedByID postgres.ColumnInteger
-	Coordinates postgres.ColumnString
+	ID                     postgres.ColumnInteger
+	CreatedAt              postgres.ColumnTimestampz
+	UpdatedAt              postgres.ColumnTimestampz
+	Latitude               postgres.ColumnFloat
+	Longitude              postgres.ColumnFloat
+	MapsLink               postgres.ColumnString
+	FullAddress            postgres.ColumnString
+	CountryCode            postgres.ColumnString
+	CreatedByID            postgres.ColumnInteger
+	UpdatedByID            postgres.ColumnInteger
+	Coordinates            postgres.ColumnString
+	AdministrativeDivision postgres.ColumnString
+	City                   postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -68,36 +70,40 @@ func newAddressTable(schemaName, tableName, alias string) *AddressTable {
 
 func newAddressTableImpl(schemaName, tableName, alias string) addressTable {
 	var (
-		IDColumn          = postgres.IntegerColumn("id")
-		CreatedAtColumn   = postgres.TimestampzColumn("created_at")
-		UpdatedAtColumn   = postgres.TimestampzColumn("updated_at")
-		LatitudeColumn    = postgres.FloatColumn("latitude")
-		LongitudeColumn   = postgres.FloatColumn("longitude")
-		MapsLinkColumn    = postgres.StringColumn("maps_link")
-		FullAddressColumn = postgres.StringColumn("full_address")
-		CountryCodeColumn = postgres.StringColumn("country_code")
-		CreatedByIDColumn = postgres.IntegerColumn("created_by_id")
-		UpdatedByIDColumn = postgres.IntegerColumn("updated_by_id")
-		CoordinatesColumn = postgres.StringColumn("coordinates")
-		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByIDColumn, UpdatedByIDColumn, CoordinatesColumn}
-		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByIDColumn, UpdatedByIDColumn}
+		IDColumn                     = postgres.IntegerColumn("id")
+		CreatedAtColumn              = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn              = postgres.TimestampzColumn("updated_at")
+		LatitudeColumn               = postgres.FloatColumn("latitude")
+		LongitudeColumn              = postgres.FloatColumn("longitude")
+		MapsLinkColumn               = postgres.StringColumn("maps_link")
+		FullAddressColumn            = postgres.StringColumn("full_address")
+		CountryCodeColumn            = postgres.StringColumn("country_code")
+		CreatedByIDColumn            = postgres.IntegerColumn("created_by_id")
+		UpdatedByIDColumn            = postgres.IntegerColumn("updated_by_id")
+		CoordinatesColumn            = postgres.StringColumn("coordinates")
+		AdministrativeDivisionColumn = postgres.StringColumn("administrative_division")
+		CityColumn                   = postgres.StringColumn("city")
+		allColumns                   = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByIDColumn, UpdatedByIDColumn, CoordinatesColumn, AdministrativeDivisionColumn, CityColumn}
+		mutableColumns               = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, LatitudeColumn, LongitudeColumn, MapsLinkColumn, FullAddressColumn, CountryCodeColumn, CreatedByIDColumn, UpdatedByIDColumn, AdministrativeDivisionColumn, CityColumn}
 	)
 
 	return addressTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:          IDColumn,
-		CreatedAt:   CreatedAtColumn,
-		UpdatedAt:   UpdatedAtColumn,
-		Latitude:    LatitudeColumn,
-		Longitude:   LongitudeColumn,
-		MapsLink:    MapsLinkColumn,
-		FullAddress: FullAddressColumn,
-		CountryCode: CountryCodeColumn,
-		CreatedByID: CreatedByIDColumn,
-		UpdatedByID: UpdatedByIDColumn,
-		Coordinates: CoordinatesColumn,
+		ID:                     IDColumn,
+		CreatedAt:              CreatedAtColumn,
+		UpdatedAt:              UpdatedAtColumn,
+		Latitude:               LatitudeColumn,
+		Longitude:              LongitudeColumn,
+		MapsLink:               MapsLinkColumn,
+		FullAddress:            FullAddressColumn,
+		CountryCode:            CountryCodeColumn,
+		CreatedByID:            CreatedByIDColumn,
+		UpdatedByID:            UpdatedByIDColumn,
+		Coordinates:            CoordinatesColumn,
+		AdministrativeDivision: AdministrativeDivisionColumn,
+		City:                   CityColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

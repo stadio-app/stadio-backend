@@ -11,6 +11,7 @@ package table
 // this method only once at the beginning of the program.
 func UseSchema(schema string) {
 	Address = Address.FromSchema(schema)
+	AdministrativeDivision = AdministrativeDivision.FromSchema(schema)
 	AuthState = AuthState.FromSchema(schema)
 	Country = Country.FromSchema(schema)
 	EmailVerification = EmailVerification.FromSchema(schema)

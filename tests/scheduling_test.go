@@ -57,6 +57,8 @@ func TestLocation(t *testing.T) {
 				Longitude: -88.2938909,
 				MapsLink: "maps.google.com",
 				FullAddress: "902 Hodge Ln, Batavia, IL 60510, USA",
+				City: "Batavia",
+				AdministrativeDivision: "Illinois",
 				CountryCode: model.CountryCodeAlpha2_Us.String(),
 			},
 			Schedule: init_schedule(9, 17, false),
