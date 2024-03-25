@@ -70,7 +70,7 @@ func (Service) GenerateJWT(key string, user *gmodel.User) (string, error) {
 		"authPlatform": user.AuthPlatform.String(),
 		"authStateId": user.AuthStateID,
 		"iat": time.Now().Unix(),
-		"eat": time.Now().Add(time.Hour * 24 * 30).Unix(),
+		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 	token, err := jwt.SignedString([]byte(key))
 	if err != nil {
@@ -89,8 +89,7 @@ func (service Service) VerifyJwt(ctx context.Context, authorization types.Author
 	if err != nil {
 		return gmodel.User{}, err
 	}
-	expiration_unix := int64(claims["eat"].(float64))
-	if time.Now().Unix() > expiration_unix {
+	if !claims.VerifyExpiresAt(time.Now().Unix(), true) {
 		return gmodel.User{}, fmt.Errorf("token expired")
 	}
 
