@@ -26,6 +26,11 @@ type Address struct {
 	UpdatedBy   *UpdatedByUser `json:"updatedBy,omitempty"`
 }
 
+type AdministrativeDivision struct {
+	Name   string `json:"name" alias:"administrative_division.administrative_division"`
+	Cities string `json:"cities"`
+}
+
 type AllEventsFilter struct {
 	RadiusMeters int       `json:"radiusMeters" validate:"required"`
 	CountryCode  string    `json:"countryCode" validate:"required,iso3166_1_alpha2"`
@@ -38,6 +43,12 @@ type AllEventsFilter struct {
 type Auth struct {
 	Token string `json:"token"`
 	User  *User  `json:"user"`
+}
+
+type Country struct {
+	Code                    string                    `json:"code" sql:"primary_key"`
+	Name                    string                    `json:"name"`
+	AdministrativeDivisions []*AdministrativeDivision `json:"administrativeDivisions"`
 }
 
 type CreateAccountInput struct {

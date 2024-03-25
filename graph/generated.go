@@ -66,9 +66,20 @@ type ComplexityRoot struct {
 		UpdatedByID func(childComplexity int) int
 	}
 
+	AdministrativeDivision struct {
+		Cities func(childComplexity int) int
+		Name   func(childComplexity int) int
+	}
+
 	Auth struct {
 		Token func(childComplexity int) int
 		User  func(childComplexity int) int
+	}
+
+	Country struct {
+		AdministrativeDivisions func(childComplexity int) int
+		Code                    func(childComplexity int) int
+		Name                    func(childComplexity int) int
 	}
 
 	CreatedByUser struct {
@@ -164,9 +175,10 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		AllEvents func(childComplexity int, filter gmodel.AllEventsFilter) int
-		Login     func(childComplexity int, email string, password string) int
-		Me        func(childComplexity int) int
+		AllEvents       func(childComplexity int, filter gmodel.AllEventsFilter) int
+		GetAllCountries func(childComplexity int) int
+		Login           func(childComplexity int, email string, password string) int
+		Me              func(childComplexity int) int
 	}
 
 	UpdatedByUser struct {
@@ -205,6 +217,7 @@ type MutationResolver interface {
 	CreateAccount(ctx context.Context, input gmodel.CreateAccountInput) (*gmodel.User, error)
 }
 type QueryResolver interface {
+	GetAllCountries(ctx context.Context) ([]*gmodel.Country, error)
 	AllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]*gmodel.Event, error)
 	Login(ctx context.Context, email string, password string) (*gmodel.Auth, error)
 	Me(ctx context.Context) (*gmodel.User, error)
@@ -327,6 +340,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Address.UpdatedByID(childComplexity), true
 
+	case "AdministrativeDivision.cities":
+		if e.complexity.AdministrativeDivision.Cities == nil {
+			break
+		}
+
+		return e.complexity.AdministrativeDivision.Cities(childComplexity), true
+
+	case "AdministrativeDivision.name":
+		if e.complexity.AdministrativeDivision.Name == nil {
+			break
+		}
+
+		return e.complexity.AdministrativeDivision.Name(childComplexity), true
+
 	case "Auth.token":
 		if e.complexity.Auth.Token == nil {
 			break
@@ -340,6 +367,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Auth.User(childComplexity), true
+
+	case "Country.administrativeDivisions":
+		if e.complexity.Country.AdministrativeDivisions == nil {
+			break
+		}
+
+		return e.complexity.Country.AdministrativeDivisions(childComplexity), true
+
+	case "Country.code":
+		if e.complexity.Country.Code == nil {
+			break
+		}
+
+		return e.complexity.Country.Code(childComplexity), true
+
+	case "Country.name":
+		if e.complexity.Country.Name == nil {
+			break
+		}
+
+		return e.complexity.Country.Name(childComplexity), true
 
 	case "CreatedByUser.active":
 		if e.complexity.CreatedByUser.Active == nil {
@@ -865,6 +913,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.AllEvents(childComplexity, args["filter"].(gmodel.AllEventsFilter)), true
 
+	case "Query.getAllCountries":
+		if e.complexity.Query.GetAllCountries == nil {
+			break
+		}
+
+		return e.complexity.Query.GetAllCountries(childComplexity), true
+
 	case "Query.login":
 		if e.complexity.Query.Login == nil {
 			break
@@ -1134,7 +1189,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "address.graphql" "directives.graphql" "event.graphql" "location.graphql" "owner.graphql" "scalars.graphql" "user.graphql"
+//go:embed "address.graphql" "countries.graphql" "directives.graphql" "event.graphql" "location.graphql" "owner.graphql" "scalars.graphql" "user.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1147,6 +1202,7 @@ func sourceData(filename string) string {
 
 var sources = []*ast.Source{
 	{Name: "address.graphql", Input: sourceData("address.graphql"), BuiltIn: false},
+	{Name: "countries.graphql", Input: sourceData("countries.graphql"), BuiltIn: false},
 	{Name: "directives.graphql", Input: sourceData("directives.graphql"), BuiltIn: false},
 	{Name: "event.graphql", Input: sourceData("event.graphql"), BuiltIn: false},
 	{Name: "location.graphql", Input: sourceData("location.graphql"), BuiltIn: false},
@@ -1915,6 +1971,94 @@ func (ec *executionContext) fieldContext_Address_updatedBy(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _AdministrativeDivision_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.AdministrativeDivision) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdministrativeDivision_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdministrativeDivision_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdministrativeDivision",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AdministrativeDivision_cities(ctx context.Context, field graphql.CollectedField, obj *gmodel.AdministrativeDivision) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AdministrativeDivision_cities(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Cities, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AdministrativeDivision_cities(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AdministrativeDivision",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Auth_token(ctx context.Context, field graphql.CollectedField, obj *gmodel.Auth) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Auth_token(ctx, field)
 	if err != nil {
@@ -2024,6 +2168,144 @@ func (ec *executionContext) fieldContext_Auth_user(ctx context.Context, field gr
 				return ec.fieldContext_User_authStateId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Country_code(ctx context.Context, field graphql.CollectedField, obj *gmodel.Country) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Country_code(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Country_code(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Country",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Country_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.Country) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Country_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Country_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Country",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Country_administrativeDivisions(ctx context.Context, field graphql.CollectedField, obj *gmodel.Country) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Country_administrativeDivisions(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AdministrativeDivisions, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*gmodel.AdministrativeDivision)
+	fc.Result = res
+	return ec.marshalNAdministrativeDivision2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAdministrativeDivisionᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Country_administrativeDivisions(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Country",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "name":
+				return ec.fieldContext_AdministrativeDivision_name(ctx, field)
+			case "cities":
+				return ec.fieldContext_AdministrativeDivision_cities(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AdministrativeDivision", field.Name)
 		},
 	}
 	return fc, nil
@@ -5430,6 +5712,58 @@ func (ec *executionContext) fieldContext_Owner_user(ctx context.Context, field g
 				return ec.fieldContext_UserShallow_active(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserShallow", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getAllCountries(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_getAllCountries(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GetAllCountries(rctx)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*gmodel.Country)
+	fc.Result = res
+	return ec.marshalNCountry2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCountryᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_getAllCountries(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "code":
+				return ec.fieldContext_Country_code(ctx, field)
+			case "name":
+				return ec.fieldContext_Country_name(ctx, field)
+			case "administrativeDivisions":
+				return ec.fieldContext_Country_administrativeDivisions(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Country", field.Name)
 		},
 	}
 	return fc, nil
@@ -8896,6 +9230,50 @@ func (ec *executionContext) _Address(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var administrativeDivisionImplementors = []string{"AdministrativeDivision"}
+
+func (ec *executionContext) _AdministrativeDivision(ctx context.Context, sel ast.SelectionSet, obj *gmodel.AdministrativeDivision) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, administrativeDivisionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AdministrativeDivision")
+		case "name":
+			out.Values[i] = ec._AdministrativeDivision_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "cities":
+			out.Values[i] = ec._AdministrativeDivision_cities(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var authImplementors = []string{"Auth"}
 
 func (ec *executionContext) _Auth(ctx context.Context, sel ast.SelectionSet, obj *gmodel.Auth) graphql.Marshaler {
@@ -8914,6 +9292,55 @@ func (ec *executionContext) _Auth(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "user":
 			out.Values[i] = ec._Auth_user(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var countryImplementors = []string{"Country"}
+
+func (ec *executionContext) _Country(ctx context.Context, sel ast.SelectionSet, obj *gmodel.Country) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, countryImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Country")
+		case "code":
+			out.Values[i] = ec._Country_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Country_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "administrativeDivisions":
+			out.Values[i] = ec._Country_administrativeDivisions(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -9491,6 +9918,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "getAllCountries":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getAllCountries(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "allEvents":
 			field := field
 
@@ -10092,6 +10541,60 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAdministrativeDivision2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAdministrativeDivisionᚄ(ctx context.Context, sel ast.SelectionSet, v []*gmodel.AdministrativeDivision) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAdministrativeDivision2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAdministrativeDivision(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNAdministrativeDivision2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAdministrativeDivision(ctx context.Context, sel ast.SelectionSet, v *gmodel.AdministrativeDivision) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._AdministrativeDivision(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNAllEventsFilter2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAllEventsFilter(ctx context.Context, v interface{}) (gmodel.AllEventsFilter, error) {
 	res, err := ec.unmarshalInputAllEventsFilter(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -10134,6 +10637,60 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNCountry2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCountryᚄ(ctx context.Context, sel ast.SelectionSet, v []*gmodel.Country) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNCountry2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCountry(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNCountry2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCountry(ctx context.Context, sel ast.SelectionSet, v *gmodel.Country) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Country(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNCreateAccountInput2githubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreateAccountInput(ctx context.Context, v interface{}) (gmodel.CreateAccountInput, error) {
