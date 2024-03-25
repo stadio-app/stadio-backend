@@ -258,6 +258,9 @@ const (
 	CountryCodeAlpha2_Ye CountryCodeAlpha2 = "YE"
 	CountryCodeAlpha2_Zm CountryCodeAlpha2 = "ZM"
 	CountryCodeAlpha2_Zw CountryCodeAlpha2 = "ZW"
+	CountryCodeAlpha2_Ss CountryCodeAlpha2 = "SS"
+	CountryCodeAlpha2_Xk CountryCodeAlpha2 = "XK"
+	CountryCodeAlpha2_Bq CountryCodeAlpha2 = "BQ"
 )
 
 func (e *CountryCodeAlpha2) Scan(value interface{}) error {
@@ -764,6 +767,12 @@ func (e *CountryCodeAlpha2) Scan(value interface{}) error {
 		*e = CountryCodeAlpha2_Zm
 	case "ZW":
 		*e = CountryCodeAlpha2_Zw
+	case "SS":
+		*e = CountryCodeAlpha2_Ss
+	case "XK":
+		*e = CountryCodeAlpha2_Xk
+	case "BQ":
+		*e = CountryCodeAlpha2_Bq
 	default:
 		return errors.New("jet: Invalid scan value '" + enumValue + "' for CountryCodeAlpha2 enum")
 	}

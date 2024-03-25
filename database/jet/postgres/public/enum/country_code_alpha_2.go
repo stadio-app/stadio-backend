@@ -256,6 +256,9 @@ var CountryCodeAlpha2 = &struct {
 	Ye postgres.StringExpression
 	Zm postgres.StringExpression
 	Zw postgres.StringExpression
+	Ss postgres.StringExpression
+	Xk postgres.StringExpression
+	Bq postgres.StringExpression
 }{
 	Af: postgres.NewEnumValue("AF"),
 	Ax: postgres.NewEnumValue("AX"),
@@ -503,4 +506,7 @@ var CountryCodeAlpha2 = &struct {
 	Ye: postgres.NewEnumValue("YE"),
 	Zm: postgres.NewEnumValue("ZM"),
 	Zw: postgres.NewEnumValue("ZW"),
+	Ss: postgres.NewEnumValue("SS"),
+	Xk: postgres.NewEnumValue("XK"),
+	Bq: postgres.NewEnumValue("BQ"),
 }
