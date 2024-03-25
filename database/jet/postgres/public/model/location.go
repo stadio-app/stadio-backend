@@ -24,5 +24,4 @@ type Location struct {
 	Status      LocationStatus
 	CreatedByID *int64
 	UpdatedByID *int64
-	Price       string
 }

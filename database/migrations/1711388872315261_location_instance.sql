@@ -8,6 +8,3 @@ CREATE TABLE "location_instance" (
 
 ALTER TABLE "event"
 ADD COLUMN "location_instance_id" BIGINT REFERENCES "location_instance"("id") ON DELETE SET NULL;
-
-ALTER TABLE "location"
-ADD COLUMN "price" MONEY NOT NULL DEFAULT '$0.00';
