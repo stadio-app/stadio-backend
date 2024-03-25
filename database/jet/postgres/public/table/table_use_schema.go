@@ -17,6 +17,7 @@ func UseSchema(schema string) {
 	EmailVerification = EmailVerification.FromSchema(schema)
 	Event = Event.FromSchema(schema)
 	Location = Location.FromSchema(schema)
+	LocationInstance = LocationInstance.FromSchema(schema)
 	LocationSchedule = LocationSchedule.FromSchema(schema)
 	Migration = Migration.FromSchema(schema)
 	Owner = Owner.FromSchema(schema)
