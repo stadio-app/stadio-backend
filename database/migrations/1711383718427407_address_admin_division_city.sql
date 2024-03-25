@@ -1,0 +1,5 @@
+ALTER TABLE "address"
+ADD COLUMN "administrative_division" VARCHAR(100) NOT NULL DEFAULT '';
+
+ALTER TABLE "address"
+ADD COLUMN "city" VARCHAR(100) NOT NULL DEFAULT '';

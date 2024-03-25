@@ -8568,7 +8568,7 @@ func (ec *executionContext) unmarshalInputCreateAddress(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"latitude", "longitude", "mapsLink", "fullAddress", "countryCode"}
+	fieldsInOrder := [...]string{"latitude", "longitude", "mapsLink", "fullAddress", "city", "administrativeDivision", "countryCode"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -8603,6 +8603,20 @@ func (ec *executionContext) unmarshalInputCreateAddress(ctx context.Context, obj
 				return it, err
 			}
 			it.FullAddress = data
+		case "city":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("city"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.City = data
+		case "administrativeDivision":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("administrativeDivision"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AdministrativeDivision = data
 		case "countryCode":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("countryCode"))
 			data, err := ec.unmarshalNString2string(ctx, v)

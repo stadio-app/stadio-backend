@@ -48,11 +48,13 @@ type CreateAccountInput struct {
 }
 
 type CreateAddress struct {
-	Latitude    float64 `json:"latitude" validate:"required,latitude"`
-	Longitude   float64 `json:"longitude" validate:"required,longitude"`
-	MapsLink    string  `json:"mapsLink" validate:"required,http_url"`
-	FullAddress string  `json:"fullAddress" validate:"required,contains"`
-	CountryCode string  `json:"countryCode" validate:"iso3166_1_alpha2"`
+	Latitude               float64 `json:"latitude" validate:"required,latitude"`
+	Longitude              float64 `json:"longitude" validate:"required,longitude"`
+	MapsLink               string  `json:"mapsLink" validate:"required,http_url"`
+	FullAddress            string  `json:"fullAddress" validate:"required,contains"`
+	City                   string  `json:"city" validate:"required"`
+	AdministrativeDivision string  `json:"administrativeDivision" validate:"required"`
+	CountryCode            string  `json:"countryCode" validate:"iso3166_1_alpha2"`
 }
 
 type CreateEvent struct {
