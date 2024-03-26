@@ -49,6 +49,9 @@ type Country struct {
 	Code                    string                    `json:"code" sql:"primary_key"`
 	Name                    string                    `json:"name"`
 	AdministrativeDivisions []*AdministrativeDivision `json:"administrativeDivisions"`
+	Currency                *Currency                 `json:"currency,omitempty"`
+	CallingCode             *string                   `json:"callingCode,omitempty"`
+	Language                *string                   `json:"language,omitempty"`
 }
 
 type CreateAccountInput struct {
@@ -98,6 +101,15 @@ type CreatedByUser struct {
 	Name   string  `json:"name" alias:"created_by_user.name"`
 	Avatar *string `json:"avatar,omitempty" alias:"created_by_user.avatar"`
 	Active *bool   `json:"active,omitempty" alias:"created_by_user.active"`
+}
+
+type Currency struct {
+	CurrencyCode string `json:"currencyCode" sql:"primary_key"`
+	Name         string `json:"name"`
+	Symbol       string `json:"symbol"`
+	SymbolNative string `json:"symbolNative"`
+	Decimals     int    `json:"decimals"`
+	NumToBasic   *int   `json:"numToBasic,omitempty"`
 }
 
 type Event struct {

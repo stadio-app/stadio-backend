@@ -19,11 +19,14 @@ func (r *queryResolver) GetAllCountries(ctx context.Context) ([]*gmodel.Country,
 	qb := table.Country.
 		SELECT(
 			table.Country.AllColumns,
-			table.AdministrativeDivision.AllColumns,
+			table.AdministrativeDivision.AdministrativeDivision,
+			table.AdministrativeDivision.Cities,
+			table.Currency.AllColumns,
 		).
 		FROM(
 			table.Country.
-				INNER_JOIN(table.AdministrativeDivision, table.AdministrativeDivision.CountryCode.EQ(table.Country.Code)),
+				INNER_JOIN(table.AdministrativeDivision, table.AdministrativeDivision.CountryCode.EQ(table.Country.Code)).
+				INNER_JOIN(table.Currency, table.Currency.CurrencyCode.EQ(table.Country.Currency)),
 		)
 	var countries []*gmodel.Country
 	if err := qb.QueryContext(ctx, r.AppContext.DB, &countries); err != nil {

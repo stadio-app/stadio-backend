@@ -78,7 +78,10 @@ type ComplexityRoot struct {
 
 	Country struct {
 		AdministrativeDivisions func(childComplexity int) int
+		CallingCode             func(childComplexity int) int
 		Code                    func(childComplexity int) int
+		Currency                func(childComplexity int) int
+		Language                func(childComplexity int) int
 		Name                    func(childComplexity int) int
 	}
 
@@ -87,6 +90,15 @@ type ComplexityRoot struct {
 		Avatar func(childComplexity int) int
 		ID     func(childComplexity int) int
 		Name   func(childComplexity int) int
+	}
+
+	Currency struct {
+		CurrencyCode func(childComplexity int) int
+		Decimals     func(childComplexity int) int
+		Name         func(childComplexity int) int
+		NumToBasic   func(childComplexity int) int
+		Symbol       func(childComplexity int) int
+		SymbolNative func(childComplexity int) int
 	}
 
 	Event struct {
@@ -375,12 +387,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Country.AdministrativeDivisions(childComplexity), true
 
+	case "Country.callingCode":
+		if e.complexity.Country.CallingCode == nil {
+			break
+		}
+
+		return e.complexity.Country.CallingCode(childComplexity), true
+
 	case "Country.code":
 		if e.complexity.Country.Code == nil {
 			break
 		}
 
 		return e.complexity.Country.Code(childComplexity), true
+
+	case "Country.currency":
+		if e.complexity.Country.Currency == nil {
+			break
+		}
+
+		return e.complexity.Country.Currency(childComplexity), true
+
+	case "Country.language":
+		if e.complexity.Country.Language == nil {
+			break
+		}
+
+		return e.complexity.Country.Language(childComplexity), true
 
 	case "Country.name":
 		if e.complexity.Country.Name == nil {
@@ -416,6 +449,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.CreatedByUser.Name(childComplexity), true
+
+	case "Currency.currencyCode":
+		if e.complexity.Currency.CurrencyCode == nil {
+			break
+		}
+
+		return e.complexity.Currency.CurrencyCode(childComplexity), true
+
+	case "Currency.decimals":
+		if e.complexity.Currency.Decimals == nil {
+			break
+		}
+
+		return e.complexity.Currency.Decimals(childComplexity), true
+
+	case "Currency.name":
+		if e.complexity.Currency.Name == nil {
+			break
+		}
+
+		return e.complexity.Currency.Name(childComplexity), true
+
+	case "Currency.numToBasic":
+		if e.complexity.Currency.NumToBasic == nil {
+			break
+		}
+
+		return e.complexity.Currency.NumToBasic(childComplexity), true
+
+	case "Currency.symbol":
+		if e.complexity.Currency.Symbol == nil {
+			break
+		}
+
+		return e.complexity.Currency.Symbol(childComplexity), true
+
+	case "Currency.symbolNative":
+		if e.complexity.Currency.SymbolNative == nil {
+			break
+		}
+
+		return e.complexity.Currency.SymbolNative(childComplexity), true
 
 	case "Event.approved":
 		if e.complexity.Event.Approved == nil {
@@ -2311,6 +2386,143 @@ func (ec *executionContext) fieldContext_Country_administrativeDivisions(ctx con
 	return fc, nil
 }
 
+func (ec *executionContext) _Country_currency(ctx context.Context, field graphql.CollectedField, obj *gmodel.Country) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Country_currency(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Currency, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*gmodel.Currency)
+	fc.Result = res
+	return ec.marshalOCurrency2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCurrency(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Country_currency(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Country",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "currencyCode":
+				return ec.fieldContext_Currency_currencyCode(ctx, field)
+			case "name":
+				return ec.fieldContext_Currency_name(ctx, field)
+			case "symbol":
+				return ec.fieldContext_Currency_symbol(ctx, field)
+			case "symbolNative":
+				return ec.fieldContext_Currency_symbolNative(ctx, field)
+			case "decimals":
+				return ec.fieldContext_Currency_decimals(ctx, field)
+			case "numToBasic":
+				return ec.fieldContext_Currency_numToBasic(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Currency", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Country_callingCode(ctx context.Context, field graphql.CollectedField, obj *gmodel.Country) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Country_callingCode(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CallingCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Country_callingCode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Country",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Country_language(ctx context.Context, field graphql.CollectedField, obj *gmodel.Country) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Country_language(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Language, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Country_language(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Country",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _CreatedByUser_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.CreatedByUser) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_CreatedByUser_id(ctx, field)
 	if err != nil {
@@ -2476,6 +2688,267 @@ func (ec *executionContext) fieldContext_CreatedByUser_active(ctx context.Contex
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Currency_currencyCode(ctx context.Context, field graphql.CollectedField, obj *gmodel.Currency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Currency_currencyCode(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CurrencyCode, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Currency_currencyCode(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Currency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Currency_name(ctx context.Context, field graphql.CollectedField, obj *gmodel.Currency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Currency_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Currency_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Currency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Currency_symbol(ctx context.Context, field graphql.CollectedField, obj *gmodel.Currency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Currency_symbol(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Symbol, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Currency_symbol(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Currency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Currency_symbolNative(ctx context.Context, field graphql.CollectedField, obj *gmodel.Currency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Currency_symbolNative(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SymbolNative, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Currency_symbolNative(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Currency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Currency_decimals(ctx context.Context, field graphql.CollectedField, obj *gmodel.Currency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Currency_decimals(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Decimals, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Currency_decimals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Currency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Currency_numToBasic(ctx context.Context, field graphql.CollectedField, obj *gmodel.Currency) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Currency_numToBasic(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumToBasic, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Currency_numToBasic(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Currency",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5762,6 +6235,12 @@ func (ec *executionContext) fieldContext_Query_getAllCountries(ctx context.Conte
 				return ec.fieldContext_Country_name(ctx, field)
 			case "administrativeDivisions":
 				return ec.fieldContext_Country_administrativeDivisions(ctx, field)
+			case "currency":
+				return ec.fieldContext_Country_currency(ctx, field)
+			case "callingCode":
+				return ec.fieldContext_Country_callingCode(ctx, field)
+			case "language":
+				return ec.fieldContext_Country_language(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Country", field.Name)
 		},
@@ -9344,6 +9823,12 @@ func (ec *executionContext) _Country(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "currency":
+			out.Values[i] = ec._Country_currency(ctx, field, obj)
+		case "callingCode":
+			out.Values[i] = ec._Country_callingCode(ctx, field, obj)
+		case "language":
+			out.Values[i] = ec._Country_language(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9392,6 +9877,67 @@ func (ec *executionContext) _CreatedByUser(ctx context.Context, sel ast.Selectio
 			out.Values[i] = ec._CreatedByUser_avatar(ctx, field, obj)
 		case "active":
 			out.Values[i] = ec._CreatedByUser_active(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var currencyImplementors = []string{"Currency"}
+
+func (ec *executionContext) _Currency(ctx context.Context, sel ast.SelectionSet, obj *gmodel.Currency) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, currencyImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Currency")
+		case "currencyCode":
+			out.Values[i] = ec._Currency_currencyCode(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Currency_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "symbol":
+			out.Values[i] = ec._Currency_symbol(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "symbolNative":
+			out.Values[i] = ec._Currency_symbolNative(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "decimals":
+			out.Values[i] = ec._Currency_decimals(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "numToBasic":
+			out.Values[i] = ec._Currency_numToBasic(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11261,6 +11807,13 @@ func (ec *executionContext) marshalOCreatedByUser2ᚖgithubᚗcomᚋstadioᚑapp
 		return graphql.Null
 	}
 	return ec._CreatedByUser(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOCurrency2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCurrency(ctx context.Context, sel ast.SelectionSet, v *gmodel.Currency) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Currency(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
