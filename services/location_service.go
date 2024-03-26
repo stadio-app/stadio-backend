@@ -183,6 +183,10 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 					postgres.TimeT(from).GT_EQ(table.LocationSchedule.From),
 					postgres.Int32(int32(to_duration)).LT_EQ(table.LocationSchedule.ToDuration),
 				),
+				postgres.OR(
+					table.LocationSchedule.On.BETWEEN(postgres.Date(from.Date()), postgres.Date(to.Date())),
+					table.LocationSchedule.On.IS_NULL(),
+				),
 			),
 		).
 		ORDER_BY(table.LocationSchedule.CreatedAt.DESC())
