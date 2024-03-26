@@ -6,5 +6,9 @@ CREATE TABLE "location_instance" (
   "name" VARCHAR(255)
 );
 
+INSERT INTO "location_instance" (
+  "location_id"
+) SELECT "id" FROM "location";
+
 ALTER TABLE "event"
 ADD COLUMN "location_instance_id" BIGINT REFERENCES "location_instance"("id") ON DELETE SET NULL;
