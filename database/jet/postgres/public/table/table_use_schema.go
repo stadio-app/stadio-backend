@@ -14,6 +14,7 @@ func UseSchema(schema string) {
 	AdministrativeDivision = AdministrativeDivision.FromSchema(schema)
 	AuthState = AuthState.FromSchema(schema)
 	Country = Country.FromSchema(schema)
+	Currency = Currency.FromSchema(schema)
 	EmailVerification = EmailVerification.FromSchema(schema)
 	Event = Event.FromSchema(schema)
 	Location = Location.FromSchema(schema)
