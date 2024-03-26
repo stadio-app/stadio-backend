@@ -7,7 +7,6 @@ package gresolver
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph"
@@ -30,8 +29,7 @@ func (r *queryResolver) GetAllCountries(ctx context.Context) ([]*gmodel.Country,
 		)
 	var countries []*gmodel.Country
 	if err := qb.QueryContext(ctx, r.AppContext.DB, &countries); err != nil {
-		log.Println(err.Error())
-		return nil, fmt.Errorf("could not query countries data")
+		return nil, fmt.Errorf("could not query country data")
 	}
 	return countries, nil
 }
