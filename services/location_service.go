@@ -16,7 +16,7 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	if len(input.Instances) == 0 {
 		return gmodel.Location{}, fmt.Errorf("must provide at least 1 location instance")
 	}
-	if len(input.Schedule) >= 7 {
+	if len(input.Schedule) < 7 {
 		return gmodel.Location{}, fmt.Errorf("minimum of 7 days of schedule is required")
 	}
 	

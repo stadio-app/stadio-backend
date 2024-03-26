@@ -62,6 +62,9 @@ func TestLocation(t *testing.T) {
 				CountryCode: model.CountryCodeAlpha2_Us.String(),
 			},
 			Schedule: init_schedule(9, 17, false),
+			Instances: []*gmodel.CreateLocationInstance{
+				{Name: "Field #1"},
+			},
 		}
 		if location, err = service.CreateLocation(ctx, &user, input); err != nil {
 			t.Fatal(err.Error())
