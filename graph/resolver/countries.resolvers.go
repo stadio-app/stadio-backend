@@ -26,6 +26,10 @@ func (r *queryResolver) GetAllCountries(ctx context.Context) ([]*gmodel.Country,
 			table.Country.
 				INNER_JOIN(table.AdministrativeDivision, table.AdministrativeDivision.CountryCode.EQ(table.Country.Code)).
 				INNER_JOIN(table.Currency, table.Currency.CurrencyCode.EQ(table.Country.Currency)),
+		).
+		ORDER_BY(
+			table.Country.Name.ASC(),
+			table.AdministrativeDivision.AdministrativeDivision.ASC(),
 		)
 	var countries []*gmodel.Country
 	if err := qb.QueryContext(ctx, r.AppContext.DB, &countries); err != nil {
