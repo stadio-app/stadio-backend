@@ -13,6 +13,13 @@ import (
 )
 
 func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, input gmodel.CreateLocation) (gmodel.Location, error) {
+	if len(input.Instances) == 0 {
+		return gmodel.Location{}, fmt.Errorf("must provide at least 1 location instance")
+	}
+	if len(input.Schedule) >= 7 {
+		return gmodel.Location{}, fmt.Errorf("minimum of 7 days of schedule is required")
+	}
+	
 	tx, err := service.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return gmodel.Location{}, fmt.Errorf("could not start transaction")
@@ -49,6 +56,13 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	}
 	location.Address = &address
 
+	// add location instances
+	location.LocationInstances, err = service.BulkCreateLocationInstances(ctx, location.ID, input.Instances)
+	if err != nil {
+		tx.Rollback()
+		return gmodel.Location{}, err
+	}
+
 	// add location schedules
 	location.LocationSchedule, err = service.BulkCreateLocationSchedule(ctx, location.ID, input.Schedule)
 	if err != nil {
@@ -61,6 +75,31 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 		return gmodel.Location{}, fmt.Errorf("could not commit location via transaction")
 	}
 	return location, nil
+}
+
+func (service Service) BulkCreateLocationInstances(
+	ctx context.Context, 
+	location_id int64, 
+	input []*gmodel.CreateLocationInstance,
+) (location_instances []*gmodel.LocationInstance, err error) {
+	create_location_instances := make([]model.LocationInstance, len(input))
+	for i := range input {
+		create_location_instances[i] = model.LocationInstance{
+			LocationID: location_id,
+			Name: &input[i].Name,
+		}
+	}
+	qb := table.LocationInstance.
+		INSERT(
+			table.LocationInstance.LocationID,
+			table.LocationInstance.Name,
+		).
+		MODELS(create_location_instances).
+		RETURNING(table.LocationInstance.AllColumns)
+	if err = qb.QueryContext(ctx, service.DbOrTxQueryable(), &location_instances); err != nil {
+		return nil, err
+	}
+	return location_instances, nil
 }
 
 func (service Service) BulkCreateLocationSchedule(

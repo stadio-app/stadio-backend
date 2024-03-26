@@ -8,6 +8,7 @@ input CreateLocation {
   type: String! @goTag(key: "validate", value: "required")
   address: CreateAddress! @goTag(key: "validate", value: "required")
   schedule: [CreateLocationSchedule!]!
+  instances: [CreateLocationInstance!]!
 }
 
 enum WeekDay {
@@ -28,6 +29,10 @@ input CreateLocationSchedule {
   available: Boolean! @goTag(key: "validate", value: "required")
 }
 
+input CreateLocationInstance {
+  name: String!
+}
+
 type Location {
   id: ID! @goTag(key: "sql", value: "primary_key")
   createdAt: Time!
@@ -46,6 +51,7 @@ type Location {
   updatedById: ID
   updatedBy: UpdatedByUser
   locationSchedule: [LocationSchedule!]!
+  locationInstances: [LocationInstance!]!
 }
 
 type LocationSchedule {
@@ -59,4 +65,9 @@ type LocationSchedule {
   from: Time
   toDuration: Int
   available: Boolean!
+}
+
+type LocationInstance {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  name: String
 }

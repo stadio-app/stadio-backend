@@ -86,6 +86,11 @@ type CreateLocation struct {
 	Type        string                    `json:"type" validate:"required"`
 	Address     *CreateAddress            `json:"address" validate:"required"`
 	Schedule    []*CreateLocationSchedule `json:"schedule"`
+	Instances   []*CreateLocationInstance `json:"instances"`
+}
+
+type CreateLocationInstance struct {
+	Name string `json:"name"`
 }
 
 type CreateLocationSchedule struct {
@@ -146,23 +151,29 @@ type EventShallow struct {
 }
 
 type Location struct {
-	ID               int64               `json:"id" sql:"primary_key"`
-	CreatedAt        time.Time           `json:"createdAt"`
-	UpdatedAt        time.Time           `json:"updatedAt"`
-	Name             string              `json:"name"`
-	Description      *string             `json:"description,omitempty"`
-	Type             string              `json:"type"`
-	OwnerID          *int64              `json:"ownerId,omitempty"`
-	Owner            *Owner              `json:"owner,omitempty"`
-	AddressID        int64               `json:"addressId"`
-	Address          *Address            `json:"address,omitempty"`
-	Deleted          bool                `json:"deleted"`
-	Status           string              `json:"status"`
-	CreatedByID      *int64              `json:"createdById,omitempty"`
-	CreatedBy        *CreatedByUser      `json:"createdBy,omitempty"`
-	UpdatedByID      *int64              `json:"updatedById,omitempty"`
-	UpdatedBy        *UpdatedByUser      `json:"updatedBy,omitempty"`
-	LocationSchedule []*LocationSchedule `json:"locationSchedule"`
+	ID                int64               `json:"id" sql:"primary_key"`
+	CreatedAt         time.Time           `json:"createdAt"`
+	UpdatedAt         time.Time           `json:"updatedAt"`
+	Name              string              `json:"name"`
+	Description       *string             `json:"description,omitempty"`
+	Type              string              `json:"type"`
+	OwnerID           *int64              `json:"ownerId,omitempty"`
+	Owner             *Owner              `json:"owner,omitempty"`
+	AddressID         int64               `json:"addressId"`
+	Address           *Address            `json:"address,omitempty"`
+	Deleted           bool                `json:"deleted"`
+	Status            string              `json:"status"`
+	CreatedByID       *int64              `json:"createdById,omitempty"`
+	CreatedBy         *CreatedByUser      `json:"createdBy,omitempty"`
+	UpdatedByID       *int64              `json:"updatedById,omitempty"`
+	UpdatedBy         *UpdatedByUser      `json:"updatedBy,omitempty"`
+	LocationSchedule  []*LocationSchedule `json:"locationSchedule"`
+	LocationInstances []*LocationInstance `json:"locationInstances"`
+}
+
+type LocationInstance struct {
+	ID   int64   `json:"id" sql:"primary_key"`
+	Name *string `json:"name,omitempty"`
 }
 
 type LocationSchedule struct {
