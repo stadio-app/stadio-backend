@@ -144,3 +144,56 @@ func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEvent
 	}
 	return events, nil
 }
+
+func (service Service) LocationInstances(ctx context.Context, location_id int64) ([]model.LocationInstance, error) {
+	qb := table.LocationInstance.
+		SELECT(table.LocationInstance.ID).
+		FROM(table.LocationInstance).
+		WHERE(table.LocationInstance.LocationID.EQ(postgres.Int(location_id)))
+	var location_instances []model.LocationInstance
+	if err := qb.QueryContext(ctx, service.DbOrTxQueryable(), &location_instances); err != nil {
+		return nil, err
+	}
+	return location_instances, nil
+}
+
+func (service Service) UnavailableLocationsBetween(
+	ctx context.Context,
+	location_id int64,
+	from time.Time,
+	to time.Time,
+) ([]model.LocationInstance, error) {
+	qb := table.LocationInstance.
+		SELECT(table.LocationInstance.AllColumns).
+		FROM(
+			table.LocationInstance.
+				INNER_JOIN(table.Location, table.Location.ID.EQ(table.LocationInstance.LocationID)).
+				LEFT_JOIN(
+					table.Event,
+					table.Event.LocationID.EQ(table.Location.ID).
+						AND(table.Event.LocationInstanceID.EQ(table.LocationInstance.ID)),
+				),
+		).
+		WHERE(
+			postgres.AND(
+				table.LocationInstance.LocationID.EQ(postgres.Int(location_id)),
+				postgres.OR(
+					// covers cases when event from or to are within db start or end dates
+					postgres.OR(
+						postgres.TimestampzT(from).BETWEEN(table.Event.StartDate, table.Event.EndDate),
+						postgres.TimestampzT(to).BETWEEN(table.Event.StartDate, table.Event.EndDate),
+					),
+					// covers cases when from or to overlap db start or end dates
+					postgres.OR(
+						table.Event.StartDate.BETWEEN(postgres.TimestampzT(from), postgres.TimestampzT(to)),
+						table.Event.EndDate.BETWEEN(postgres.TimestampzT(from), postgres.TimestampzT(to)),
+					),
+				),
+			),
+		)
+	var unavailable_instances []model.LocationInstance
+	if err := qb.QueryContext(ctx, service.DbOrTxQueryable(), &unavailable_instances); err != nil {
+		return nil, err
+	}
+	return unavailable_instances, nil
+}
