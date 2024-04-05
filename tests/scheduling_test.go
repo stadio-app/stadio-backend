@@ -87,6 +87,36 @@ func TestLocation(t *testing.T) {
 				}
 			}
 		}
+
+		t.Run("show all location instances", func(t *testing.T) {
+			all_instances, err := service.AllLocationInstances(ctx, location.ID)
+			if err != nil {
+				t.Fatal("could not return all location instances", err.Error())
+			}
+			if len(all_instances) != len(input.Instances) {
+				t.Fatal("length does not match")
+			}
+		})
+
+		t.Run("show all unavailable location instances", func(t *testing.T) {
+			instances, err := service.UnavailableLocationInstancesBetween(ctx, location.ID, time.Now(), time.Now().Add(time.Hour))
+			if err != nil {
+				t.Fatal("could not return location instances", err.Error())
+			}
+			if len(instances) != 0 {
+				t.Fatal("there should be no other events to cause a conflict")
+			}
+		})
+
+		t.Run("show all available location instances", func(t *testing.T) {
+			instances, err := service.AvailableLocationInstancesBetween(ctx, location.ID, time.Now(), time.Now().Add(time.Hour))
+			if err != nil {
+				t.Fatal("could not return location instances", err.Error())
+			}
+			if len(instances) != len(input.Instances) {
+				t.Fatal("there should be exactly the same instances available as the amount created")
+			}
+		})
 	})
 
 	t.Run("create event", func(t *testing.T) {

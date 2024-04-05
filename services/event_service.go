@@ -23,6 +23,14 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 		return gmodel.EventShallow{}, fmt.Errorf("time slot already taken by another event")
 	}
 
+	location_instances, err := service.AvailableLocationInstancesBetween(ctx, input.LocationID, input.StartDate, input.EndDate)
+	if err != nil {
+		return gmodel.EventShallow{}, err
+	}
+	if len(location_instances) == 0 {
+		return gmodel.EventShallow{}, fmt.Errorf("location is full at this time")
+	}
+
 	qb := table.Event.
 		INSERT(
 			table.Event.LocationID,
@@ -31,6 +39,7 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 			table.Event.Type,
 			table.Event.StartDate,
 			table.Event.EndDate,
+			table.Event.LocationInstanceID,
 			table.Event.CreatedByID,
 			table.Event.UpdatedByID,
 		).
@@ -41,6 +50,7 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 			Type: &input.Type,
 			StartDate: input.StartDate,
 			EndDate: input.EndDate,
+			LocationInstanceID: &location_instances[0].ID,
 			CreatedByID: &user.ID,
 			UpdatedByID: &user.ID,
 		}).RETURNING(table.Event.AllColumns)
@@ -145,7 +155,7 @@ func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEvent
 	return events, nil
 }
 
-func (service Service) LocationInstances(ctx context.Context, location_id int64) ([]model.LocationInstance, error) {
+func (service Service) AllLocationInstances(ctx context.Context, location_id int64) ([]model.LocationInstance, error) {
 	qb := table.LocationInstance.
 		SELECT(table.LocationInstance.ID).
 		FROM(table.LocationInstance).
@@ -157,7 +167,7 @@ func (service Service) LocationInstances(ctx context.Context, location_id int64)
 	return location_instances, nil
 }
 
-func (service Service) UnavailableLocationsBetween(
+func (service Service) UnavailableLocationInstancesBetween(
 	ctx context.Context,
 	location_id int64,
 	from time.Time,
@@ -196,4 +206,32 @@ func (service Service) UnavailableLocationsBetween(
 		return nil, err
 	}
 	return unavailable_instances, nil
+}
+
+func (service Service) AvailableLocationInstancesBetween(ctx context.Context,
+	location_id int64,
+	from time.Time,
+	to time.Time,
+) ([]model.LocationInstance, error) {
+	available_instances := []model.LocationInstance{}
+	all_instances, err := service.AllLocationInstances(ctx, location_id)
+	if err != nil {
+		return available_instances, err
+	}
+
+	unavailable_instances, err := service.UnavailableLocationInstancesBetween(ctx, location_id, from, to)
+	if err != nil {
+		return available_instances, err
+	}
+	unavailable_instance_map := map[int64]int64{}
+	for _, instance := range unavailable_instances {
+		unavailable_instance_map[instance.ID] = instance.ID
+	}
+
+	for _, instance := range all_instances {
+		if unavailable_instance_map[instance.ID] == 0 {
+			available_instances = append(available_instances, instance)
+		}
+	}
+	return available_instances, nil
 }
