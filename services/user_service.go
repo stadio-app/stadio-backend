@@ -2,12 +2,16 @@ package services
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
+	"google.golang.org/api/oauth2/v2"
 )
 
 func (service Service) CreateInternalUser(ctx context.Context, input gmodel.CreateAccountInput) (gmodel.User, error) {
@@ -62,6 +66,61 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 	return user, nil
 }
 
+func (service Service) CreateOauthUser(ctx context.Context, input gmodel.CreateAccountInput, oauth_type model.UserAuthPlatformType) (gmodel.User, error) {
+	var user gmodel.User
+	qb := table.User.
+		INSERT(
+			table.User.Email,
+			table.User.Name,
+			table.User.AuthPlatform,
+			table.User.Active,
+			table.User.PhoneNumber,
+		).
+		MODEL(model.User{
+			Email: input.Email,
+			Name: input.Name,
+			AuthPlatform: oauth_type,
+			Active: true,
+			PhoneNumber: input.PhoneNumber,
+		}).
+		RETURNING(table.User.AllColumns)
+	if err := qb.QueryContext(ctx, service.DbOrTxQueryable(), &user); err != nil {
+		return gmodel.User{}, fmt.Errorf("user entry could not be created. %s", err.Error())
+	}
+	return user, nil
+}
+
+func (service Service) GoogleAuthentication(ctx context.Context, access_token string) (auth_state gmodel.Auth, created bool, err error) {
+	res, err := http.Get(fmt.Sprintf("https://www.googleapis.com/oauth2/v2/userinfo?access_token=%s", access_token))
+	if err != nil {
+		return gmodel.Auth{}, false, err
+	}
+	userDataRaw, err := io.ReadAll(res.Body)
+	if err != nil {
+		return gmodel.Auth{}, false, err
+	}
+	var userData oauth2.Userinfo
+	if err := json.Unmarshal(userDataRaw, &userData); err != nil {
+		return gmodel.Auth{}, false, err
+	}
+
+	var user gmodel.User
+	if service.UserEmailExists(ctx, userData.Email) {
+		user, _ = service.FindUserByEmail(ctx, userData.Email)
+	} else {
+		user, err = service.CreateOauthUser(ctx, gmodel.CreateAccountInput{
+			Email: userData.Email,
+			Name: userData.Name,
+		}, model.UserAuthPlatformType_Google)
+		if err != nil {
+			return gmodel.Auth{}, false, err
+		}
+		created = true
+	}
+	auth_state, err = service.CreateAuthStateWithJwt(ctx, user.ID)
+	return auth_state, created, err
+}
+
 func (service Service) LoginInternal(ctx context.Context, email string, password string) (gmodel.Auth, error) {
 	db := service.DbOrTxQueryable()	
 	query := table.User.
@@ -82,25 +141,29 @@ func (service Service) LoginInternal(ctx context.Context, email string, password
 		return gmodel.Auth{}, fmt.Errorf("incorrect email or password")
 	}
 
+	return service.CreateAuthStateWithJwt(ctx, verify_user.ID)
+}
+
+func (service Service) CreateAuthStateWithJwt(ctx context.Context, user_id int64) (gmodel.Auth, error) {
 	auth_state, auth_state_err := service.CreateAuthState(ctx, gmodel.User{
-		ID: verify_user.ID,
+		ID: user_id,
 	}, nil)
 	if auth_state_err != nil {
 		return gmodel.Auth{}, fmt.Errorf("could not create auth state")
 	}
 
-	query = table.User.
+	qb := table.User.
 		SELECT(table.User.AllColumns, table.AuthState.ID).
 		FROM(table.User.LEFT_JOIN(
 			table.AuthState, 
 			table.User.ID.EQ(table.AuthState.UserID),
 		)).
 		WHERE(postgres.AND(
-			table.User.ID.EQ(postgres.Int(verify_user.ID)),
+			table.User.ID.EQ(postgres.Int(user_id)),
 			table.AuthState.ID.EQ(postgres.Int(auth_state.ID)),
 		)).LIMIT(1)
 	var user gmodel.User
-	if err := query.QueryContext(ctx, db, &user); err != nil {
+	if err := qb.QueryContext(ctx, service.DbOrTxQueryable(), &user); err != nil {
 		return gmodel.Auth{}, fmt.Errorf("internal error")
 	}
 
@@ -125,4 +188,16 @@ func (service Service) UserEmailExists(ctx context.Context, email string) bool {
 	var dest struct{ Email string }
 	err := query.QueryContext(ctx, service.DbOrTxQueryable(), &dest)
 	return err == nil
+}
+
+func (service Service) FindUserByEmail(ctx context.Context, email string) (gmodel.User, error) {
+	qb := table.User.
+		SELECT(table.User.AllColumns).
+		WHERE(table.User.Email.EQ(postgres.String(email))).
+		LIMIT(1)
+	var user gmodel.User
+	if err := qb.QueryContext(ctx, service.DbOrTxQueryable(), &user); err != nil {
+		return gmodel.User{}, err
+	}
+	return user, nil
 }
