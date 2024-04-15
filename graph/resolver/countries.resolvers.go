@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/go-jet/jet/v2/postgres"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -19,7 +20,7 @@ func (r *queryResolver) GetAllCountries(ctx context.Context) ([]*gmodel.Country,
 		SELECT(
 			table.Country.AllColumns,
 			table.AdministrativeDivision.AdministrativeDivision,
-			table.AdministrativeDivision.Cities,
+			postgres.Raw("array_to_json(administrative_division.cities)::TEXT").AS("administrative_division.cities"),
 			table.Currency.AllColumns,
 		).
 		FROM(
