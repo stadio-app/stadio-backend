@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
@@ -19,8 +18,13 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 	if !service.LocationScheduleAvailableBetween(ctx, input.LocationID, input.StartDate, input.EndDate) {
 		return gmodel.EventShallow{}, fmt.Errorf("location is unavailable at the selected date range")
 	}
-	if service.EventTimingCollides(ctx, input.LocationID, input.StartDate, input.EndDate) {
-		return gmodel.EventShallow{}, fmt.Errorf("time slot already taken by another event")
+
+	location_instances, err := service.AvailableLocationInstancesBetween(ctx, input.LocationID, input.StartDate, input.EndDate)
+	if err != nil {
+		return gmodel.EventShallow{}, err
+	}
+	if len(location_instances) == 0 {
+		return gmodel.EventShallow{}, fmt.Errorf("location is full at this time")
 	}
 
 	qb := table.Event.
@@ -31,6 +35,7 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 			table.Event.Type,
 			table.Event.StartDate,
 			table.Event.EndDate,
+			table.Event.LocationInstanceID,
 			table.Event.CreatedByID,
 			table.Event.UpdatedByID,
 		).
@@ -41,6 +46,7 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 			Type: &input.Type,
 			StartDate: input.StartDate,
 			EndDate: input.EndDate,
+			LocationInstanceID: &location_instances[0].ID,
 			CreatedByID: &user.ID,
 			UpdatedByID: &user.ID,
 		}).RETURNING(table.Event.AllColumns)
@@ -49,35 +55,6 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 		return gmodel.EventShallow{}, err
 	}
 	return new_event, nil
-}
-
-func (service Service) EventTimingCollides(ctx context.Context, location_id int64, from time.Time, to time.Time) bool {
-	qb := table.Event.
-		SELECT(table.Event.ID).
-		FROM(table.Event).
-		WHERE(
-			postgres.AND(
-				table.Event.LocationID.EQ(postgres.Int(location_id)),
-				postgres.OR(
-					// covers cases when from or to are contained inbound
-					postgres.OR(
-						postgres.TimestampzT(from).BETWEEN(table.Event.StartDate, table.Event.EndDate),
-						postgres.TimestampzT(to).BETWEEN(table.Event.StartDate, table.Event.EndDate),
-					),
-					// covers cases when from or to overlap db start or end dates
-					postgres.OR(
-						table.Event.StartDate.BETWEEN(postgres.TimestampzT(from), postgres.TimestampzT(to)),
-						table.Event.EndDate.BETWEEN(postgres.TimestampzT(from), postgres.TimestampzT(to)),
-					),
-				),
-			),
-		)
-	var conflicting_events []int
-	db := service.DbOrTxQueryable()
-	if err := qb.QueryContext(ctx, db, &conflicting_events); err != nil {
-		return true
-	}
-	return len(conflicting_events) != 0
 }
 
 func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]gmodel.Event, error) {

@@ -7,10 +7,14 @@
 
 package model
 
-type Country struct {
-	Code        CountryCodeAlpha2 `sql:"primary_key"`
-	Name        string
-	Currency    *string
-	CallingCode *string
-	Language    *string
+import (
+	"time"
+)
+
+type LocationInstance struct {
+	ID         int64 `sql:"primary_key"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	LocationID int64
+	Name       *string
 }

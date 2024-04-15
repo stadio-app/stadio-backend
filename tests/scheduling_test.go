@@ -37,6 +37,18 @@ func init_schedule(from int, to int, open_on_weekends bool) []*gmodel.CreateLoca
 	return schedule_ptr
 }
 
+func init_location_instances(count int) []*gmodel.CreateLocationInstance {
+	instances := make([]gmodel.CreateLocationInstance, count)
+	for i := range instances {
+		instances[i] = gmodel.CreateLocationInstance{ Name: fmt.Sprintf("field #%d", i) }
+	}
+	result := make([]*gmodel.CreateLocationInstance, count)
+	for i := range instances {
+		result[i] = &instances[i]
+	}
+	return result
+}
+
 func TestLocation(t *testing.T) {
 	user, err := service.CreateInternalUser(ctx, gmodel.CreateAccountInput{
 		Email: "location_test@thestadio.com",
@@ -62,6 +74,9 @@ func TestLocation(t *testing.T) {
 				CountryCode: model.CountryCodeAlpha2_Us.String(),
 			},
 			Schedule: init_schedule(9, 17, false),
+			Instances: []*gmodel.CreateLocationInstance{
+				{Name: "Field #1"},
+			},
 		}
 		if location, err = service.CreateLocation(ctx, &user, input); err != nil {
 			t.Fatal(err.Error())
@@ -84,6 +99,36 @@ func TestLocation(t *testing.T) {
 				}
 			}
 		}
+
+		t.Run("show all location instances", func(t *testing.T) {
+			all_instances, err := service.AllLocationInstances(ctx, location.ID)
+			if err != nil {
+				t.Fatal("could not return all location instances", err.Error())
+			}
+			if len(all_instances) != len(input.Instances) {
+				t.Fatal("length does not match")
+			}
+		})
+
+		t.Run("show all unavailable location instances", func(t *testing.T) {
+			instances, err := service.UnavailableLocationInstancesBetween(ctx, location.ID, time.Now(), time.Now().Add(time.Hour))
+			if err != nil {
+				t.Fatal("could not return location instances", err.Error())
+			}
+			if len(instances) != 0 {
+				t.Fatal("there should be no other events to cause a conflict")
+			}
+		})
+
+		t.Run("show all available location instances", func(t *testing.T) {
+			instances, err := service.AvailableLocationInstancesBetween(ctx, location.ID, time.Now(), time.Now().Add(time.Hour))
+			if err != nil {
+				t.Fatal("could not return location instances", err.Error())
+			}
+			if len(instances) != len(input.Instances) {
+				t.Fatal("there should be exactly the same instances available as the amount created")
+			}
+		})
 	})
 
 	t.Run("create event", func(t *testing.T) {
@@ -268,6 +313,119 @@ func TestLocation(t *testing.T) {
 			})
 			if err != nil {
 				t.Fatal("location should be available.", err.Error())
+			}
+		})
+	})
+
+	t.Run("complex scheduling", func(t *testing.T) {
+		num_instances := 7
+		location, err := service.CreateLocation(ctx, &user, gmodel.CreateLocation{
+			Name: "My Soccer Field",
+			Type: "Indoor Soccer Field",
+			Address: &gmodel.CreateAddress{
+				Latitude: 39.49739,
+				Longitude: -109.76647,
+				MapsLink: "https://www.google.com/maps/place/39%C2%B029'50.6%22N+109%C2%B045'59.3%22W/@39.49739,-109.76647,16953012m/data=!3m1!1e3!4m4!3m3!8m2!3d39.49739!4d-109.76647?entry=ttu",
+				FullAddress: "Some Random Location, Vernal, UT 84078, USA",
+				City: "Vernal",
+				AdministrativeDivision: "Utah",
+				CountryCode: model.CountryCodeAlpha2_Us.String(),
+			},
+			Schedule: init_schedule(7, 20, true), // 7am - 8pm
+			Instances: init_location_instances(num_instances),
+		})
+		if err != nil {
+			t.Fatal("could not create complex location")
+		}
+		if len(location.LocationInstances) != num_instances {
+			t.Fatal("incorrect number of instances created")
+		}
+
+		now := time.Now()
+
+		t.Run("create 1 event per instance at now", func(t *testing.T) {
+			for i := 0; i < num_instances; i++ {
+				event, err := service.CreateEvent(ctx, user, gmodel.CreateEvent{
+					Name: fmt.Sprintf("event #%d", i + 1),
+					StartDate: now,
+					EndDate: now.Add(time.Hour),
+					LocationID: location.ID,
+				})
+
+				if err != nil {
+					t.Fatal("could not create event", err.Error())
+				}
+
+				if event.LocationInstanceID != location.LocationInstances[i].ID {
+					t.Fatal("order should be based on location_instance.id", event)
+				}
+			}
+
+			t.Run("re-create 1 event per instance at now", func(t *testing.T) {
+				for i := 0; i < num_instances; i++ {
+					_, err := service.CreateEvent(ctx, user, gmodel.CreateEvent{
+						Name: fmt.Sprintf("event #%d", i + 1),
+						StartDate: now,
+						EndDate: now.Add(time.Hour),
+						LocationID: location.ID,
+					})
+	
+					if err == nil {
+						t.Fatal("event should already be full at the specified time")
+					}
+				}
+			})
+		})
+
+		t.Run("create 1 event per instance 1 hour after now", func(t *testing.T) {
+			cur_now := now.Add(time.Hour)
+			all_instances, err := service.AllLocationInstances(ctx, location.ID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(all_instances) != num_instances {
+				t.Fatal("incorrect number of location instances")
+			}
+
+			unavailable, err := service.UnavailableLocationInstancesBetween(ctx, location.ID, cur_now, cur_now.Add(time.Hour))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(unavailable) != 0 {
+				t.Fatal("there should be no unavailable location instances for this date range")
+			}
+
+			for i := 0; i < num_instances; i++ {
+				event, err := service.CreateEvent(ctx, user, gmodel.CreateEvent{
+					Name: fmt.Sprintf("event #%d", i + 1),
+					StartDate: cur_now,
+					EndDate: cur_now.Add(time.Hour),
+					LocationID: location.ID,
+				})
+
+				if err != nil {
+					t.Fatal("could not create event", err.Error())
+				}
+
+				if event.LocationInstanceID != location.LocationInstances[i].ID {
+					t.Fatal("order should be based on location_instance.id", event)
+				}
+			}
+
+			unavailable, err = service.UnavailableLocationInstancesBetween(ctx, location.ID, cur_now, cur_now.Add(time.Hour))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(unavailable) != num_instances {
+				t.Fatalf("there should be %d unavailable instances for the date range", num_instances)
+			}
+
+			available, err := service.AvailableLocationInstancesBetween(ctx, location.ID, cur_now, cur_now.Add(time.Hour))
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(available) != 0 {
+				t.Fatal("there should be no available location instances")
 			}
 		})
 	})

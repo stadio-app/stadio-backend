@@ -13,6 +13,13 @@ import (
 )
 
 func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, input gmodel.CreateLocation) (gmodel.Location, error) {
+	if len(input.Instances) == 0 {
+		return gmodel.Location{}, fmt.Errorf("must provide at least 1 location instance")
+	}
+	if len(input.Schedule) < 7 {
+		return gmodel.Location{}, fmt.Errorf("minimum of 7 days of schedule is required")
+	}
+	
 	tx, err := service.DB.BeginTx(ctx, nil)
 	if err != nil {
 		return gmodel.Location{}, fmt.Errorf("could not start transaction")
@@ -49,6 +56,13 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	}
 	location.Address = &address
 
+	// add location instances
+	location.LocationInstances, err = service.BulkCreateLocationInstances(ctx, location.ID, input.Instances)
+	if err != nil {
+		tx.Rollback()
+		return gmodel.Location{}, err
+	}
+
 	// add location schedules
 	location.LocationSchedule, err = service.BulkCreateLocationSchedule(ctx, location.ID, input.Schedule)
 	if err != nil {
@@ -61,6 +75,31 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 		return gmodel.Location{}, fmt.Errorf("could not commit location via transaction")
 	}
 	return location, nil
+}
+
+func (service Service) BulkCreateLocationInstances(
+	ctx context.Context, 
+	location_id int64, 
+	input []*gmodel.CreateLocationInstance,
+) (location_instances []*gmodel.LocationInstance, err error) {
+	create_location_instances := make([]model.LocationInstance, len(input))
+	for i := range input {
+		create_location_instances[i] = model.LocationInstance{
+			LocationID: location_id,
+			Name: &input[i].Name,
+		}
+	}
+	qb := table.LocationInstance.
+		INSERT(
+			table.LocationInstance.LocationID,
+			table.LocationInstance.Name,
+		).
+		MODELS(create_location_instances).
+		RETURNING(table.LocationInstance.AllColumns)
+	if err = qb.QueryContext(ctx, service.DbOrTxQueryable(), &location_instances); err != nil {
+		return nil, err
+	}
+	return location_instances, nil
 }
 
 func (service Service) BulkCreateLocationSchedule(
@@ -183,6 +222,10 @@ func (service Service) LocationScheduleAvailableBetween(ctx context.Context, loc
 					postgres.TimeT(from).GT_EQ(table.LocationSchedule.From),
 					postgres.Int32(int32(to_duration)).LT_EQ(table.LocationSchedule.ToDuration),
 				),
+				postgres.OR(
+					table.LocationSchedule.On.BETWEEN(postgres.Date(from.Date()), postgres.Date(to.Date())),
+					table.LocationSchedule.On.IS_NULL(),
+				),
 			),
 		).
 		ORDER_BY(table.LocationSchedule.CreatedAt.DESC())
@@ -225,4 +268,89 @@ func (Service) ToDuration(from int, to int) int32 {
 		return int32(to - from)
 	}
 	return int32((to + 24) - from)
+}
+
+func (service Service) AllLocationInstances(ctx context.Context, location_id int64) ([]model.LocationInstance, error) {
+	qb := table.LocationInstance.
+		SELECT(table.LocationInstance.ID).
+		FROM(table.LocationInstance).
+		WHERE(table.LocationInstance.LocationID.EQ(postgres.Int(location_id)))
+	var location_instances []model.LocationInstance
+	if err := qb.QueryContext(ctx, service.DbOrTxQueryable(), &location_instances); err != nil {
+		return nil, err
+	}
+	return location_instances, nil
+}
+
+func (service Service) UnavailableLocationInstancesBetween(
+	ctx context.Context,
+	location_id int64,
+	from time.Time,
+	to time.Time,
+) ([]model.LocationInstance, error) {
+	// 1 minute wiggle room
+	from = from.Add(time.Minute)
+	to = to.Add(-1 * time.Minute)
+
+	qb := table.LocationInstance.
+		SELECT(table.LocationInstance.AllColumns).
+		FROM(
+			table.LocationInstance.
+				INNER_JOIN(table.Location, table.Location.ID.EQ(table.LocationInstance.LocationID)).
+				LEFT_JOIN(
+					table.Event,
+					table.Event.LocationID.EQ(table.Location.ID).
+						AND(table.Event.LocationInstanceID.EQ(table.LocationInstance.ID)),
+				),
+		).
+		WHERE(
+			postgres.AND(
+				table.LocationInstance.LocationID.EQ(postgres.Int(location_id)),
+				postgres.OR(
+					// covers cases when event from or to are within db start or end dates
+					postgres.OR(
+						postgres.TimestampzT(from).BETWEEN(table.Event.StartDate, table.Event.EndDate),
+						postgres.TimestampzT(to).BETWEEN(table.Event.StartDate, table.Event.EndDate),
+					),
+					// covers cases when from or to overlap db start or end dates
+					postgres.OR(
+						table.Event.StartDate.BETWEEN(postgres.TimestampzT(from), postgres.TimestampzT(to)),
+						table.Event.EndDate.BETWEEN(postgres.TimestampzT(from), postgres.TimestampzT(to)),
+					),
+				),
+			),
+		)
+	var unavailable_instances []model.LocationInstance
+	if err := qb.QueryContext(ctx, service.DbOrTxQueryable(), &unavailable_instances); err != nil {
+		return nil, err
+	}
+	return unavailable_instances, nil
+}
+
+func (service Service) AvailableLocationInstancesBetween(ctx context.Context,
+	location_id int64,
+	from time.Time,
+	to time.Time,
+) ([]model.LocationInstance, error) {
+	available_instances := []model.LocationInstance{}
+	all_instances, err := service.AllLocationInstances(ctx, location_id)
+	if err != nil {
+		return available_instances, err
+	}
+
+	unavailable_instances, err := service.UnavailableLocationInstancesBetween(ctx, location_id, from, to)
+	if err != nil {
+		return available_instances, err
+	}
+	unavailable_instance_map := map[int64]int64{}
+	for _, instance := range unavailable_instances {
+		unavailable_instance_map[instance.ID] = instance.ID
+	}
+
+	for _, instance := range all_instances {
+		if unavailable_instance_map[instance.ID] == 0 {
+			available_instances = append(available_instances, instance)
+		}
+	}
+	return available_instances, nil
 }

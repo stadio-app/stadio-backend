@@ -7,7 +7,6 @@ package gresolver
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph"
@@ -19,16 +18,22 @@ func (r *queryResolver) GetAllCountries(ctx context.Context) ([]*gmodel.Country,
 	qb := table.Country.
 		SELECT(
 			table.Country.AllColumns,
-			table.AdministrativeDivision.AllColumns,
+			table.AdministrativeDivision.AdministrativeDivision,
+			table.AdministrativeDivision.Cities,
+			table.Currency.AllColumns,
 		).
 		FROM(
 			table.Country.
-				INNER_JOIN(table.AdministrativeDivision, table.AdministrativeDivision.CountryCode.EQ(table.Country.Code)),
+				INNER_JOIN(table.AdministrativeDivision, table.AdministrativeDivision.CountryCode.EQ(table.Country.Code)).
+				INNER_JOIN(table.Currency, table.Currency.CurrencyCode.EQ(table.Country.Currency)),
+		).
+		ORDER_BY(
+			table.Country.Name.ASC(),
+			table.AdministrativeDivision.AdministrativeDivision.ASC(),
 		)
 	var countries []*gmodel.Country
 	if err := qb.QueryContext(ctx, r.AppContext.DB, &countries); err != nil {
-		log.Println(err.Error())
-		return nil, fmt.Errorf("could not query countries data")
+		return nil, fmt.Errorf("could not query country data")
 	}
 	return countries, nil
 }

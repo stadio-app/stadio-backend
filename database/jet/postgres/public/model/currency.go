@@ -7,10 +7,11 @@
 
 package model
 
-type Country struct {
-	Code        CountryCodeAlpha2 `sql:"primary_key"`
-	Name        string
-	Currency    *string
-	CallingCode *string
-	Language    *string
+type Currency struct {
+	CurrencyCode string `sql:"primary_key"`
+	Name         string
+	Symbol       string
+	SymbolNative string
+	Decimals     int32
+	NumToBasic   *int32
 }

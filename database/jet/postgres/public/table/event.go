@@ -17,18 +17,19 @@ type eventTable struct {
 	postgres.Table
 
 	// Columns
-	ID          postgres.ColumnInteger
-	CreatedAt   postgres.ColumnTimestampz
-	UpdatedAt   postgres.ColumnTimestampz
-	Name        postgres.ColumnString
-	Description postgres.ColumnString
-	Type        postgres.ColumnString
-	StartDate   postgres.ColumnTimestampz
-	EndDate     postgres.ColumnTimestampz
-	LocationID  postgres.ColumnInteger
-	CreatedByID postgres.ColumnInteger
-	UpdatedByID postgres.ColumnInteger
-	Approved    postgres.ColumnBool
+	ID                 postgres.ColumnInteger
+	CreatedAt          postgres.ColumnTimestampz
+	UpdatedAt          postgres.ColumnTimestampz
+	Name               postgres.ColumnString
+	Description        postgres.ColumnString
+	Type               postgres.ColumnString
+	StartDate          postgres.ColumnTimestampz
+	EndDate            postgres.ColumnTimestampz
+	LocationID         postgres.ColumnInteger
+	CreatedByID        postgres.ColumnInteger
+	UpdatedByID        postgres.ColumnInteger
+	Approved           postgres.ColumnBool
+	LocationInstanceID postgres.ColumnInteger
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -69,38 +70,40 @@ func newEventTable(schemaName, tableName, alias string) *EventTable {
 
 func newEventTableImpl(schemaName, tableName, alias string) eventTable {
 	var (
-		IDColumn          = postgres.IntegerColumn("id")
-		CreatedAtColumn   = postgres.TimestampzColumn("created_at")
-		UpdatedAtColumn   = postgres.TimestampzColumn("updated_at")
-		NameColumn        = postgres.StringColumn("name")
-		DescriptionColumn = postgres.StringColumn("description")
-		TypeColumn        = postgres.StringColumn("type")
-		StartDateColumn   = postgres.TimestampzColumn("start_date")
-		EndDateColumn     = postgres.TimestampzColumn("end_date")
-		LocationIDColumn  = postgres.IntegerColumn("location_id")
-		CreatedByIDColumn = postgres.IntegerColumn("created_by_id")
-		UpdatedByIDColumn = postgres.IntegerColumn("updated_by_id")
-		ApprovedColumn    = postgres.BoolColumn("approved")
-		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, StartDateColumn, EndDateColumn, LocationIDColumn, CreatedByIDColumn, UpdatedByIDColumn, ApprovedColumn}
-		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, StartDateColumn, EndDateColumn, LocationIDColumn, CreatedByIDColumn, UpdatedByIDColumn, ApprovedColumn}
+		IDColumn                 = postgres.IntegerColumn("id")
+		CreatedAtColumn          = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn          = postgres.TimestampzColumn("updated_at")
+		NameColumn               = postgres.StringColumn("name")
+		DescriptionColumn        = postgres.StringColumn("description")
+		TypeColumn               = postgres.StringColumn("type")
+		StartDateColumn          = postgres.TimestampzColumn("start_date")
+		EndDateColumn            = postgres.TimestampzColumn("end_date")
+		LocationIDColumn         = postgres.IntegerColumn("location_id")
+		CreatedByIDColumn        = postgres.IntegerColumn("created_by_id")
+		UpdatedByIDColumn        = postgres.IntegerColumn("updated_by_id")
+		ApprovedColumn           = postgres.BoolColumn("approved")
+		LocationInstanceIDColumn = postgres.IntegerColumn("location_instance_id")
+		allColumns               = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, StartDateColumn, EndDateColumn, LocationIDColumn, CreatedByIDColumn, UpdatedByIDColumn, ApprovedColumn, LocationInstanceIDColumn}
+		mutableColumns           = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, NameColumn, DescriptionColumn, TypeColumn, StartDateColumn, EndDateColumn, LocationIDColumn, CreatedByIDColumn, UpdatedByIDColumn, ApprovedColumn, LocationInstanceIDColumn}
 	)
 
 	return eventTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:          IDColumn,
-		CreatedAt:   CreatedAtColumn,
-		UpdatedAt:   UpdatedAtColumn,
-		Name:        NameColumn,
-		Description: DescriptionColumn,
-		Type:        TypeColumn,
-		StartDate:   StartDateColumn,
-		EndDate:     EndDateColumn,
-		LocationID:  LocationIDColumn,
-		CreatedByID: CreatedByIDColumn,
-		UpdatedByID: UpdatedByIDColumn,
-		Approved:    ApprovedColumn,
+		ID:                 IDColumn,
+		CreatedAt:          CreatedAtColumn,
+		UpdatedAt:          UpdatedAtColumn,
+		Name:               NameColumn,
+		Description:        DescriptionColumn,
+		Type:               TypeColumn,
+		StartDate:          StartDateColumn,
+		EndDate:            EndDateColumn,
+		LocationID:         LocationIDColumn,
+		CreatedByID:        CreatedByIDColumn,
+		UpdatedByID:        UpdatedByIDColumn,
+		Approved:           ApprovedColumn,
+		LocationInstanceID: LocationInstanceIDColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

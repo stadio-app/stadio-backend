@@ -17,8 +17,11 @@ type countryTable struct {
 	postgres.Table
 
 	// Columns
-	Code postgres.ColumnString
-	Name postgres.ColumnString
+	Code        postgres.ColumnString
+	Name        postgres.ColumnString
+	Currency    postgres.ColumnString
+	CallingCode postgres.ColumnString
+	Language    postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -59,18 +62,24 @@ func newCountryTable(schemaName, tableName, alias string) *CountryTable {
 
 func newCountryTableImpl(schemaName, tableName, alias string) countryTable {
 	var (
-		CodeColumn     = postgres.StringColumn("code")
-		NameColumn     = postgres.StringColumn("name")
-		allColumns     = postgres.ColumnList{CodeColumn, NameColumn}
-		mutableColumns = postgres.ColumnList{NameColumn}
+		CodeColumn        = postgres.StringColumn("code")
+		NameColumn        = postgres.StringColumn("name")
+		CurrencyColumn    = postgres.StringColumn("currency")
+		CallingCodeColumn = postgres.StringColumn("calling_code")
+		LanguageColumn    = postgres.StringColumn("language")
+		allColumns        = postgres.ColumnList{CodeColumn, NameColumn, CurrencyColumn, CallingCodeColumn, LanguageColumn}
+		mutableColumns    = postgres.ColumnList{NameColumn, CurrencyColumn, CallingCodeColumn, LanguageColumn}
 	)
 
 	return countryTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		Code: CodeColumn,
-		Name: NameColumn,
+		Code:        CodeColumn,
+		Name:        NameColumn,
+		Currency:    CurrencyColumn,
+		CallingCode: CallingCodeColumn,
+		Language:    LanguageColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

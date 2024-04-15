@@ -79,6 +79,9 @@ func (service Service) LoginInternal(ctx context.Context, email string, password
 	if verify_user.AuthPlatform != model.UserAuthPlatformType_Internal || verify_user.Password == nil {
 		return gmodel.Auth{}, fmt.Errorf("login platform is %s", verify_user.AuthPlatform.String())
 	}
+	if verify_user.Password == nil {
+		return gmodel.Auth{}, fmt.Errorf("password has not been set for this account. try a different authentication method")
+	}
 	if !service.VerifyPasswordHash(password, *verify_user.Password) {
 		return gmodel.Auth{}, fmt.Errorf("incorrect email or password")
 	}

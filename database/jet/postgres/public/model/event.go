@@ -12,16 +12,17 @@ import (
 )
 
 type Event struct {
-	ID          int64 `sql:"primary_key"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	Name        string
-	Description *string
-	Type        *string
-	StartDate   time.Time
-	EndDate     time.Time
-	LocationID  *int64
-	CreatedByID *int64
-	UpdatedByID *int64
-	Approved    bool
+	ID                 int64 `sql:"primary_key"`
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+	Name               string
+	Description        *string
+	Type               *string
+	StartDate          time.Time
+	EndDate            time.Time
+	LocationID         *int64
+	CreatedByID        *int64
+	UpdatedByID        *int64
+	Approved           bool
+	LocationInstanceID *int64
 }
