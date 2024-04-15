@@ -102,36 +102,38 @@ type ComplexityRoot struct {
 	}
 
 	Event struct {
-		Approved    func(childComplexity int) int
-		CreatedAt   func(childComplexity int) int
-		CreatedBy   func(childComplexity int) int
-		CreatedByID func(childComplexity int) int
-		Description func(childComplexity int) int
-		EndDate     func(childComplexity int) int
-		ID          func(childComplexity int) int
-		Location    func(childComplexity int) int
-		LocationID  func(childComplexity int) int
-		Name        func(childComplexity int) int
-		StartDate   func(childComplexity int) int
-		Type        func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
-		UpdatedBy   func(childComplexity int) int
-		UpdatedByID func(childComplexity int) int
+		Approved           func(childComplexity int) int
+		CreatedAt          func(childComplexity int) int
+		CreatedBy          func(childComplexity int) int
+		CreatedByID        func(childComplexity int) int
+		Description        func(childComplexity int) int
+		EndDate            func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		Location           func(childComplexity int) int
+		LocationID         func(childComplexity int) int
+		LocationInstanceID func(childComplexity int) int
+		Name               func(childComplexity int) int
+		StartDate          func(childComplexity int) int
+		Type               func(childComplexity int) int
+		UpdatedAt          func(childComplexity int) int
+		UpdatedBy          func(childComplexity int) int
+		UpdatedByID        func(childComplexity int) int
 	}
 
 	EventShallow struct {
-		Approved    func(childComplexity int) int
-		CreatedAt   func(childComplexity int) int
-		CreatedByID func(childComplexity int) int
-		Description func(childComplexity int) int
-		EndDate     func(childComplexity int) int
-		ID          func(childComplexity int) int
-		LocationID  func(childComplexity int) int
-		Name        func(childComplexity int) int
-		StartDate   func(childComplexity int) int
-		Type        func(childComplexity int) int
-		UpdatedAt   func(childComplexity int) int
-		UpdatedByID func(childComplexity int) int
+		Approved           func(childComplexity int) int
+		CreatedAt          func(childComplexity int) int
+		CreatedByID        func(childComplexity int) int
+		Description        func(childComplexity int) int
+		EndDate            func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		LocationID         func(childComplexity int) int
+		LocationInstanceID func(childComplexity int) int
+		Name               func(childComplexity int) int
+		StartDate          func(childComplexity int) int
+		Type               func(childComplexity int) int
+		UpdatedAt          func(childComplexity int) int
+		UpdatedByID        func(childComplexity int) int
 	}
 
 	Location struct {
@@ -561,6 +563,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Event.LocationID(childComplexity), true
 
+	case "Event.locationInstanceId":
+		if e.complexity.Event.LocationInstanceID == nil {
+			break
+		}
+
+		return e.complexity.Event.LocationInstanceID(childComplexity), true
+
 	case "Event.name":
 		if e.complexity.Event.Name == nil {
 			break
@@ -651,6 +660,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EventShallow.LocationID(childComplexity), true
+
+	case "EventShallow.locationInstanceId":
+		if e.complexity.EventShallow.LocationInstanceID == nil {
+			break
+		}
+
+		return e.complexity.EventShallow.LocationInstanceID(childComplexity), true
 
 	case "EventShallow.name":
 		if e.complexity.EventShallow.Name == nil {
@@ -3454,6 +3470,50 @@ func (ec *executionContext) fieldContext_Event_location(ctx context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _Event_locationInstanceId(ctx context.Context, field graphql.CollectedField, obj *gmodel.Event) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Event_locationInstanceId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LocationInstanceID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNID2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Event_locationInstanceId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Event",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Event_createdById(ctx context.Context, field graphql.CollectedField, obj *gmodel.Event) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Event_createdById(ctx, field)
 	if err != nil {
@@ -4063,6 +4123,50 @@ func (ec *executionContext) _EventShallow_locationId(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext_EventShallow_locationId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "EventShallow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _EventShallow_locationInstanceId(ctx context.Context, field graphql.CollectedField, obj *gmodel.EventShallow) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_EventShallow_locationInstanceId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LocationInstanceID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int64)
+	fc.Result = res
+	return ec.marshalNID2int64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_EventShallow_locationInstanceId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "EventShallow",
 		Field:      field,
@@ -5697,6 +5801,8 @@ func (ec *executionContext) fieldContext_Mutation_createEvent(ctx context.Contex
 				return ec.fieldContext_EventShallow_endDate(ctx, field)
 			case "locationId":
 				return ec.fieldContext_EventShallow_locationId(ctx, field)
+			case "locationInstanceId":
+				return ec.fieldContext_EventShallow_locationInstanceId(ctx, field)
 			case "createdById":
 				return ec.fieldContext_EventShallow_createdById(ctx, field)
 			case "updatedById":
@@ -6496,6 +6602,8 @@ func (ec *executionContext) fieldContext_Query_allEvents(ctx context.Context, fi
 				return ec.fieldContext_Event_locationId(ctx, field)
 			case "location":
 				return ec.fieldContext_Event_location(ctx, field)
+			case "locationInstanceId":
+				return ec.fieldContext_Event_locationInstanceId(ctx, field)
 			case "createdById":
 				return ec.fieldContext_Event_createdById(ctx, field)
 			case "createdBy":
@@ -10219,6 +10327,11 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "location":
 			out.Values[i] = ec._Event_location(ctx, field, obj)
+		case "locationInstanceId":
+			out.Values[i] = ec._Event_locationInstanceId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createdById":
 			out.Values[i] = ec._Event_createdById(ctx, field, obj)
 		case "createdBy":
@@ -10305,6 +10418,11 @@ func (ec *executionContext) _EventShallow(ctx context.Context, sel ast.Selection
 			}
 		case "locationId":
 			out.Values[i] = ec._EventShallow_locationId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "locationInstanceId":
+			out.Values[i] = ec._EventShallow_locationInstanceId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

@@ -36,6 +36,7 @@ type Event {
   endDate: Time!
   locationId: ID!
   location: Location
+  locationInstanceId: ID!
   createdById: ID
   createdBy: CreatedByUser
   updatedById: ID
@@ -55,6 +56,8 @@ type EventShallow {
   startDate: Time! @goTag(key: "alias", value: "event.start_date")
   endDate: Time! @goTag(key: "alias", value: "event.end_date")
   locationId: ID! @goTag(key: "alias", value: "event.location_id")
+  locationInstanceId: ID!
+    @goTag(key: "alias", value: "event.location_instance_id")
   createdById: ID @goTag(key: "alias", value: "event.created_by_id")
   updatedById: ID @goTag(key: "alias", value: "event.updated_by_id")
   approved: Boolean! @goTag(key: "alias", value: "event.approved")
