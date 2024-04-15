@@ -288,6 +288,10 @@ func (service Service) UnavailableLocationInstancesBetween(
 	from time.Time,
 	to time.Time,
 ) ([]model.LocationInstance, error) {
+	// 1 minute wiggle room
+	from = from.Add(time.Minute)
+	to = to.Add(-1 * time.Minute)
+
 	qb := table.LocationInstance.
 		SELECT(table.LocationInstance.AllColumns).
 		FROM(
