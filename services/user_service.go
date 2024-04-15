@@ -92,12 +92,12 @@ func (service Service) CreateOauthUser(ctx context.Context, input gmodel.CreateA
 
 func (service Service) GoogleAuthentication(ctx context.Context, access_token string) (gmodel.Auth, error) {
 	res, err := http.Get(fmt.Sprintf("https://www.googleapis.com/oauth2/v2/userinfo?access_token=%s", access_token))
-	if err != nil {
-		return gmodel.Auth{}, err
+	if err != nil || res.StatusCode == http.StatusUnauthorized {
+		return gmodel.Auth{}, fmt.Errorf("invalid access token")
 	}
 	userDataRaw, err := io.ReadAll(res.Body)
 	if err != nil {
-		return gmodel.Auth{}, err
+		return gmodel.Auth{}, fmt.Errorf("could not read response body")
 	}
 	var userData oauth2.Userinfo
 	if err := json.Unmarshal(userDataRaw, &userData); err != nil {
