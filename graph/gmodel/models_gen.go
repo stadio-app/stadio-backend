@@ -41,8 +41,9 @@ type AllEventsFilter struct {
 }
 
 type Auth struct {
-	Token string `json:"token"`
-	User  *User  `json:"user"`
+	Token     string `json:"token"`
+	User      *User  `json:"user"`
+	IsNewUser *bool  `json:"isNewUser,omitempty"`
 }
 
 type Country struct {

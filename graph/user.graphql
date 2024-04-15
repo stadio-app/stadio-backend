@@ -3,8 +3,9 @@ extend type Mutation {
 }
 
 extend type Query {
-    login(email: String!, password: String!): Auth!
-    me: User! @isAuthenticated
+  login(email: String!, password: String!): Auth!
+  googleOAuth(accessToken: String!): Auth!
+  me: User! @isAuthenticated
 }
 
 input CreateAccountInput {
@@ -65,4 +66,5 @@ type UpdatedByUser {
 type Auth {
   token: String!
   user: User!
+  isNewUser: Boolean
 }

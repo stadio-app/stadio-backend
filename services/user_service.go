@@ -90,21 +90,22 @@ func (service Service) CreateOauthUser(ctx context.Context, input gmodel.CreateA
 	return user, nil
 }
 
-func (service Service) GoogleAuthentication(ctx context.Context, access_token string) (auth_state gmodel.Auth, created bool, err error) {
+func (service Service) GoogleAuthentication(ctx context.Context, access_token string) (gmodel.Auth, error) {
 	res, err := http.Get(fmt.Sprintf("https://www.googleapis.com/oauth2/v2/userinfo?access_token=%s", access_token))
 	if err != nil {
-		return gmodel.Auth{}, false, err
+		return gmodel.Auth{}, err
 	}
 	userDataRaw, err := io.ReadAll(res.Body)
 	if err != nil {
-		return gmodel.Auth{}, false, err
+		return gmodel.Auth{}, err
 	}
 	var userData oauth2.Userinfo
 	if err := json.Unmarshal(userDataRaw, &userData); err != nil {
-		return gmodel.Auth{}, false, err
+		return gmodel.Auth{}, err
 	}
 
 	var user gmodel.User
+	new_user := false
 	if service.UserEmailExists(ctx, userData.Email) {
 		user, _ = service.FindUserByEmail(ctx, userData.Email)
 	} else {
@@ -113,12 +114,15 @@ func (service Service) GoogleAuthentication(ctx context.Context, access_token st
 			Name: userData.Name,
 		}, model.UserAuthPlatformType_Google)
 		if err != nil {
-			return gmodel.Auth{}, false, err
+			return gmodel.Auth{}, err
 		}
-		created = true
+		new_user = true
 	}
-	auth_state, err = service.CreateAuthStateWithJwt(ctx, user.ID)
-	return auth_state, created, err
+	auth_state, err := service.CreateAuthStateWithJwt(ctx, user.ID)
+	if err == nil && new_user {
+		auth_state.IsNewUser = &new_user
+	}
+	return auth_state, err
 }
 
 func (service Service) LoginInternal(ctx context.Context, email string, password string) (gmodel.Auth, error) {

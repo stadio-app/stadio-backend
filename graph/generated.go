@@ -72,8 +72,9 @@ type ComplexityRoot struct {
 	}
 
 	Auth struct {
-		Token func(childComplexity int) int
-		User  func(childComplexity int) int
+		IsNewUser func(childComplexity int) int
+		Token     func(childComplexity int) int
+		User      func(childComplexity int) int
 	}
 
 	Country struct {
@@ -197,6 +198,7 @@ type ComplexityRoot struct {
 	Query struct {
 		AllEvents       func(childComplexity int, filter gmodel.AllEventsFilter) int
 		GetAllCountries func(childComplexity int) int
+		GoogleOAuth     func(childComplexity int, accessToken string) int
 		Login           func(childComplexity int, email string, password string) int
 		Me              func(childComplexity int) int
 	}
@@ -240,6 +242,7 @@ type QueryResolver interface {
 	GetAllCountries(ctx context.Context) ([]*gmodel.Country, error)
 	AllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]*gmodel.Event, error)
 	Login(ctx context.Context, email string, password string) (*gmodel.Auth, error)
+	GoogleOAuth(ctx context.Context, accessToken string) (*gmodel.Auth, error)
 	Me(ctx context.Context) (*gmodel.User, error)
 }
 
@@ -373,6 +376,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.AdministrativeDivision.Name(childComplexity), true
+
+	case "Auth.isNewUser":
+		if e.complexity.Auth.IsNewUser == nil {
+			break
+		}
+
+		return e.complexity.Auth.IsNewUser(childComplexity), true
 
 	case "Auth.token":
 		if e.complexity.Auth.Token == nil {
@@ -1038,6 +1048,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.GetAllCountries(childComplexity), true
 
+	case "Query.googleOAuth":
+		if e.complexity.Query.GoogleOAuth == nil {
+			break
+		}
+
+		args, err := ec.field_Query_googleOAuth_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GoogleOAuth(childComplexity, args["accessToken"].(string)), true
+
 	case "Query.login":
 		if e.complexity.Query.Login == nil {
 			break
@@ -1407,6 +1429,21 @@ func (ec *executionContext) field_Query_allEvents_args(ctx context.Context, rawA
 		}
 	}
 	args["filter"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_googleOAuth_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["accessToken"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("accessToken"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["accessToken"] = arg0
 	return args, nil
 }
 
@@ -2287,6 +2324,47 @@ func (ec *executionContext) fieldContext_Auth_user(ctx context.Context, field gr
 				return ec.fieldContext_User_authStateId(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Auth_isNewUser(ctx context.Context, field graphql.CollectedField, obj *gmodel.Auth) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Auth_isNewUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsNewUser, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Auth_isNewUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Auth",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -6675,6 +6753,8 @@ func (ec *executionContext) fieldContext_Query_login(ctx context.Context, field 
 				return ec.fieldContext_Auth_token(ctx, field)
 			case "user":
 				return ec.fieldContext_Auth_user(ctx, field)
+			case "isNewUser":
+				return ec.fieldContext_Auth_isNewUser(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Auth", field.Name)
 		},
@@ -6687,6 +6767,69 @@ func (ec *executionContext) fieldContext_Query_login(ctx context.Context, field 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_login_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_googleOAuth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_googleOAuth(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().GoogleOAuth(rctx, fc.Args["accessToken"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*gmodel.Auth)
+	fc.Result = res
+	return ec.marshalNAuth2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐAuth(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_googleOAuth(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "token":
+				return ec.fieldContext_Auth_token(ctx, field)
+			case "user":
+				return ec.fieldContext_Auth_user(ctx, field)
+			case "isNewUser":
+				return ec.fieldContext_Auth_isNewUser(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Auth", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_googleOAuth_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -10085,6 +10228,8 @@ func (ec *executionContext) _Auth(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "isNewUser":
+			out.Values[i] = ec._Auth_isNewUser(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10885,6 +11030,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_login(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "googleOAuth":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_googleOAuth(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

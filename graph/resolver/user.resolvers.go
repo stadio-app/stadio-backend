@@ -31,6 +31,12 @@ func (r *queryResolver) Login(ctx context.Context, email string, password string
 	return &auth, err
 }
 
+// GoogleOAuth is the resolver for the googleOAuth field.
+func (r *queryResolver) GoogleOAuth(ctx context.Context, accessToken string) (*gmodel.Auth, error) {
+	auth, err := r.Service.GoogleAuthentication(ctx, accessToken)
+	return &auth, err
+}
+
 // Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*gmodel.User, error) {
 	auth_user := r.Service.GetAuthUserFromContext(ctx)
