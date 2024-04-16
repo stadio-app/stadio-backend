@@ -2,16 +2,15 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/oauth2/v2"
+	"google.golang.org/api/option"
 )
 
 func (service Service) CreateInternalUser(ctx context.Context, input gmodel.CreateAccountInput) (gmodel.User, error) {
@@ -91,27 +90,24 @@ func (service Service) CreateOauthUser(ctx context.Context, input gmodel.CreateA
 }
 
 func (service Service) GoogleAuthentication(ctx context.Context, access_token string) (gmodel.Auth, error) {
-	res, err := http.Get(fmt.Sprintf("https://www.googleapis.com/oauth2/v2/userinfo?access_token=%s", access_token))
-	if err != nil || res.StatusCode == http.StatusUnauthorized {
-		return gmodel.Auth{}, fmt.Errorf("invalid access token")
-	}
-	userDataRaw, err := io.ReadAll(res.Body)
+	oauth_service, err := oauth2.NewService(ctx, option.WithoutAuthentication())
 	if err != nil {
-		return gmodel.Auth{}, fmt.Errorf("could not read response body")
+		return gmodel.Auth{}, fmt.Errorf("could not create service")
 	}
-	var userData oauth2.Userinfo
-	if err := json.Unmarshal(userDataRaw, &userData); err != nil {
-		return gmodel.Auth{}, err
+	userinfo_service := oauth2.NewUserinfoService(oauth_service)
+	userinfo, err := userinfo_service.Get().Do(googleapi.QueryParameter("access_token", access_token))
+	if err != nil {
+		return gmodel.Auth{}, fmt.Errorf("invalid access token")
 	}
 
 	var user gmodel.User
 	new_user := false
-	if service.UserEmailExists(ctx, userData.Email) {
-		user, _ = service.FindUserByEmail(ctx, userData.Email)
+	if service.UserEmailExists(ctx, userinfo.Email) {
+		user, _ = service.FindUserByEmail(ctx, userinfo.Email)
 	} else {
 		user, err = service.CreateOauthUser(ctx, gmodel.CreateAccountInput{
-			Email: userData.Email,
-			Name: userData.Name,
+			Email: userinfo.Email,
+			Name: userinfo.Name,
 		}, model.UserAuthPlatformType_Google)
 		if err != nil {
 			return gmodel.Auth{}, err
