@@ -16,11 +16,14 @@ import (
 
 // GetAllCountries is the resolver for the getAllCountries field.
 func (r *queryResolver) GetAllCountries(ctx context.Context) ([]*gmodel.Country, error) {
+	cities_col := fmt.Sprintf("%s.%s", table.AdministrativeDivision.TableName(), table.AdministrativeDivision.Cities.Name())
 	qb := table.Country.
 		SELECT(
 			table.Country.AllColumns,
 			table.AdministrativeDivision.AdministrativeDivision,
-			postgres.Raw("array_to_json(administrative_division.cities)::TEXT").AS("administrative_division.cities"),
+			postgres.
+				Raw(fmt.Sprintf("array_to_json(%s)::TEXT", cities_col)).
+				AS(cities_col),
 			table.Currency.AllColumns,
 		).
 		FROM(
