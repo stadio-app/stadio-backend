@@ -341,7 +341,13 @@ func TestLocation(t *testing.T) {
 			t.Fatal("incorrect number of instances created")
 		}
 
-		now := time.Now()
+		now, err := time.Parse(
+			time.DateTime,
+			fmt.Sprintf("%s 07:00:00", time.Now().Format(time.DateOnly)),
+		)
+		if err != nil {
+			t.Fatal(err)
+		}
 
 		t.Run("create 1 event per instance at now", func(t *testing.T) {
 			for i := 0; i < num_instances; i++ {
