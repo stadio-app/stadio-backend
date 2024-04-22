@@ -51,13 +51,13 @@ func (r *mutationResolver) ResendEmailVerificationCode(ctx context.Context, emai
 
 // Login is the resolver for the login field.
 func (r *queryResolver) Login(ctx context.Context, email string, password string) (*gmodel.Auth, error) {
-	auth, err := r.Service.LoginInternal(ctx, email, password)
+	auth, err := r.Service.LoginInternal(ctx, email, password, nil)
 	return &auth, err
 }
 
 // GoogleOAuth is the resolver for the googleOAuth field.
 func (r *queryResolver) GoogleOAuth(ctx context.Context, accessToken string) (*gmodel.Auth, error) {
-	auth, err := r.Service.GoogleAuthentication(ctx, accessToken)
+	auth, err := r.Service.GoogleAuthentication(ctx, accessToken, nil)
 	return &auth, err
 }
 

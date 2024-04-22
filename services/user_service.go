@@ -33,7 +33,6 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 			table.User.Email,
 			table.User.Name,
 			table.User.Password,
-			table.User.AuthPlatform,
 			table.User.Active,
 			table.User.PhoneNumber,
 		).
@@ -41,7 +40,6 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 			Email: input.Email,
 			Name: input.Name,
 			Password: &hashed_password,
-			AuthPlatform: model.UserAuthPlatformType_Internal,
 			Active: false,
 			PhoneNumber: input.PhoneNumber,
 		}).
@@ -70,14 +68,12 @@ func (service Service) CreateOauthUser(ctx context.Context, input gmodel.CreateA
 		INSERT(
 			table.User.Email,
 			table.User.Name,
-			table.User.AuthPlatform,
 			table.User.Active,
 			table.User.PhoneNumber,
 		).
 		MODEL(model.User{
 			Email: input.Email,
 			Name: input.Name,
-			AuthPlatform: oauth_type,
 			Active: true,
 			PhoneNumber: input.PhoneNumber,
 		}).
@@ -88,7 +84,7 @@ func (service Service) CreateOauthUser(ctx context.Context, input gmodel.CreateA
 	return user, nil
 }
 
-func (service Service) GoogleAuthentication(ctx context.Context, access_token string) (gmodel.Auth, error) {
+func (service Service) GoogleAuthentication(ctx context.Context, access_token string, ip_address *string) (gmodel.Auth, error) {
 	oauth_service, err := oauth2.NewService(ctx, option.WithoutAuthentication())
 	if err != nil {
 		return gmodel.Auth{}, fmt.Errorf("could not create service")
@@ -113,14 +109,14 @@ func (service Service) GoogleAuthentication(ctx context.Context, access_token st
 		}
 		new_user = true
 	}
-	auth_state, err := service.CreateAuthStateWithJwt(ctx, user.ID)
+	auth_state, err := service.CreateAuthStateWithJwt(ctx, user.ID, model.UserAuthPlatformType_Google, ip_address)
 	if err == nil && new_user {
 		auth_state.IsNewUser = &new_user
 	}
 	return auth_state, err
 }
 
-func (service Service) LoginInternal(ctx context.Context, email string, password string) (gmodel.Auth, error) {
+func (service Service) LoginInternal(ctx context.Context, email string, password string, ip_address *string) (gmodel.Auth, error) {
 	db := service.DbOrTxQueryable()	
 	query := table.User.
 		SELECT(table.User.AllColumns).
@@ -140,19 +136,26 @@ func (service Service) LoginInternal(ctx context.Context, email string, password
 		return gmodel.Auth{}, fmt.Errorf("incorrect email or password")
 	}
 
-	return service.CreateAuthStateWithJwt(ctx, verify_user.ID)
+	return service.CreateAuthStateWithJwt(ctx, verify_user.ID, model.UserAuthPlatformType_Internal, ip_address)
 }
 
-func (service Service) CreateAuthStateWithJwt(ctx context.Context, user_id int64) (gmodel.Auth, error) {
-	auth_state, auth_state_err := service.CreateAuthState(ctx, gmodel.User{
-		ID: user_id,
-	}, nil)
+func (service Service) CreateAuthStateWithJwt(
+	ctx context.Context, 
+	user_id int64, 
+	auth_platform model.UserAuthPlatformType, 
+	ip_address *string,
+) (gmodel.Auth, error) {
+	auth_state, auth_state_err := service.CreateAuthState(ctx, gmodel.User{ ID: user_id }, auth_platform, ip_address)
 	if auth_state_err != nil {
 		return gmodel.Auth{}, fmt.Errorf("could not create auth state")
 	}
 
 	qb := table.User.
-		SELECT(table.User.AllColumns, table.AuthState.ID).
+		SELECT(
+			table.User.AllColumns,
+			table.AuthState.ID, 
+			table.AuthState.Platform,
+		).
 		FROM(table.User.LEFT_JOIN(
 			table.AuthState, 
 			table.User.ID.EQ(table.AuthState.UserID),

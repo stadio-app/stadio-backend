@@ -32,9 +32,6 @@ func TestUser(t *testing.T) {
 		if user1.Active {
 			t.Fatal("User.Active should be set to false")
 		}
-		if user1.AuthPlatform != gmodel.AuthPlatformTypeInternal {
-			t.Fatal("user auth platform should be internal")
-		}
 
 		t.Parallel()
 
@@ -109,7 +106,7 @@ func TestUser(t *testing.T) {
 	t.Run("login", func(t *testing.T) {
 		t.Run("correct input", func(t *testing.T) {
 			t.Run("inactive user", func(t *testing.T) {
-				_, err := service.LoginInternal(ctx, user1_input.Email, user1_input.Password)
+				_, err := service.LoginInternal(ctx, user1_input.Email, user1_input.Password, nil)
 				if err == nil {
 					t.Fatal("should not login. user is still inactive")
 				}
@@ -127,11 +124,12 @@ func TestUser(t *testing.T) {
 				}
 				user1.Active = true
 
-				user1_auth, err = service.LoginInternal(ctx, user1_input.Email, user1_input.Password)
+				user1_auth, err = service.LoginInternal(ctx, user1_input.Email, user1_input.Password, nil)
 				if err != nil {
 					t.Fatal("could not login", err.Error())
 				}
 				user1.AuthStateID = user1_auth.User.AuthStateID
+				user1.AuthPlatform = user1_auth.User.AuthPlatform
 				if *user1_auth.User != user1 {
 					t.Fatal("returned user object does not match")
 				}
@@ -169,7 +167,7 @@ func TestUser(t *testing.T) {
 				})
 
 				t.Run("new login should create new auth_state entry", func(t *testing.T) {
-					user1_auth2, err = service.LoginInternal(ctx, user1_input.Email, user1_input.Password)
+					user1_auth2, err = service.LoginInternal(ctx, user1_input.Email, user1_input.Password, nil)
 					if err != nil {
 						t.Fatal("could not login", err.Error())
 					}
@@ -192,7 +190,7 @@ func TestUser(t *testing.T) {
 		})
 
 		t.Run("incorrect input", func(t *testing.T) {
-			_, err := service.LoginInternal(ctx, user1_input.Email, "somerandompassword")
+			_, err := service.LoginInternal(ctx, user1_input.Email, "somerandompassword", nil)
 			if err == nil {
 				t.Fatal("login should fail. password is incorrect")
 			}

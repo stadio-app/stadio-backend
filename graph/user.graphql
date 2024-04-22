@@ -34,7 +34,7 @@ type User {
   birthDate: Time
   bio: String
   active: Boolean!
-  authPlatform: AuthPlatformType!
+  authPlatform: AuthPlatformType @goTag(key: "alias", value: "auth_state.platform")
   authStateId: ID @goTag(key: "alias", value: "auth_state.id")
 }
 

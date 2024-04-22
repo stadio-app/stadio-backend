@@ -17,18 +17,17 @@ type userTable struct {
 	postgres.Table
 
 	// Columns
-	ID           postgres.ColumnInteger
-	CreatedAt    postgres.ColumnTimestampz
-	UpdatedAt    postgres.ColumnTimestampz
-	Email        postgres.ColumnString
-	PhoneNumber  postgres.ColumnString
-	Name         postgres.ColumnString
-	Password     postgres.ColumnString
-	Avatar       postgres.ColumnString
-	BirthDate    postgres.ColumnDate
-	Bio          postgres.ColumnString
-	Active       postgres.ColumnBool
-	AuthPlatform postgres.ColumnString
+	ID          postgres.ColumnInteger
+	CreatedAt   postgres.ColumnTimestampz
+	UpdatedAt   postgres.ColumnTimestampz
+	Email       postgres.ColumnString
+	PhoneNumber postgres.ColumnString
+	Name        postgres.ColumnString
+	Password    postgres.ColumnString
+	Avatar      postgres.ColumnString
+	BirthDate   postgres.ColumnDate
+	Bio         postgres.ColumnString
+	Active      postgres.ColumnBool
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -69,38 +68,36 @@ func newUserTable(schemaName, tableName, alias string) *UserTable {
 
 func newUserTableImpl(schemaName, tableName, alias string) userTable {
 	var (
-		IDColumn           = postgres.IntegerColumn("id")
-		CreatedAtColumn    = postgres.TimestampzColumn("created_at")
-		UpdatedAtColumn    = postgres.TimestampzColumn("updated_at")
-		EmailColumn        = postgres.StringColumn("email")
-		PhoneNumberColumn  = postgres.StringColumn("phone_number")
-		NameColumn         = postgres.StringColumn("name")
-		PasswordColumn     = postgres.StringColumn("password")
-		AvatarColumn       = postgres.StringColumn("avatar")
-		BirthDateColumn    = postgres.DateColumn("birth_date")
-		BioColumn          = postgres.StringColumn("bio")
-		ActiveColumn       = postgres.BoolColumn("active")
-		AuthPlatformColumn = postgres.StringColumn("auth_platform")
-		allColumns         = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, EmailColumn, PhoneNumberColumn, NameColumn, PasswordColumn, AvatarColumn, BirthDateColumn, BioColumn, ActiveColumn, AuthPlatformColumn}
-		mutableColumns     = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, EmailColumn, PhoneNumberColumn, NameColumn, PasswordColumn, AvatarColumn, BirthDateColumn, BioColumn, ActiveColumn, AuthPlatformColumn}
+		IDColumn          = postgres.IntegerColumn("id")
+		CreatedAtColumn   = postgres.TimestampzColumn("created_at")
+		UpdatedAtColumn   = postgres.TimestampzColumn("updated_at")
+		EmailColumn       = postgres.StringColumn("email")
+		PhoneNumberColumn = postgres.StringColumn("phone_number")
+		NameColumn        = postgres.StringColumn("name")
+		PasswordColumn    = postgres.StringColumn("password")
+		AvatarColumn      = postgres.StringColumn("avatar")
+		BirthDateColumn   = postgres.DateColumn("birth_date")
+		BioColumn         = postgres.StringColumn("bio")
+		ActiveColumn      = postgres.BoolColumn("active")
+		allColumns        = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, EmailColumn, PhoneNumberColumn, NameColumn, PasswordColumn, AvatarColumn, BirthDateColumn, BioColumn, ActiveColumn}
+		mutableColumns    = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, EmailColumn, PhoneNumberColumn, NameColumn, PasswordColumn, AvatarColumn, BirthDateColumn, BioColumn, ActiveColumn}
 	)
 
 	return userTable{
 		Table: postgres.NewTable(schemaName, tableName, alias, allColumns...),
 
 		//Columns
-		ID:           IDColumn,
-		CreatedAt:    CreatedAtColumn,
-		UpdatedAt:    UpdatedAtColumn,
-		Email:        EmailColumn,
-		PhoneNumber:  PhoneNumberColumn,
-		Name:         NameColumn,
-		Password:     PasswordColumn,
-		Avatar:       AvatarColumn,
-		BirthDate:    BirthDateColumn,
-		Bio:          BioColumn,
-		Active:       ActiveColumn,
-		AuthPlatform: AuthPlatformColumn,
+		ID:          IDColumn,
+		CreatedAt:   CreatedAtColumn,
+		UpdatedAt:   UpdatedAtColumn,
+		Email:       EmailColumn,
+		PhoneNumber: PhoneNumberColumn,
+		Name:        NameColumn,
+		Password:    PasswordColumn,
+		Avatar:      AvatarColumn,
+		BirthDate:   BirthDateColumn,
+		Bio:         BioColumn,
+		Active:      ActiveColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

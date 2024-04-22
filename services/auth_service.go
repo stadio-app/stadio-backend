@@ -18,13 +18,15 @@ import (
 const EMAIL_VERIFICATION_CODE_LEN = 10
 
 // Given an existing user, create an auth_state row
-func (service Service) CreateAuthState(ctx context.Context, user gmodel.User, ip_address *string) (model.AuthState, error) {
+func (service Service) CreateAuthState(ctx context.Context, user gmodel.User, auth_platform model.UserAuthPlatformType, ip_address *string) (model.AuthState, error) {
 	query := table.AuthState.INSERT(
 		table.AuthState.UserID,
 		table.AuthState.IPAddress,
+		table.AuthState.Platform,
 	).MODEL(model.AuthState{
 		UserID: user.ID,
 		IPAddress: ip_address,
+		Platform: auth_platform,
 	}).RETURNING(table.AuthState.AllColumns)
 
 	var auth_state model.AuthState
@@ -161,8 +163,8 @@ func (Service) GenerateJWT(key string, user *gmodel.User) (string, error) {
 		"id": user.ID,
 		"name": user.Name,
 		"email": user.Email,
-		"authPlatform": user.AuthPlatform.String(),
-		"authStateId": user.AuthStateID,
+		"authPlatform": (*user.AuthPlatform).String(),
+		"authStateId": *user.AuthStateID,
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
@@ -194,6 +196,7 @@ func (service Service) VerifyJwt(ctx context.Context, authorization types.Author
 		SELECT(
 			table.User.AllColumns,
 			table.AuthState.ID,
+			table.AuthState.Platform,
 		).
 		FROM(table.User.LEFT_JOIN(
 			table.AuthState, 
