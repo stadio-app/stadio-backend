@@ -24,7 +24,8 @@ func TestUser(t *testing.T) {
 	
 	t.Run("create user", func(t *testing.T) {
 		var err error
-		user1, err = service.CreateInternalUser(ctx, user1_input)
+		var email_verification model.EmailVerification
+		user1, email_verification, err = service.CreateInternalUser(ctx, user1_input)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -61,16 +62,6 @@ func TestUser(t *testing.T) {
 		})
 
 		t.Run("should create email verification entry", func(t *testing.T) {
-			qb := table.EmailVerification.
-				SELECT(table.EmailVerification.AllColumns).
-				FROM(table.EmailVerification).
-				WHERE(table.EmailVerification.UserID.EQ(postgres.Int(user1.ID))).
-				LIMIT(1)
-			var email_verification model.EmailVerification
-			if err := qb.QueryContext(ctx, db, &email_verification); err != nil {
-				t.Fatal("email verification entry was not created.", err.Error())
-			}
-
 			ev_check, err := service.FindEmailVerificationByCode(ctx, email_verification.Code)
 			if err != nil {
 				t.Fatal("should find verification entry using the code")
@@ -104,7 +95,7 @@ func TestUser(t *testing.T) {
 		})
 
 		t.Run("duplicate user", func(t *testing.T) {
-			_, err := service.CreateInternalUser(ctx, gmodel.CreateAccountInput{
+			_, _, err := service.CreateInternalUser(ctx, gmodel.CreateAccountInput{
 				Email: user1.Email,
 				Password: "abc123",
 			})

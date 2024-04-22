@@ -18,10 +18,11 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, input gmodel.Creat
 		return nil, validation_err
 	}
 
-	new_user, err := r.Service.CreateInternalUser(ctx, input)
+	new_user, _, err := r.Service.CreateInternalUser(ctx, input)
 	if err != nil {
 		return nil, fmt.Errorf("could not create user. %s", err.Error())
 	}
+	// TODO: send email verification mail via new_user.Email
 	return &new_user, nil
 }
 

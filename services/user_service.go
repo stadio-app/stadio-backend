@@ -13,22 +13,21 @@ import (
 	"google.golang.org/api/option"
 )
 
-func (service Service) CreateInternalUser(ctx context.Context, input gmodel.CreateAccountInput) (gmodel.User, error) {
+func (service Service) CreateInternalUser(ctx context.Context, input gmodel.CreateAccountInput) (user gmodel.User, email_verification model.EmailVerification, err error) {
 	if service.UserEmailExists(ctx, input.Email) {
-		return gmodel.User{}, fmt.Errorf("email already exists")
+		return gmodel.User{}, model.EmailVerification{}, fmt.Errorf("email already exists")
 	}
 	hashed_password, hash_err := service.HashPassword(input.Password)
 	if hash_err != nil {
-		return gmodel.User{}, hash_err
+		return gmodel.User{}, model.EmailVerification{}, hash_err
 	}
 
 	// Create transaction
 	tx, tx_err := service.DB.BeginTx(ctx, nil)
 	if tx_err != nil {
-		return gmodel.User{}, tx_err
+		return gmodel.User{}, model.EmailVerification{}, tx_err
 	}
 
-	var user gmodel.User
 	qb := table.User.
 		INSERT(
 			table.User.Email,
@@ -49,20 +48,20 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 		RETURNING(table.User.AllColumns)
 	if err := qb.QueryContext(ctx, tx, &user); err != nil {
 		tx.Rollback()
-		return gmodel.User{}, fmt.Errorf("user entry could not be created. %s", err.Error())
+		return gmodel.User{}, model.EmailVerification{}, fmt.Errorf("user entry could not be created. %s", err.Error())
 	}
 	service.TX = tx
-	if _, err := service.CreateEmailVerification(ctx, user); err != nil {
+	if email_verification, err = service.CreateEmailVerification(ctx, user); err != nil {
 		tx.Rollback()
-		return gmodel.User{}, err
+		return gmodel.User{}, model.EmailVerification{}, err
 	}
 
 	// Commit changes from transaction
 	if err := tx.Commit(); err != nil {
 		tx.Rollback()
-		return gmodel.User{}, err
+		return gmodel.User{}, model.EmailVerification{}, err
 	}
-	return user, nil
+	return user, email_verification, nil
 }
 
 func (service Service) CreateOauthUser(ctx context.Context, input gmodel.CreateAccountInput, oauth_type model.UserAuthPlatformType) (gmodel.User, error) {
