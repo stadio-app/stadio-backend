@@ -25,6 +25,15 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, input gmodel.Creat
 	return &new_user, nil
 }
 
+// VerifyEmail is the resolver for the verifyEmail field.
+func (r *mutationResolver) VerifyEmail(ctx context.Context, verificationCode string) (*gmodel.User, error) {
+	user, err := r.Service.VerifyUserEmail(ctx, verificationCode)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 // Login is the resolver for the login field.
 func (r *queryResolver) Login(ctx context.Context, email string, password string) (*gmodel.Auth, error) {
 	auth, err := r.Service.LoginInternal(ctx, email, password)
