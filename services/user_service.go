@@ -201,3 +201,15 @@ func (service Service) FindUserByEmail(ctx context.Context, email string) (gmode
 	}
 	return user, nil
 }
+
+func (service Service) FindUserById(ctx context.Context, id int64) (gmodel.User, error) {
+	qb := table.User.
+		SELECT(table.User.AllColumns).
+		WHERE(table.User.ID.EQ(postgres.Int(id))).
+		LIMIT(1)
+	var user gmodel.User
+	if err := qb.QueryContext(ctx, service.DbOrTxQueryable(), &user); err != nil {
+		return gmodel.User{}, err
+	}
+	return user, nil
+}
