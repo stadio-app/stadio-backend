@@ -163,8 +163,8 @@ func (Service) GenerateJWT(key string, user *gmodel.User) (string, error) {
 		"id": user.ID,
 		"name": user.Name,
 		"email": user.Email,
-		"authPlatform": user.AuthPlatform.String(),
-		"authStateId": user.AuthStateID,
+		"authPlatform": (*user.AuthPlatform).String(),
+		"authStateId": *user.AuthStateID,
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
@@ -196,6 +196,7 @@ func (service Service) VerifyJwt(ctx context.Context, authorization types.Author
 		SELECT(
 			table.User.AllColumns,
 			table.AuthState.ID,
+			table.AuthState.Platform,
 		).
 		FROM(table.User.LEFT_JOIN(
 			table.AuthState, 

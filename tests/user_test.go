@@ -32,9 +32,6 @@ func TestUser(t *testing.T) {
 		if user1.Active {
 			t.Fatal("User.Active should be set to false")
 		}
-		if user1.AuthPlatform != gmodel.AuthPlatformTypeInternal {
-			t.Fatal("user auth platform should be internal")
-		}
 
 		t.Parallel()
 
@@ -132,6 +129,7 @@ func TestUser(t *testing.T) {
 					t.Fatal("could not login", err.Error())
 				}
 				user1.AuthStateID = user1_auth.User.AuthStateID
+				user1.AuthPlatform = user1_auth.User.AuthPlatform
 				if *user1_auth.User != user1 {
 					t.Fatal("returned user object does not match")
 				}

@@ -219,18 +219,18 @@ type UpdatedByUser struct {
 }
 
 type User struct {
-	ID           int64            `json:"id" sql:"primary_key"`
-	CreatedAt    time.Time        `json:"createdAt"`
-	UpdatedAt    time.Time        `json:"updatedAt"`
-	Email        string           `json:"email"`
-	PhoneNumber  *string          `json:"phoneNumber,omitempty"`
-	Name         string           `json:"name"`
-	Avatar       *string          `json:"avatar,omitempty"`
-	BirthDate    *time.Time       `json:"birthDate,omitempty"`
-	Bio          *string          `json:"bio,omitempty"`
-	Active       bool             `json:"active"`
-	AuthPlatform AuthPlatformType `json:"authPlatform"`
-	AuthStateID  *int64           `json:"authStateId,omitempty" alias:"auth_state.id"`
+	ID           int64             `json:"id" sql:"primary_key"`
+	CreatedAt    time.Time         `json:"createdAt"`
+	UpdatedAt    time.Time         `json:"updatedAt"`
+	Email        string            `json:"email"`
+	PhoneNumber  *string           `json:"phoneNumber,omitempty"`
+	Name         string            `json:"name"`
+	Avatar       *string           `json:"avatar,omitempty"`
+	BirthDate    *time.Time        `json:"birthDate,omitempty"`
+	Bio          *string           `json:"bio,omitempty"`
+	Active       bool              `json:"active"`
+	AuthPlatform *AuthPlatformType `json:"authPlatform,omitempty" alias:"auth_state.platform"`
+	AuthStateID  *int64            `json:"authStateId,omitempty" alias:"auth_state.id"`
 }
 
 type UserShallow struct {

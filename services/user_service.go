@@ -151,7 +151,11 @@ func (service Service) CreateAuthStateWithJwt(
 	}
 
 	qb := table.User.
-		SELECT(table.User.AllColumns, table.AuthState.ID).
+		SELECT(
+			table.User.AllColumns,
+			table.AuthState.ID, 
+			table.AuthState.Platform,
+		).
 		FROM(table.User.LEFT_JOIN(
 			table.AuthState, 
 			table.User.ID.EQ(table.AuthState.UserID),
