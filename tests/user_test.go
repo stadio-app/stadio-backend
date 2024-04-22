@@ -70,6 +70,37 @@ func TestUser(t *testing.T) {
 			if err := qb.QueryContext(ctx, db, &email_verification); err != nil {
 				t.Fatal("email verification entry was not created.", err.Error())
 			}
+
+			ev_check, err := service.FindEmailVerificationByCode(ctx, email_verification.Code)
+			if err != nil {
+				t.Fatal("should find verification entry using the code")
+			}
+			if ev_check.ID != email_verification.ID {
+				t.Fatal("verification ids must match")
+			}
+
+			t.Run("email verification helper methods", func(t *testing.T) {
+				service.TX, err = db.BeginTx(ctx, nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				u, err := service.VerifyUserEmail(ctx, email_verification.Code)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if u.ID != email_verification.UserID {
+					t.Fatal("user id is incorrect")
+				}
+				if !u.Active {
+					t.Fatal("user should be set to active")
+				}
+				if _, err := service.FindEmailVerificationByCode(ctx, email_verification.Code); err == nil {
+					t.Fatal("verification entry should be deleted")
+				}
+				service.TX.Rollback()
+				service.TX = nil
+			})
 		})
 
 		t.Run("duplicate user", func(t *testing.T) {
