@@ -16,4 +16,5 @@ type AuthState struct {
 	LoggedInAt time.Time
 	UserID     int64
 	IPAddress  *string
+	Platform   UserAuthPlatformType
 }
