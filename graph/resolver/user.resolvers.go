@@ -18,11 +18,35 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, input gmodel.Creat
 		return nil, validation_err
 	}
 
-	new_user, err := r.Service.CreateInternalUser(ctx, input)
+	new_user, _, err := r.Service.CreateInternalUser(ctx, input)
 	if err != nil {
 		return nil, fmt.Errorf("could not create user. %s", err.Error())
 	}
+	// TODO: send email verification mail via new_user.Email
 	return &new_user, nil
+}
+
+// VerifyEmail is the resolver for the verifyEmail field.
+func (r *mutationResolver) VerifyEmail(ctx context.Context, verificationCode string) (*gmodel.User, error) {
+	user, err := r.Service.VerifyUserEmail(ctx, verificationCode)
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
+// ResendEmailVerificationCode is the resolver for the resendEmailVerificationCode field.
+func (r *mutationResolver) ResendEmailVerificationCode(ctx context.Context, email string) (bool, error) {
+	user, err := r.Service.FindUserByEmail(ctx, email)
+	if err != nil {
+		return false, fmt.Errorf("no user found with the provided email address")
+	}
+	email_verification, err := r.Service.ResendEmailVerification(ctx, user)
+	if err != nil {
+		return false, err
+	}
+	// TODO: Send email with new verification code
+	return email_verification.ID > 0, nil
 }
 
 // Login is the resolver for the login field.

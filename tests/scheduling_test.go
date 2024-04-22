@@ -50,7 +50,7 @@ func init_location_instances(count int) []*gmodel.CreateLocationInstance {
 }
 
 func TestLocation(t *testing.T) {
-	user, err := service.CreateInternalUser(ctx, gmodel.CreateAccountInput{
+	user, _, err := service.CreateInternalUser(ctx, gmodel.CreateAccountInput{
 		Email: "location_test@thestadio.com",
 		Name: "Location Test User",
 		Password: "location_test_password123",

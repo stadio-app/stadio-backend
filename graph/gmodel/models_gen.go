@@ -230,7 +230,7 @@ type User struct {
 	Bio          *string          `json:"bio,omitempty"`
 	Active       bool             `json:"active"`
 	AuthPlatform AuthPlatformType `json:"authPlatform"`
-	AuthStateID  int64            `json:"authStateId" alias:"auth_state.id"`
+	AuthStateID  *int64           `json:"authStateId,omitempty" alias:"auth_state.id"`
 }
 
 type UserShallow struct {

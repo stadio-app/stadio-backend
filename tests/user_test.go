@@ -24,7 +24,8 @@ func TestUser(t *testing.T) {
 	
 	t.Run("create user", func(t *testing.T) {
 		var err error
-		user1, err = service.CreateInternalUser(ctx, user1_input)
+		var email_verification model.EmailVerification
+		user1, email_verification, err = service.CreateInternalUser(ctx, user1_input)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -61,19 +62,40 @@ func TestUser(t *testing.T) {
 		})
 
 		t.Run("should create email verification entry", func(t *testing.T) {
-			qb := table.EmailVerification.
-				SELECT(table.EmailVerification.AllColumns).
-				FROM(table.EmailVerification).
-				WHERE(table.EmailVerification.UserID.EQ(postgres.Int(user1.ID))).
-				LIMIT(1)
-			var email_verification model.EmailVerification
-			if err := qb.QueryContext(ctx, db, &email_verification); err != nil {
-				t.Fatal("email verification entry was not created.", err.Error())
+			ev_check, err := service.FindEmailVerificationByCode(ctx, email_verification.Code)
+			if err != nil {
+				t.Fatal("should find verification entry using the code")
 			}
+			if ev_check.ID != email_verification.ID {
+				t.Fatal("verification ids must match")
+			}
+
+			t.Run("email verification helper methods", func(t *testing.T) {
+				service.TX, err = db.BeginTx(ctx, nil)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				u, err := service.VerifyUserEmail(ctx, email_verification.Code)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if u.ID != email_verification.UserID {
+					t.Fatal("user id is incorrect")
+				}
+				if !u.Active {
+					t.Fatal("user should be set to active")
+				}
+				if _, err := service.FindEmailVerificationByCode(ctx, email_verification.Code); err == nil {
+					t.Fatal("verification entry should be deleted")
+				}
+				service.TX.Rollback()
+				service.TX = nil
+			})
 		})
 
 		t.Run("duplicate user", func(t *testing.T) {
-			_, err := service.CreateInternalUser(ctx, gmodel.CreateAccountInput{
+			_, _, err := service.CreateInternalUser(ctx, gmodel.CreateAccountInput{
 				Email: user1.Email,
 				Password: "abc123",
 			})
@@ -135,7 +157,7 @@ func TestUser(t *testing.T) {
 					var auth_state model.AuthState
 					qb := table.AuthState.SELECT(table.AuthState.AllColumns).
 						FROM(table.AuthState).
-						WHERE(table.AuthState.ID.EQ(postgres.Int(user1_auth.User.AuthStateID))).
+						WHERE(table.AuthState.ID.EQ(postgres.Int(*user1_auth.User.AuthStateID))).
 						LIMIT(1)
 					if err := qb.QueryContext(ctx, db, &auth_state); err != nil {
 						t.Fatal("could not find auth_state entry", err.Error())
