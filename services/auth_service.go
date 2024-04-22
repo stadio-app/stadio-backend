@@ -48,7 +48,60 @@ func (service Service) CreateEmailVerification(ctx context.Context, user gmodel.
 
 	var email_verification model.EmailVerification
 	err := query.QueryContext(ctx, service.DbOrTxQueryable(), &email_verification)
+	// TODO: Send email with verification code
 	return email_verification, err
+}
+
+func (service Service) FindEmailVerificationByCode(ctx context.Context, verification_code string) (model.EmailVerification, error) {
+	qb := table.EmailVerification.
+		SELECT(table.EmailVerification.AllColumns).
+		WHERE(table.EmailVerification.Code.EQ(postgres.String(verification_code))).
+		LIMIT(1)
+	var email_verification model.EmailVerification
+	if err := qb.QueryContext(ctx, service.DbOrTxQueryable(), &email_verification); err != nil {
+		return model.EmailVerification{}, fmt.Errorf("invalid email verification code")
+	}
+	return email_verification, nil
+}
+
+func (service Service) VerifyUserEmail(ctx context.Context, verification_code string) (gmodel.User, error) {
+	var err error
+	service.TX, err = service.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return gmodel.User{}, err
+	}
+
+	email_verification, err := service.FindEmailVerificationByCode(ctx, verification_code)
+	if err != nil {
+		service.TX.Rollback()
+		return gmodel.User{}, err
+	}
+
+	update := table.User.
+		UPDATE(table.User.Active, table.User.UpdatedAt).
+		SET(postgres.Bool(true), postgres.DateT(time.Now())).
+		WHERE(table.User.ID.EQ(postgres.Int(email_verification.UserID)))
+	if _, err := update.ExecContext(ctx, service.TX); err != nil {
+		service.TX.Rollback()
+		return gmodel.User{}, fmt.Errorf("could not update user email verification status to verified")
+	}
+
+	// Remove email_verification row
+	delete := table.EmailVerification.
+		DELETE().
+		WHERE(postgres.AND(
+			table.EmailVerification.ID.EQ(postgres.Int(email_verification.ID)),
+			table.EmailVerification.Code.EQ(postgres.String(verification_code)),
+		))
+	if _, err := delete.ExecContext(ctx, service.TX); err != nil {
+		service.TX.Rollback()
+		return gmodel.User{}, fmt.Errorf("could not delete email verification entry")
+	}
+
+	if err := service.TX.Commit(); err != nil {
+		return gmodel.User{}, fmt.Errorf("could not commit changes")
+	}
+	return service.FindUserById(ctx, email_verification.ID)
 }
 
 func (Service) HashPassword(password string) (string, error) {
