@@ -68,6 +68,7 @@ func (service Service) VerifyUserEmail(ctx context.Context, verification_code st
 	var err error
 	service.TX, err = service.DB.BeginTx(ctx, nil)
 	if err != nil {
+		service.TX.Rollback()
 		return gmodel.User{}, err
 	}
 
@@ -75,6 +76,18 @@ func (service Service) VerifyUserEmail(ctx context.Context, verification_code st
 	if err != nil {
 		service.TX.Rollback()
 		return gmodel.User{}, err
+	}
+
+	if time.Until(email_verification.CreatedAt).Abs() > time.Hour {
+		service.TX.Rollback()
+		// Delete verification entry since it's expired
+		del_query := table.EmailVerification.
+			DELETE().
+			WHERE(table.EmailVerification.ID.EQ(postgres.Int(email_verification.ID)))
+		if _, err := del_query.ExecContext(ctx, service.DB); err != nil {
+			return gmodel.User{}, err
+		}
+		return gmodel.User{}, fmt.Errorf("verification code has expired")
 	}
 
 	update := table.User.
@@ -101,7 +114,8 @@ func (service Service) VerifyUserEmail(ctx context.Context, verification_code st
 	if err := service.TX.Commit(); err != nil {
 		return gmodel.User{}, fmt.Errorf("could not commit changes")
 	}
-	return service.FindUserById(ctx, email_verification.ID)
+	service.TX = nil
+	return service.FindUserById(ctx, email_verification.UserID)
 }
 
 func (Service) HashPassword(password string) (string, error) {
