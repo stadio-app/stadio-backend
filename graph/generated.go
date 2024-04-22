@@ -7718,14 +7718,11 @@ func (ec *executionContext) _User_authStateId(ctx context.Context, field graphql
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(int64)
+	res := resTmp.(*int64)
 	fc.Result = res
-	return ec.marshalNID2int64(ctx, field.Selections, res)
+	return ec.marshalOID2ᚖint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_User_authStateId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -11221,9 +11218,6 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "authStateId":
 			out.Values[i] = ec._User_authStateId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

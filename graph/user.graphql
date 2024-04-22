@@ -33,7 +33,7 @@ type User {
   bio: String
   active: Boolean!
   authPlatform: AuthPlatformType!
-  authStateId: ID! @goTag(key: "alias", value: "auth_state.id")
+  authStateId: ID @goTag(key: "alias", value: "auth_state.id")
 }
 
 type UserShallow {
