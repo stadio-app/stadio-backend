@@ -34,6 +34,20 @@ func (r *mutationResolver) VerifyEmail(ctx context.Context, verificationCode str
 	return &user, nil
 }
 
+// ResendEmailVerificationCode is the resolver for the resendEmailVerificationCode field.
+func (r *mutationResolver) ResendEmailVerificationCode(ctx context.Context, email string) (bool, error) {
+	user, err := r.Service.FindUserByEmail(ctx, email)
+	if err != nil {
+		return false, fmt.Errorf("no user found with the provided email address")
+	}
+	email_verification, err := r.Service.ResendEmailVerification(ctx, user)
+	if err != nil {
+		return false, err
+	}
+	// TODO: Send email with new verification code
+	return email_verification.ID > 0, nil
+}
+
 // Login is the resolver for the login field.
 func (r *queryResolver) Login(ctx context.Context, email string, password string) (*gmodel.Auth, error) {
 	auth, err := r.Service.LoginInternal(ctx, email, password)

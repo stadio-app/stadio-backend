@@ -51,6 +51,34 @@ func (service Service) CreateEmailVerification(ctx context.Context, user gmodel.
 	return email_verification, err
 }
 
+func (service Service) ResendEmailVerification(ctx context.Context, user gmodel.User) (email_verification model.EmailVerification, err error) {
+	if user.Active {
+		return model.EmailVerification{}, fmt.Errorf("user already has a verified email address")
+	}
+	service.TX, err = service.DB.BeginTx(ctx, nil)
+	if err != nil {
+		return model.EmailVerification{}, err
+	}
+
+	_, err = table.EmailVerification.DELETE().
+		WHERE(table.EmailVerification.UserID.EQ(postgres.Int(user.ID))).
+		ExecContext(ctx, service.TX)
+	if err != nil {
+		service.TX.Rollback()
+		return model.EmailVerification{}, fmt.Errorf("user email verification entry deletion failed")
+	}
+
+	email_verification, err = service.CreateEmailVerification(ctx, user)
+	if err != nil {
+		service.TX.Rollback()
+		return model.EmailVerification{}, err
+	}
+	if err := service.TX.Commit(); err != nil {
+		return model.EmailVerification{}, fmt.Errorf("could not commit changes")
+	}
+	return email_verification, nil
+}
+
 func (service Service) FindEmailVerificationByCode(ctx context.Context, verification_code string) (model.EmailVerification, error) {
 	qb := table.EmailVerification.
 		SELECT(table.EmailVerification.AllColumns).

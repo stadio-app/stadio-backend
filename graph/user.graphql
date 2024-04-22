@@ -1,6 +1,7 @@
 extend type Mutation {
   createAccount(input: CreateAccountInput!): User!
   verifyEmail(verificationCode: String!): User!
+  resendEmailVerificationCode(email: String!): Boolean!
 }
 
 extend type Query {
