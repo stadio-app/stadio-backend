@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"io"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/cloudflare/cloudflare-go"
@@ -18,6 +19,6 @@ func (service Service) CloudflareImageUpload(ctx context.Context, data cloudflar
 
 func (service Service) GraphImageUpload(ctx context.Context, file graphql.Upload) (cloudflare.Image, error) {
 	return service.CloudflareImageUpload(ctx, cloudflare.UploadImageParams{
-		File: nil,
+		File: io.NopCloser(file.File),
 	})
 }
