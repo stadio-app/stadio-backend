@@ -23,6 +23,7 @@ type locationImageTable struct {
 	UploadID         postgres.ColumnString
 	OriginalFilename postgres.ColumnString
 	LocationID       postgres.ColumnInteger
+	Default          postgres.ColumnBool
 	Caption          postgres.ColumnString
 	CreatedBy        postgres.ColumnInteger
 	UpdatedBy        postgres.ColumnInteger
@@ -72,11 +73,12 @@ func newLocationImageTableImpl(schemaName, tableName, alias string) locationImag
 		UploadIDColumn         = postgres.StringColumn("upload_id")
 		OriginalFilenameColumn = postgres.StringColumn("original_filename")
 		LocationIDColumn       = postgres.IntegerColumn("location_id")
+		DefaultColumn          = postgres.BoolColumn("default")
 		CaptionColumn          = postgres.StringColumn("caption")
 		CreatedByColumn        = postgres.IntegerColumn("created_by")
 		UpdatedByColumn        = postgres.IntegerColumn("updated_by")
-		allColumns             = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, UploadIDColumn, OriginalFilenameColumn, LocationIDColumn, CaptionColumn, CreatedByColumn, UpdatedByColumn}
-		mutableColumns         = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, UploadIDColumn, OriginalFilenameColumn, LocationIDColumn, CaptionColumn, CreatedByColumn, UpdatedByColumn}
+		allColumns             = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, UploadIDColumn, OriginalFilenameColumn, LocationIDColumn, DefaultColumn, CaptionColumn, CreatedByColumn, UpdatedByColumn}
+		mutableColumns         = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, UploadIDColumn, OriginalFilenameColumn, LocationIDColumn, DefaultColumn, CaptionColumn, CreatedByColumn, UpdatedByColumn}
 	)
 
 	return locationImageTable{
@@ -89,6 +91,7 @@ func newLocationImageTableImpl(schemaName, tableName, alias string) locationImag
 		UploadID:         UploadIDColumn,
 		OriginalFilename: OriginalFilenameColumn,
 		LocationID:       LocationIDColumn,
+		Default:          DefaultColumn,
 		Caption:          CaptionColumn,
 		CreatedBy:        CreatedByColumn,
 		UpdatedBy:        UpdatedByColumn,
