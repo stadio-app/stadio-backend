@@ -17,7 +17,7 @@ type LocationImage struct {
 	UpdatedAt        time.Time
 	UploadID         string
 	OriginalFilename string
-	LocationID       *int64
+	LocationID       int64
 	Default          bool
 	Caption          *string
 	CreatedBy        *int64
