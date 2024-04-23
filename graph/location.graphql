@@ -9,6 +9,7 @@ input CreateLocation {
   address: CreateAddress! @goTag(key: "validate", value: "required")
   schedule: [CreateLocationSchedule!]!
   instances: [CreateLocationInstance!]!
+  images: [CreateLocationImage!]!
 }
 
 enum WeekDay {
@@ -31,6 +32,12 @@ input CreateLocationSchedule {
 
 input CreateLocationInstance {
   name: String!
+}
+
+input CreateLocationImage {
+  file: Upload!
+  default: Boolean!
+  caption: String
 }
 
 type Location {
@@ -70,4 +77,24 @@ type LocationSchedule {
 type LocationInstance {
   id: ID! @goTag(key: "sql", value: "primary_key")
   name: String
+}
+
+type LocationImageSimple {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  uploadId: String!
+  default: Boolean!
+  originalFilename: String
+}
+
+type LocationImage {
+  id: ID! @goTag(key: "sql", value: "primary_key")
+  createdAt: Time!
+  updatedAt: Time!
+  uploadId: String!
+  originalFilename: String!
+  default: Boolean!
+  caption: String
+  locationId: Int!
+  createdBy: CreatedByUser
+  updatedBy: UpdatedByUser
 }

@@ -7,6 +7,8 @@ import (
 	"io"
 	"strconv"
 	"time"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Address struct {
@@ -88,6 +90,13 @@ type CreateLocation struct {
 	Address     *CreateAddress            `json:"address" validate:"required"`
 	Schedule    []*CreateLocationSchedule `json:"schedule"`
 	Instances   []*CreateLocationInstance `json:"instances"`
+	Images      []*CreateLocationImage    `json:"images"`
+}
+
+type CreateLocationImage struct {
+	File    graphql.Upload `json:"file"`
+	Default bool           `json:"default"`
+	Caption *string        `json:"caption,omitempty"`
 }
 
 type CreateLocationInstance struct {
@@ -172,6 +181,26 @@ type Location struct {
 	UpdatedBy         *UpdatedByUser      `json:"updatedBy,omitempty"`
 	LocationSchedule  []*LocationSchedule `json:"locationSchedule"`
 	LocationInstances []*LocationInstance `json:"locationInstances"`
+}
+
+type LocationImage struct {
+	ID               int64          `json:"id" sql:"primary_key"`
+	CreatedAt        time.Time      `json:"createdAt"`
+	UpdatedAt        time.Time      `json:"updatedAt"`
+	UploadID         string         `json:"uploadId"`
+	OriginalFilename string         `json:"originalFilename"`
+	Default          bool           `json:"default"`
+	Caption          *string        `json:"caption,omitempty"`
+	LocationID       int            `json:"locationId"`
+	CreatedBy        *CreatedByUser `json:"createdBy,omitempty"`
+	UpdatedBy        *UpdatedByUser `json:"updatedBy,omitempty"`
+}
+
+type LocationImageSimple struct {
+	ID               int64   `json:"id" sql:"primary_key"`
+	UploadID         string  `json:"uploadId"`
+	Default          bool    `json:"default"`
+	OriginalFilename *string `json:"originalFilename,omitempty"`
 }
 
 type LocationInstance struct {
