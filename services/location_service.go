@@ -19,6 +19,9 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	if len(input.Schedule) < 7 {
 		return gmodel.Location{}, fmt.Errorf("minimum of 7 days of schedule is required")
 	}
+	if len(input.Images) == 0 || len(input.Images) > 5 {
+		return gmodel.Location{}, fmt.Errorf("minimum 1 image upload, and maximum of 5 images")
+	}
 	
 	tx, err := service.DB.BeginTx(ctx, nil)
 	if err != nil {
@@ -65,6 +68,13 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 
 	// add location schedules
 	location.LocationSchedule, err = service.BulkCreateLocationSchedule(ctx, location.ID, input.Schedule)
+	if err != nil {
+		tx.Rollback()
+		return gmodel.Location{}, err
+	}
+
+	// upload and store images
+	_, err = service.BulkUploadAndCreateLocationImages(ctx, location.ID, user, input.Images)
 	if err != nil {
 		tx.Rollback()
 		return gmodel.Location{}, err
@@ -120,6 +130,45 @@ func (service Service) BulkCreateLocationSchedule(
 		location_schedule_ptrs[i] = &location_schedules[i]
 	}
 	return location_schedule_ptrs, nil
+}
+
+func (service Service) BulkUploadAndCreateLocationImages(
+	ctx context.Context, 
+	location_id int64,
+	user *gmodel.User,
+	image_inputs []*gmodel.CreateLocationImage,
+) ([]*gmodel.LocationImage, error) {
+	inserted_images := make([]*gmodel.LocationImage, len(image_inputs))
+	for i, image_input := range image_inputs {
+		uploaded_image, err := service.GraphImageUpload(ctx, image_input.File)
+		if err != nil {
+			return nil, fmt.Errorf("failed to upload image %s to Cloudflare", image_input.File.Filename)
+		}
+
+		insert_qb := table.LocationImage.INSERT(
+			table.LocationImage.LocationID,
+			table.LocationImage.Default,
+			table.LocationImage.UploadID,
+			table.LocationImage.OriginalFilename,
+			table.LocationImage.Caption,
+			table.LocationImage.CreatedBy,
+			table.LocationImage.UpdatedBy,
+		).MODEL(model.LocationImage{
+			LocationID: location_id,
+			Default: image_input.Default,
+			UploadID: uploaded_image.ID,
+			OriginalFilename: image_input.File.Filename,
+			Caption: image_input.Caption,
+			CreatedBy: &user.ID,
+			UpdatedBy: &user.ID,
+		}).RETURNING(table.LocationImage.AllColumns)
+		var image gmodel.LocationImage
+		if err := insert_qb.QueryContext(ctx, service.DbOrTxQueryable(), &image); err != nil {
+			return nil, err
+		}
+		inserted_images[i] = &image
+	}
+	return inserted_images, nil
 }
 
 func (service Service) CreateLocationSchedule(
