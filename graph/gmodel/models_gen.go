@@ -181,26 +181,15 @@ type Location struct {
 	UpdatedBy         *UpdatedByUser      `json:"updatedBy,omitempty"`
 	LocationSchedule  []*LocationSchedule `json:"locationSchedule"`
 	LocationInstances []*LocationInstance `json:"locationInstances"`
+	LocationImages    []*LocationImage    `json:"locationImages"`
 }
 
 type LocationImage struct {
-	ID               int64          `json:"id" sql:"primary_key"`
-	CreatedAt        time.Time      `json:"createdAt"`
-	UpdatedAt        time.Time      `json:"updatedAt"`
-	UploadID         string         `json:"uploadId"`
-	OriginalFilename string         `json:"originalFilename"`
-	Default          bool           `json:"default"`
-	Caption          *string        `json:"caption,omitempty"`
-	LocationID       int            `json:"locationId"`
-	CreatedBy        *CreatedByUser `json:"createdBy,omitempty"`
-	UpdatedBy        *UpdatedByUser `json:"updatedBy,omitempty"`
-}
-
-type LocationImageSimple struct {
 	ID               int64   `json:"id" sql:"primary_key"`
 	UploadID         string  `json:"uploadId"`
+	OriginalFilename string  `json:"originalFilename"`
 	Default          bool    `json:"default"`
-	OriginalFilename *string `json:"originalFilename,omitempty"`
+	Caption          *string `json:"caption,omitempty"`
 }
 
 type LocationInstance struct {
