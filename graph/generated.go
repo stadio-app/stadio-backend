@@ -200,8 +200,8 @@ type ComplexityRoot struct {
 	Query struct {
 		AllEvents       func(childComplexity int, filter gmodel.AllEventsFilter) int
 		GetAllCountries func(childComplexity int) int
-		GoogleOAuth     func(childComplexity int, accessToken string) int
-		Login           func(childComplexity int, email string, password string) int
+		GoogleOAuth     func(childComplexity int, accessToken string, ipAddress *string) int
+		Login           func(childComplexity int, email string, password string, ipAddress *string) int
 		Me              func(childComplexity int) int
 	}
 
@@ -245,8 +245,8 @@ type MutationResolver interface {
 type QueryResolver interface {
 	GetAllCountries(ctx context.Context) ([]*gmodel.Country, error)
 	AllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]*gmodel.Event, error)
-	Login(ctx context.Context, email string, password string) (*gmodel.Auth, error)
-	GoogleOAuth(ctx context.Context, accessToken string) (*gmodel.Auth, error)
+	Login(ctx context.Context, email string, password string, ipAddress *string) (*gmodel.Auth, error)
+	GoogleOAuth(ctx context.Context, accessToken string, ipAddress *string) (*gmodel.Auth, error)
 	Me(ctx context.Context) (*gmodel.User, error)
 }
 
@@ -1086,7 +1086,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.GoogleOAuth(childComplexity, args["accessToken"].(string)), true
+		return e.complexity.Query.GoogleOAuth(childComplexity, args["accessToken"].(string), args["ipAddress"].(*string)), true
 
 	case "Query.login":
 		if e.complexity.Query.Login == nil {
@@ -1098,7 +1098,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Login(childComplexity, args["email"].(string), args["password"].(string)), true
+		return e.complexity.Query.Login(childComplexity, args["email"].(string), args["password"].(string), args["ipAddress"].(*string)), true
 
 	case "Query.me":
 		if e.complexity.Query.Me == nil {
@@ -1502,6 +1502,15 @@ func (ec *executionContext) field_Query_googleOAuth_args(ctx context.Context, ra
 		}
 	}
 	args["accessToken"] = arg0
+	var arg1 *string
+	if tmp, ok := rawArgs["ipAddress"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ipAddress"))
+		arg1, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ipAddress"] = arg1
 	return args, nil
 }
 
@@ -1526,6 +1535,15 @@ func (ec *executionContext) field_Query_login_args(ctx context.Context, rawArgs 
 		}
 	}
 	args["password"] = arg1
+	var arg2 *string
+	if tmp, ok := rawArgs["ipAddress"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ipAddress"))
+		arg2, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["ipAddress"] = arg2
 	return args, nil
 }
 
@@ -6918,7 +6936,7 @@ func (ec *executionContext) _Query_login(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Login(rctx, fc.Args["email"].(string), fc.Args["password"].(string))
+		return ec.resolvers.Query().Login(rctx, fc.Args["email"].(string), fc.Args["password"].(string), fc.Args["ipAddress"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6981,7 +6999,7 @@ func (ec *executionContext) _Query_googleOAuth(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().GoogleOAuth(rctx, fc.Args["accessToken"].(string))
+		return ec.resolvers.Query().GoogleOAuth(rctx, fc.Args["accessToken"].(string), fc.Args["ipAddress"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

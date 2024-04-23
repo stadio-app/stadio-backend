@@ -5,8 +5,8 @@ extend type Mutation {
 }
 
 extend type Query {
-  login(email: String!, password: String!): Auth!
-  googleOAuth(accessToken: String!): Auth!
+  login(email: String!, password: String!, ipAddress: String): Auth!
+  googleOAuth(accessToken: String!, ipAddress: String): Auth!
   me: User! @isAuthenticated
 }
 
