@@ -146,6 +146,7 @@ type ComplexityRoot struct {
 		Deleted           func(childComplexity int) int
 		Description       func(childComplexity int) int
 		ID                func(childComplexity int) int
+		LocationImages    func(childComplexity int) int
 		LocationInstances func(childComplexity int) int
 		LocationSchedule  func(childComplexity int) int
 		Name              func(childComplexity int) int
@@ -160,18 +161,6 @@ type ComplexityRoot struct {
 
 	LocationImage struct {
 		Caption          func(childComplexity int) int
-		CreatedAt        func(childComplexity int) int
-		CreatedBy        func(childComplexity int) int
-		Default          func(childComplexity int) int
-		ID               func(childComplexity int) int
-		LocationID       func(childComplexity int) int
-		OriginalFilename func(childComplexity int) int
-		UpdatedAt        func(childComplexity int) int
-		UpdatedBy        func(childComplexity int) int
-		UploadID         func(childComplexity int) int
-	}
-
-	LocationImageSimple struct {
 		Default          func(childComplexity int) int
 		ID               func(childComplexity int) int
 		OriginalFilename func(childComplexity int) int
@@ -793,6 +782,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Location.ID(childComplexity), true
 
+	case "Location.locationImages":
+		if e.complexity.Location.LocationImages == nil {
+			break
+		}
+
+		return e.complexity.Location.LocationImages(childComplexity), true
+
 	case "Location.locationInstances":
 		if e.complexity.Location.LocationInstances == nil {
 			break
@@ -870,20 +866,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LocationImage.Caption(childComplexity), true
 
-	case "LocationImage.createdAt":
-		if e.complexity.LocationImage.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.LocationImage.CreatedAt(childComplexity), true
-
-	case "LocationImage.createdBy":
-		if e.complexity.LocationImage.CreatedBy == nil {
-			break
-		}
-
-		return e.complexity.LocationImage.CreatedBy(childComplexity), true
-
 	case "LocationImage.default":
 		if e.complexity.LocationImage.Default == nil {
 			break
@@ -898,13 +880,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LocationImage.ID(childComplexity), true
 
-	case "LocationImage.locationId":
-		if e.complexity.LocationImage.LocationID == nil {
-			break
-		}
-
-		return e.complexity.LocationImage.LocationID(childComplexity), true
-
 	case "LocationImage.originalFilename":
 		if e.complexity.LocationImage.OriginalFilename == nil {
 			break
@@ -912,54 +887,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LocationImage.OriginalFilename(childComplexity), true
 
-	case "LocationImage.updatedAt":
-		if e.complexity.LocationImage.UpdatedAt == nil {
-			break
-		}
-
-		return e.complexity.LocationImage.UpdatedAt(childComplexity), true
-
-	case "LocationImage.updatedBy":
-		if e.complexity.LocationImage.UpdatedBy == nil {
-			break
-		}
-
-		return e.complexity.LocationImage.UpdatedBy(childComplexity), true
-
 	case "LocationImage.uploadId":
 		if e.complexity.LocationImage.UploadID == nil {
 			break
 		}
 
 		return e.complexity.LocationImage.UploadID(childComplexity), true
-
-	case "LocationImageSimple.default":
-		if e.complexity.LocationImageSimple.Default == nil {
-			break
-		}
-
-		return e.complexity.LocationImageSimple.Default(childComplexity), true
-
-	case "LocationImageSimple.id":
-		if e.complexity.LocationImageSimple.ID == nil {
-			break
-		}
-
-		return e.complexity.LocationImageSimple.ID(childComplexity), true
-
-	case "LocationImageSimple.originalFilename":
-		if e.complexity.LocationImageSimple.OriginalFilename == nil {
-			break
-		}
-
-		return e.complexity.LocationImageSimple.OriginalFilename(childComplexity), true
-
-	case "LocationImageSimple.uploadId":
-		if e.complexity.LocationImageSimple.UploadID == nil {
-			break
-		}
-
-		return e.complexity.LocationImageSimple.UploadID(childComplexity), true
 
 	case "LocationInstance.id":
 		if e.complexity.LocationInstance.ID == nil {
@@ -3736,6 +3669,8 @@ func (ec *executionContext) fieldContext_Event_location(ctx context.Context, fie
 				return ec.fieldContext_Location_locationSchedule(ctx, field)
 			case "locationInstances":
 				return ec.fieldContext_Location_locationInstances(ctx, field)
+			case "locationImages":
+				return ec.fieldContext_Location_locationImages(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Location", field.Name)
 		},
@@ -5446,6 +5381,62 @@ func (ec *executionContext) fieldContext_Location_locationInstances(ctx context.
 	return fc, nil
 }
 
+func (ec *executionContext) _Location_locationImages(ctx context.Context, field graphql.CollectedField, obj *gmodel.Location) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Location_locationImages(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LocationImages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*gmodel.LocationImage)
+	fc.Result = res
+	return ec.marshalNLocationImage2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocationImageᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Location_locationImages(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Location",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_LocationImage_id(ctx, field)
+			case "uploadId":
+				return ec.fieldContext_LocationImage_uploadId(ctx, field)
+			case "originalFilename":
+				return ec.fieldContext_LocationImage_originalFilename(ctx, field)
+			case "default":
+				return ec.fieldContext_LocationImage_default(ctx, field)
+			case "caption":
+				return ec.fieldContext_LocationImage_caption(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type LocationImage", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _LocationImage_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImage) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_LocationImage_id(ctx, field)
 	if err != nil {
@@ -5485,94 +5476,6 @@ func (ec *executionContext) fieldContext_LocationImage_id(ctx context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LocationImage_createdAt(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImage) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationImage_createdAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LocationImage_createdAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LocationImage",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LocationImage_updatedAt(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImage) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationImage_updatedAt(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UpdatedAt, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(time.Time)
-	fc.Result = res
-	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LocationImage_updatedAt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LocationImage",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -5741,325 +5644,6 @@ func (ec *executionContext) _LocationImage_caption(ctx context.Context, field gr
 func (ec *executionContext) fieldContext_LocationImage_caption(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "LocationImage",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LocationImage_locationId(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImage) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationImage_locationId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.LocationID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LocationImage_locationId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LocationImage",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LocationImage_createdBy(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImage) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationImage_createdBy(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.CreatedBy, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*gmodel.CreatedByUser)
-	fc.Result = res
-	return ec.marshalOCreatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐCreatedByUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LocationImage_createdBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LocationImage",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_CreatedByUser_id(ctx, field)
-			case "name":
-				return ec.fieldContext_CreatedByUser_name(ctx, field)
-			case "avatar":
-				return ec.fieldContext_CreatedByUser_avatar(ctx, field)
-			case "active":
-				return ec.fieldContext_CreatedByUser_active(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type CreatedByUser", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LocationImage_updatedBy(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImage) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationImage_updatedBy(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UpdatedBy, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*gmodel.UpdatedByUser)
-	fc.Result = res
-	return ec.marshalOUpdatedByUser2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐUpdatedByUser(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LocationImage_updatedBy(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LocationImage",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_UpdatedByUser_id(ctx, field)
-			case "name":
-				return ec.fieldContext_UpdatedByUser_name(ctx, field)
-			case "avatar":
-				return ec.fieldContext_UpdatedByUser_avatar(ctx, field)
-			case "active":
-				return ec.fieldContext_UpdatedByUser_active(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UpdatedByUser", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LocationImageSimple_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImageSimple) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationImageSimple_id(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int64)
-	fc.Result = res
-	return ec.marshalNID2int64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LocationImageSimple_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LocationImageSimple",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LocationImageSimple_uploadId(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImageSimple) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationImageSimple_uploadId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.UploadID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LocationImageSimple_uploadId(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LocationImageSimple",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LocationImageSimple_default(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImageSimple) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationImageSimple_default(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Default, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LocationImageSimple_default(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LocationImageSimple",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _LocationImageSimple_originalFilename(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImageSimple) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_LocationImageSimple_originalFilename(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.OriginalFilename, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_LocationImageSimple_originalFilename(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LocationImageSimple",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -6403,6 +5987,8 @@ func (ec *executionContext) fieldContext_LocationSchedule_location(ctx context.C
 				return ec.fieldContext_Location_locationSchedule(ctx, field)
 			case "locationInstances":
 				return ec.fieldContext_Location_locationInstances(ctx, field)
+			case "locationImages":
+				return ec.fieldContext_Location_locationImages(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Location", field.Name)
 		},
@@ -6819,6 +6405,8 @@ func (ec *executionContext) fieldContext_Mutation_createLocation(ctx context.Con
 				return ec.fieldContext_Location_locationSchedule(ctx, field)
 			case "locationInstances":
 				return ec.fieldContext_Location_locationInstances(ctx, field)
+			case "locationImages":
+				return ec.fieldContext_Location_locationImages(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Location", field.Name)
 		},
@@ -11677,6 +11265,11 @@ func (ec *executionContext) _Location(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "locationImages":
+			out.Values[i] = ec._Location_locationImages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11716,16 +11309,6 @@ func (ec *executionContext) _LocationImage(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "createdAt":
-			out.Values[i] = ec._LocationImage_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "updatedAt":
-			out.Values[i] = ec._LocationImage_updatedAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "uploadId":
 			out.Values[i] = ec._LocationImage_uploadId(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -11743,66 +11326,6 @@ func (ec *executionContext) _LocationImage(ctx context.Context, sel ast.Selectio
 			}
 		case "caption":
 			out.Values[i] = ec._LocationImage_caption(ctx, field, obj)
-		case "locationId":
-			out.Values[i] = ec._LocationImage_locationId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "createdBy":
-			out.Values[i] = ec._LocationImage_createdBy(ctx, field, obj)
-		case "updatedBy":
-			out.Values[i] = ec._LocationImage_updatedBy(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var locationImageSimpleImplementors = []string{"LocationImageSimple"}
-
-func (ec *executionContext) _LocationImageSimple(ctx context.Context, sel ast.SelectionSet, obj *gmodel.LocationImageSimple) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, locationImageSimpleImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("LocationImageSimple")
-		case "id":
-			out.Values[i] = ec._LocationImageSimple_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "uploadId":
-			out.Values[i] = ec._LocationImageSimple_uploadId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "default":
-			out.Values[i] = ec._LocationImageSimple_default(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "originalFilename":
-			out.Values[i] = ec._LocationImageSimple_originalFilename(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13105,6 +12628,60 @@ func (ec *executionContext) marshalNLocation2ᚖgithubᚗcomᚋstadioᚑappᚋst
 		return graphql.Null
 	}
 	return ec._Location(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNLocationImage2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocationImageᚄ(ctx context.Context, sel ast.SelectionSet, v []*gmodel.LocationImage) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNLocationImage2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocationImage(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNLocationImage2ᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocationImage(ctx context.Context, sel ast.SelectionSet, v *gmodel.LocationImage) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._LocationImage(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNLocationInstance2ᚕᚖgithubᚗcomᚋstadioᚑappᚋstadioᚑbackendᚋgraphᚋgmodelᚐLocationInstanceᚄ(ctx context.Context, sel ast.SelectionSet, v []*gmodel.LocationInstance) graphql.Marshaler {

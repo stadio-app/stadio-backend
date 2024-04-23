@@ -59,6 +59,7 @@ type Location {
   updatedBy: UpdatedByUser
   locationSchedule: [LocationSchedule!]!
   locationInstances: [LocationInstance!]!
+  locationImages: [LocationImage!]!
 }
 
 type LocationSchedule {
@@ -79,22 +80,10 @@ type LocationInstance {
   name: String
 }
 
-type LocationImageSimple {
-  id: ID! @goTag(key: "sql", value: "primary_key")
-  uploadId: String!
-  default: Boolean!
-  originalFilename: String
-}
-
 type LocationImage {
   id: ID! @goTag(key: "sql", value: "primary_key")
-  createdAt: Time!
-  updatedAt: Time!
   uploadId: String!
   originalFilename: String!
   default: Boolean!
   caption: String
-  locationId: Int!
-  createdBy: CreatedByUser
-  updatedBy: UpdatedByUser
 }
