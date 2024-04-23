@@ -5,6 +5,7 @@ CREATE TABLE "location_image" (
     "upload_id" TEXT NOT NULL UNIQUE,
     "original_filename" VARCHAR(255) NOT NULL,
     "location_id" BIGINT REFERENCES "location"("id") ON DELETE CASCADE,
+    "default" BOOLEAN NOT NULL DEFAULT FALSE,
     "caption" TEXT,
     "created_by" BIGINT REFERENCES "user"("id") ON DELETE SET NULL, 
     "updated_by" BIGINT REFERENCES "user"("id") ON DELETE SET NULL
