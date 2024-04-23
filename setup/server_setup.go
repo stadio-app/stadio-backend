@@ -6,6 +6,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/ayaanqui/go-migration-tool/migration_tool"
+	"github.com/cloudflare/cloudflare-go"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/stadio-app/stadio-backend/graph"
@@ -37,11 +38,18 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 		panic(err)
 	}
 
+	// Cloudflare
+	cloudflareApi, err := cloudflare.New(tokens.Cloudflare.ApiKey, tokens.Cloudflare.ApiEmail)
+	if err != nil {
+		panic(err)
+	}
+
 	server.Tokens = &tokens
 	service := services.Service{
 		DB: server.DB,
 		StructValidator: server.StructValidator,
 		Tokens: &tokens,
+		CloudflareApi: cloudflareApi,
 	}
 
 	// TODO: only show in dev environment

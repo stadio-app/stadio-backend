@@ -3,6 +3,7 @@ package services
 import (
 	"database/sql"
 
+	"github.com/cloudflare/cloudflare-go"
 	"github.com/go-jet/jet/v2/qrm"
 	"github.com/go-playground/validator/v10"
 	"github.com/stadio-app/stadio-backend/types"
@@ -13,6 +14,7 @@ type Service struct {
 	TX *sql.Tx
 	StructValidator *validator.Validate
 	Tokens *types.Tokens
+	CloudflareApi *cloudflare.API
 }
 
 // Returns a transaction if present.
