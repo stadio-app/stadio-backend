@@ -25,11 +25,11 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 		return gmodel.Location{}, fmt.Errorf("could not start transaction")
 	}
 	service.TX = tx
+	defer service.TX.Rollback()
 
 	// must create address first
 	address, err := service.CreateAddress(ctx, user, *input.Address)
 	if err != nil {
-		tx.Rollback()
 		return gmodel.Location{}, err
 	}
 	
@@ -51,7 +51,6 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	
 	var location gmodel.Location
 	if err := qb.QueryContext(ctx, tx, &location); err != nil {
-		tx.Rollback()
 		return gmodel.Location{}, fmt.Errorf("could not create location")
 	}
 	location.Address = &address
@@ -59,19 +58,16 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	// add location instances
 	location.LocationInstances, err = service.BulkCreateLocationInstances(ctx, location.ID, input.Instances)
 	if err != nil {
-		tx.Rollback()
 		return gmodel.Location{}, err
 	}
 
 	// add location schedules
 	location.LocationSchedule, err = service.BulkCreateLocationSchedule(ctx, location.ID, input.Schedule)
 	if err != nil {
-		tx.Rollback()
 		return gmodel.Location{}, err
 	}
 
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
 		return gmodel.Location{}, fmt.Errorf("could not commit location via transaction")
 	}
 	return location, nil
