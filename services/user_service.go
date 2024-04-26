@@ -70,6 +70,7 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 	if tx_err != nil {
 		return gmodel.User{}, model.EmailVerification{}, tx_err
 	}
+	defer tx.Rollback()
 
 	qb := table.User.
 		INSERT(
@@ -88,18 +89,15 @@ func (service Service) CreateInternalUser(ctx context.Context, input gmodel.Crea
 		}).
 		RETURNING(table.User.AllColumns)
 	if err := qb.QueryContext(ctx, tx, &user); err != nil {
-		tx.Rollback()
 		return gmodel.User{}, model.EmailVerification{}, fmt.Errorf("user entry could not be created. %s", err.Error())
 	}
 	service.TX = tx
 	if email_verification, err = service.CreateEmailVerification(ctx, user); err != nil {
-		tx.Rollback()
 		return gmodel.User{}, model.EmailVerification{}, err
 	}
 
 	// Commit changes from transaction
 	if err := tx.Commit(); err != nil {
-		tx.Rollback()
 		return gmodel.User{}, model.EmailVerification{}, err
 	}
 	return user, email_verification, nil
@@ -267,18 +265,17 @@ func (service Service) ResendEmailVerification(ctx context.Context, user gmodel.
 	if err != nil {
 		return model.EmailVerification{}, err
 	}
+	defer service.TX.Rollback()
 
 	_, err = table.EmailVerification.DELETE().
 		WHERE(table.EmailVerification.UserID.EQ(postgres.Int(user.ID))).
 		ExecContext(ctx, service.TX)
 	if err != nil {
-		service.TX.Rollback()
 		return model.EmailVerification{}, fmt.Errorf("user email verification entry deletion failed")
 	}
 
 	email_verification, err = service.CreateEmailVerification(ctx, user)
 	if err != nil {
-		service.TX.Rollback()
 		return model.EmailVerification{}, err
 	}
 	if err := service.TX.Commit(); err != nil {
@@ -303,18 +300,16 @@ func (service Service) VerifyUserEmail(ctx context.Context, verification_code st
 	var err error
 	service.TX, err = service.DB.BeginTx(ctx, nil)
 	if err != nil {
-		service.TX.Rollback()
 		return gmodel.User{}, err
 	}
+	defer service.TX.Rollback()
 
 	email_verification, err := service.FindEmailVerificationByCode(ctx, verification_code)
 	if err != nil {
-		service.TX.Rollback()
 		return gmodel.User{}, err
 	}
 
 	if time.Until(email_verification.CreatedAt).Abs() > time.Hour {
-		service.TX.Rollback()
 		// Delete verification entry since it's expired
 		del_query := table.EmailVerification.
 			DELETE().
@@ -330,7 +325,6 @@ func (service Service) VerifyUserEmail(ctx context.Context, verification_code st
 		SET(postgres.Bool(true), postgres.DateT(time.Now())).
 		WHERE(table.User.ID.EQ(postgres.Int(email_verification.UserID)))
 	if _, err := update.ExecContext(ctx, service.TX); err != nil {
-		service.TX.Rollback()
 		return gmodel.User{}, fmt.Errorf("could not update user email verification status to verified")
 	}
 
@@ -342,7 +336,6 @@ func (service Service) VerifyUserEmail(ctx context.Context, verification_code st
 			table.EmailVerification.Code.EQ(postgres.String(verification_code)),
 		))
 	if _, err := delete.ExecContext(ctx, service.TX); err != nil {
-		service.TX.Rollback()
 		return gmodel.User{}, fmt.Errorf("could not delete email verification entry")
 	}
 
