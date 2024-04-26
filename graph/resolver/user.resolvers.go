@@ -25,6 +25,16 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, input gmodel.Creat
 	return &new_user, nil
 }
 
+// VerifyUser is the resolver for the verifyUser field.
+func (r *mutationResolver) VerifyUser(ctx context.Context, email string, activationCode string) (bool, error) {
+	// panic(fmt.Errorf("not implemented: VerifyUser - verifyUser"))
+	active_set, err := r.Service.VerifyUser(ctx, email, activationCode)
+	if err != nil {
+		return false, fmt.Errorf("error in email verification: %s", err.Error())
+	}
+	return active_set, nil
+}
+
 // Login is the resolver for the login field.
 func (r *queryResolver) Login(ctx context.Context, email string, password string) (*gmodel.Auth, error) {
 	auth, err := r.Service.LoginInternal(ctx, email, password)

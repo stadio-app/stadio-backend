@@ -1,5 +1,6 @@
 extend type Mutation {
   createAccount(input: CreateAccountInput!): User!
+  verifyUser(email: String!, activation_code: String!): Boolean!
 }
 
 extend type Query {
@@ -34,6 +35,11 @@ type User {
   active: Boolean!
   authPlatform: AuthPlatformType!
   authStateId: ID! @goTag(key: "alias", value: "auth_state.id")
+}
+
+type VerifyableUser {
+  active: Boolean!
+  code: String!
 }
 
 type UserShallow {

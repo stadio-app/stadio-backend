@@ -15,7 +15,7 @@ func (service Service) IsAuthenticatedDirective(ctx context.Context, obj interfa
 	}
 	user, err := service.VerifyJwt(ctx, authorization)
 	if err != nil {
-		return nil, fmt.Errorf("unauthorized")
+		return nil, fmt.Errorf("unauthorized: %", err)
 	}
 	new_ctx := context.WithValue(ctx, types.AuthUserKey, user)
 	return next(new_ctx)

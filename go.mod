@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.44
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-jet/jet/v2 v2.11.0
+	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/vektah/gqlparser/v2 v2.5.11
 	golang.org/x/crypto v0.21.0

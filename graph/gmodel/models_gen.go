@@ -240,6 +240,11 @@ type UserShallow struct {
 	Active *bool   `json:"active,omitempty" alias:"user.active"`
 }
 
+type VerifyableUser struct {
+	Active bool   `json:"active"`
+	Code   string `json:"code"`
+}
+
 type AuthPlatformType string
 
 const (

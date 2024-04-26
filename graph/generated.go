@@ -180,6 +180,7 @@ type ComplexityRoot struct {
 		CreateAccount  func(childComplexity int, input gmodel.CreateAccountInput) int
 		CreateEvent    func(childComplexity int, input gmodel.CreateEvent) int
 		CreateLocation func(childComplexity int, input gmodel.CreateLocation) int
+		VerifyUser     func(childComplexity int, email string, activationCode string) int
 	}
 
 	Owner struct {
@@ -231,12 +232,18 @@ type ComplexityRoot struct {
 		ID     func(childComplexity int) int
 		Name   func(childComplexity int) int
 	}
+
+	VerifyableUser struct {
+		Active func(childComplexity int) int
+		Code   func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
 	CreateEvent(ctx context.Context, input gmodel.CreateEvent) (*gmodel.EventShallow, error)
 	CreateLocation(ctx context.Context, input gmodel.CreateLocation) (*gmodel.Location, error)
 	CreateAccount(ctx context.Context, input gmodel.CreateAccountInput) (*gmodel.User, error)
+	VerifyUser(ctx context.Context, email string, activationCode string) (bool, error)
 }
 type QueryResolver interface {
 	GetAllCountries(ctx context.Context) ([]*gmodel.Country, error)
@@ -959,6 +966,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.CreateLocation(childComplexity, args["input"].(gmodel.CreateLocation)), true
 
+	case "Mutation.verifyUser":
+		if e.complexity.Mutation.VerifyUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_verifyUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.VerifyUser(childComplexity, args["email"].(string), args["activation_code"].(string)), true
+
 	case "Owner.createdAt":
 		if e.complexity.Owner.CreatedAt == nil {
 			break
@@ -1219,6 +1238,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UserShallow.Name(childComplexity), true
 
+	case "VerifyableUser.active":
+		if e.complexity.VerifyableUser.Active == nil {
+			break
+		}
+
+		return e.complexity.VerifyableUser.Active(childComplexity), true
+
+	case "VerifyableUser.code":
+		if e.complexity.VerifyableUser.Code == nil {
+			break
+		}
+
+		return e.complexity.VerifyableUser.Code(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -1399,6 +1432,30 @@ func (ec *executionContext) field_Mutation_createLocation_args(ctx context.Conte
 		}
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_verifyUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["email"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["email"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["activation_code"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("activation_code"))
+		arg1, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["activation_code"] = arg1
 	return args, nil
 }
 
@@ -6099,6 +6156,61 @@ func (ec *executionContext) fieldContext_Mutation_createAccount(ctx context.Cont
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_verifyUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_verifyUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().VerifyUser(rctx, fc.Args["email"].(string), fc.Args["activation_code"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_verifyUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_verifyUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Owner_id(ctx context.Context, field graphql.CollectedField, obj *gmodel.Owner) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Owner_id(ctx, field)
 	if err != nil {
@@ -7906,6 +8018,94 @@ func (ec *executionContext) fieldContext_UserShallow_active(ctx context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VerifyableUser_active(ctx context.Context, field graphql.CollectedField, obj *gmodel.VerifyableUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VerifyableUser_active(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Active, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VerifyableUser_active(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VerifyableUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _VerifyableUser_code(ctx context.Context, field graphql.CollectedField, obj *gmodel.VerifyableUser) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_VerifyableUser_code(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Code, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_VerifyableUser_code(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "VerifyableUser",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -10856,6 +11056,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "verifyUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_verifyUser(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -11272,6 +11479,50 @@ func (ec *executionContext) _UserShallow(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._UserShallow_avatar(ctx, field, obj)
 		case "active":
 			out.Values[i] = ec._UserShallow_active(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var verifyableUserImplementors = []string{"VerifyableUser"}
+
+func (ec *executionContext) _VerifyableUser(ctx context.Context, sel ast.SelectionSet, obj *gmodel.VerifyableUser) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, verifyableUserImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("VerifyableUser")
+		case "active":
+			out.Values[i] = ec._VerifyableUser_active(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "code":
+			out.Values[i] = ec._VerifyableUser_code(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
