@@ -169,9 +169,6 @@ func (service Service) LoginInternal(ctx context.Context, email string, password
 	if err := query.QueryContext(ctx, db, &verify_user); err != nil {
 		return gmodel.Auth{}, fmt.Errorf("incorrect email or password")
 	}
-	if !verify_user.Active {
-		return gmodel.Auth{}, fmt.Errorf("please verify your email")
-	}
 	if verify_user.Password == nil {
 		return gmodel.Auth{}, fmt.Errorf("password has not been set for this account. try a different authentication method")
 	}
