@@ -107,8 +107,8 @@ func TestUser(t *testing.T) {
 		t.Run("correct input", func(t *testing.T) {
 			t.Run("inactive user", func(t *testing.T) {
 				_, err := service.LoginInternal(ctx, user1_input.Email, user1_input.Password, nil)
-				if err == nil {
-					t.Fatal("should not login. user is still inactive")
+				if err != nil {
+					t.Fatal("should still login, even if user is inactive")
 				}
 			})
 
@@ -182,8 +182,8 @@ func TestUser(t *testing.T) {
 					if err := qb.QueryContext(ctx, db, &logins); err != nil {
 						t.Fatal("could not query auth state for user", err.Error())
 					}
-					if len(logins) != 2 {
-						t.Fatal("auth_state for user should be 2")
+					if len(logins) != 3 {
+						t.Fatal("auth_state for user should be 3")
 					}
 				})
 			})
