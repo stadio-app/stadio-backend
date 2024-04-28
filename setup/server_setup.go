@@ -6,6 +6,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/ayaanqui/go-migration-tool/migration_tool"
+	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/stadio-app/stadio-backend/graph"
@@ -38,10 +39,18 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 	}
 
 	server.Tokens = &tokens
+
+	// Cloudinary CDN
+	cloudinary, err := cloudinary.NewFromParams(tokens.Cloudinary.CloudName, tokens.Cloudinary.ApiKey, tokens.Cloudinary.ApiSecret)
+	if err != nil {
+		panic(err)
+	}
+
 	service := services.Service{
 		DB: server.DB,
 		StructValidator: server.StructValidator,
 		Tokens: &tokens,
+		Cloudinary: cloudinary,
 	}
 
 	// TODO: only show in dev environment
