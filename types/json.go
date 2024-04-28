@@ -5,9 +5,9 @@ type SendGridTemplates struct {
 }
 
 type SendGridTokens struct {
-	ApiKey string `json:"api_key"`
-	RecoveryCode string `json:"recovery_code,omitempty"`
-	ApiKeyId string `json:"api_key_id,omitempty"`
+	ApiKey string `json:"apiKey"`
+	RecoveryCode string `json:"recoveryCode,omitempty"`
+	ApiKeyId string `json:"apiKeyId,omitempty"`
 	Templates SendGridTemplates `json:"templates,omitempty"`
 }
 
