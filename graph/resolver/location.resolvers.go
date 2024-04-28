@@ -6,7 +6,9 @@ package gresolver
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
 
@@ -18,5 +20,19 @@ func (r *mutationResolver) CreateLocation(ctx context.Context, input gmodel.Crea
 	}
 	user := r.Service.GetAuthUserFromContext(ctx)
 	location, err := r.Service.CreateLocation(ctx, &user, input)
+	if err != nil {
+		return nil, err
+	}
+
+	for i, location_image := range location.LocationImages {
+		image_input := input.Images[i]
+		upload_params := uploader.UploadParams{
+			PublicID: location_image.UploadID,
+		}
+		_, err := r.Service.GraphImageUpload(ctx, image_input.File, upload_params)
+		if err != nil {
+			return nil, fmt.Errorf("failed to upload image %s to CDN", image_input.File.Filename)
+		}
+	}
 	return &location, err
 }

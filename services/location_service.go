@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/go-jet/jet/v2/postgres"
+	"github.com/google/uuid"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -72,7 +72,7 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	}
 
 	// upload and store images
-	_, err = service.BulkUploadAndCreateLocationImages(ctx, location.ID, user, input.Images)
+	_, err = service.BulkCreateLocationImages(ctx, location.ID, user, input.Images)
 	if err != nil {
 		tx.Rollback()
 		return gmodel.Location{}, err
@@ -129,7 +129,9 @@ func (service Service) BulkCreateLocationSchedule(
 	return location_schedule_ptrs, nil
 }
 
-func (service Service) BulkUploadAndCreateLocationImages(
+// Creates location_image entries. This method does not upload the images to the CDN.
+// Instead use the upload_id column to set the CDN image id
+func (service Service) BulkCreateLocationImages(
 	ctx context.Context, 
 	location_id int64,
 	user *gmodel.User,
@@ -137,11 +139,7 @@ func (service Service) BulkUploadAndCreateLocationImages(
 ) ([]*gmodel.LocationImage, error) {
 	inserted_images := make([]*gmodel.LocationImage, len(image_inputs))
 	for i, image_input := range image_inputs {
-		uploaded_image, err := service.GraphImageUpload(ctx, image_input.File, uploader.UploadParams{})
-		if err != nil {
-			return nil, fmt.Errorf("failed to upload image %s to Cloudflare", image_input.File.Filename)
-		}
-
+		// TODO: validate image content type
 		insert_qb := table.LocationImage.INSERT(
 			table.LocationImage.LocationID,
 			table.LocationImage.Default,
@@ -153,7 +151,7 @@ func (service Service) BulkUploadAndCreateLocationImages(
 		).MODEL(model.LocationImage{
 			LocationID: location_id,
 			Default: image_input.Default,
-			UploadID: uploaded_image.PublicID,
+			UploadID: uuid.New().String(),
 			OriginalFilename: image_input.File.Filename,
 			Caption: image_input.Caption,
 			CreatedBy: &user.ID,
