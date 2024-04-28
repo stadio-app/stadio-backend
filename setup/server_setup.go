@@ -9,6 +9,7 @@ import (
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
+	"github.com/sendgrid/sendgrid-go"
 	"github.com/stadio-app/stadio-backend/graph"
 	gresolver "github.com/stadio-app/stadio-backend/graph/resolver"
 	"github.com/stadio-app/stadio-backend/services"
@@ -46,11 +47,14 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 		panic(err)
 	}
 
+	sendgrid_client := sendgrid.NewSendClient(tokens.SendGrid.ApiKey)
+
 	service := services.Service{
 		DB: server.DB,
 		StructValidator: server.StructValidator,
 		Tokens: &tokens,
 		Cloudinary: cloudinary,
+		Sendgrid: sendgrid_client,
 	}
 
 	// TODO: only show in dev environment
