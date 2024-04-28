@@ -137,18 +137,9 @@ func (service Service) BulkCreateLocationImages(
 	user *gmodel.User,
 	image_inputs []*gmodel.CreateLocationImage,
 ) ([]*gmodel.LocationImage, error) {
-	inserted_images := make([]*gmodel.LocationImage, len(image_inputs))
+	inserted_images := make([]model.LocationImage, len(image_inputs))
 	for i, image_input := range image_inputs {
-		// TODO: validate image content type
-		insert_qb := table.LocationImage.INSERT(
-			table.LocationImage.LocationID,
-			table.LocationImage.Default,
-			table.LocationImage.UploadID,
-			table.LocationImage.OriginalFilename,
-			table.LocationImage.Caption,
-			table.LocationImage.CreatedBy,
-			table.LocationImage.UpdatedBy,
-		).MODEL(model.LocationImage{
+		inserted_images[i] = model.LocationImage{
 			LocationID: location_id,
 			Default: image_input.Default,
 			UploadID: uuid.New().String(),
@@ -156,14 +147,26 @@ func (service Service) BulkCreateLocationImages(
 			Caption: image_input.Caption,
 			CreatedBy: &user.ID,
 			UpdatedBy: &user.ID,
-		}).RETURNING(table.LocationImage.AllColumns)
-		var image gmodel.LocationImage
-		if err := insert_qb.QueryContext(ctx, service.DbOrTxQueryable(), &image); err != nil {
-			return nil, err
 		}
-		inserted_images[i] = &image
 	}
-	return inserted_images, nil
+
+	insert_qb := table.LocationImage.
+		INSERT(
+			table.LocationImage.LocationID,
+			table.LocationImage.Default,
+			table.LocationImage.UploadID,
+			table.LocationImage.OriginalFilename,
+			table.LocationImage.Caption,
+			table.LocationImage.CreatedBy,
+			table.LocationImage.UpdatedBy,
+		).
+		MODELS(inserted_images).
+		RETURNING(table.LocationImage.AllColumns)
+	var location_images []*gmodel.LocationImage
+	if err := insert_qb.QueryContext(ctx, service.DbOrTxQueryable(), &location_images); err != nil {
+		return nil, err
+	}
+	return location_images, nil
 }
 
 func (service Service) CreateLocationSchedule(

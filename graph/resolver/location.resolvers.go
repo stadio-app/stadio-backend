@@ -34,5 +34,5 @@ func (r *mutationResolver) CreateLocation(ctx context.Context, input gmodel.Crea
 			return nil, fmt.Errorf("failed to upload image %s to CDN", image_input.File.Filename)
 		}
 	}
-	return &location, err
+	return &location, nil
 }
