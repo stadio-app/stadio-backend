@@ -7,6 +7,7 @@ package gresolver
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
@@ -18,11 +19,13 @@ func (r *mutationResolver) CreateAccount(ctx context.Context, input gmodel.Creat
 		return nil, validation_err
 	}
 
-	new_user, _, err := r.Service.CreateInternalUser(ctx, input)
+	new_user, email_verification, err := r.Service.CreateInternalUser(ctx, input)
 	if err != nil {
 		return nil, fmt.Errorf("could not create user. %s", err.Error())
 	}
-	// TODO: send email verification mail via new_user.Email
+	if res, _ := r.Service.SendEmailVerification(new_user, email_verification); res.StatusCode == http.StatusBadRequest {
+		return nil, fmt.Errorf(res.Body)
+	}
 	return &new_user, nil
 }
 
@@ -45,7 +48,9 @@ func (r *mutationResolver) ResendEmailVerificationCode(ctx context.Context, emai
 	if err != nil {
 		return false, err
 	}
-	// TODO: Send email with new verification code
+	if res, _ := r.Service.SendEmailVerification(user, email_verification); res.StatusCode == http.StatusBadRequest {
+		return false, fmt.Errorf(res.Body)
+	}
 	return email_verification.ID > 0, nil
 }
 
