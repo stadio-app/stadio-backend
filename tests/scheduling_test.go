@@ -2,11 +2,13 @@ package tests
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/google/uuid"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -67,6 +69,7 @@ func TestLocation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	defer file.Close()
 
 	t.Run("create location", func(t *testing.T) {
 		input := gmodel.CreateLocation{
@@ -108,6 +111,19 @@ func TestLocation(t *testing.T) {
 		if _, err := uuid.Parse(location.LocationImages[0].UploadID); err != nil {
 			t.Fatal("location_image.upload_id is not a valid UUID", err)
 		}
+
+		t.Run("upload images to CDN", func(t *testing.T) {
+			for i, image := range input.Images {
+				location_image := location.LocationImages[i]
+				upload, err := service.GraphImageUpload(ctx, image.Image, uploader.UploadParams{
+					PublicID: location_image.UploadID,
+				})
+				if err != nil {
+					t.Fatal(err)
+				}
+				log.Printf("Upload: %+v\n", upload)
+			}
+		})
 
 		for i, schedule := range location.LocationSchedule {
 			schedule_input := input.Schedule[i]
