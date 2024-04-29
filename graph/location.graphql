@@ -84,6 +84,7 @@ type LocationImage {
   id: ID! @goTag(key: "sql", value: "primary_key")
   uploadId: String!
   originalFilename: String!
+  contentType: String!
   default: Boolean!
   caption: String
 }

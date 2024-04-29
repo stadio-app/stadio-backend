@@ -139,11 +139,16 @@ func (service Service) BulkCreateLocationImages(
 ) ([]*gmodel.LocationImage, error) {
 	inserted_images := make([]model.LocationImage, len(image_inputs))
 	for i, image_input := range image_inputs {
+		if image_input.Image.ContentType == "" {
+			image_input.Image.ContentType = "image/jpeg"
+		}
+
 		inserted_images[i] = model.LocationImage{
 			LocationID: location_id,
 			Default: image_input.Default,
 			UploadID: uuid.New().String(),
 			OriginalFilename: image_input.Image.Filename,
+			ContentType: image_input.Image.ContentType,
 			Caption: image_input.Caption,
 			CreatedBy: &user.ID,
 			UpdatedBy: &user.ID,
@@ -156,6 +161,7 @@ func (service Service) BulkCreateLocationImages(
 			table.LocationImage.Default,
 			table.LocationImage.UploadID,
 			table.LocationImage.OriginalFilename,
+			table.LocationImage.ContentType,
 			table.LocationImage.Caption,
 			table.LocationImage.CreatedBy,
 			table.LocationImage.UpdatedBy,

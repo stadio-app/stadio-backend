@@ -161,6 +161,7 @@ type ComplexityRoot struct {
 
 	LocationImage struct {
 		Caption          func(childComplexity int) int
+		ContentType      func(childComplexity int) int
 		Default          func(childComplexity int) int
 		ID               func(childComplexity int) int
 		OriginalFilename func(childComplexity int) int
@@ -865,6 +866,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.LocationImage.Caption(childComplexity), true
+
+	case "LocationImage.contentType":
+		if e.complexity.LocationImage.ContentType == nil {
+			break
+		}
+
+		return e.complexity.LocationImage.ContentType(childComplexity), true
 
 	case "LocationImage.default":
 		if e.complexity.LocationImage.Default == nil {
@@ -5426,6 +5434,8 @@ func (ec *executionContext) fieldContext_Location_locationImages(ctx context.Con
 				return ec.fieldContext_LocationImage_uploadId(ctx, field)
 			case "originalFilename":
 				return ec.fieldContext_LocationImage_originalFilename(ctx, field)
+			case "contentType":
+				return ec.fieldContext_LocationImage_contentType(ctx, field)
 			case "default":
 				return ec.fieldContext_LocationImage_default(ctx, field)
 			case "caption":
@@ -5557,6 +5567,50 @@ func (ec *executionContext) _LocationImage_originalFilename(ctx context.Context,
 }
 
 func (ec *executionContext) fieldContext_LocationImage_originalFilename(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "LocationImage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _LocationImage_contentType(ctx context.Context, field graphql.CollectedField, obj *gmodel.LocationImage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_LocationImage_contentType(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContentType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_LocationImage_contentType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "LocationImage",
 		Field:      field,
@@ -11316,6 +11370,11 @@ func (ec *executionContext) _LocationImage(ctx context.Context, sel ast.Selectio
 			}
 		case "originalFilename":
 			out.Values[i] = ec._LocationImage_originalFilename(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "contentType":
+			out.Values[i] = ec._LocationImage_contentType(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

@@ -188,6 +188,7 @@ type LocationImage struct {
 	ID               int64   `json:"id" sql:"primary_key"`
 	UploadID         string  `json:"uploadId"`
 	OriginalFilename string  `json:"originalFilename"`
+	ContentType      string  `json:"contentType"`
 	Default          bool    `json:"default"`
 	Caption          *string `json:"caption,omitempty"`
 }

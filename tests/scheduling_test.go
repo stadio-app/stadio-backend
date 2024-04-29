@@ -109,6 +109,9 @@ func TestLocation(t *testing.T) {
 		if _, err := uuid.Parse(location.LocationImages[0].UploadID); err != nil {
 			t.Fatal("location_image.upload_id is not a valid UUID", err)
 		}
+		if location.LocationImages[0].ContentType != "image/png" {
+			t.Fatal("image content type is incorrect")
+		}
 
 		// TODO: Uncomment to test image uploading with the CDN
 		// t.Run("upload images to CDN", func(t *testing.T) {
