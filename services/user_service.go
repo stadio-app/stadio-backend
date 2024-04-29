@@ -12,6 +12,7 @@ import (
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 	"github.com/stadio-app/stadio-backend/types"
 	"github.com/stadio-app/stadio-backend/utils"
+	"github.com/thanhpk/randstr"
 	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/oauth2/v2"
@@ -236,10 +237,7 @@ func (service Service) CreateAuthState(ctx context.Context, user gmodel.User, au
 }
 
 func (service Service) CreateEmailVerification(ctx context.Context, user gmodel.User) (model.EmailVerification, error) {
-	code, code_err := utils.GenerateRandomUrlEncodedString(EMAIL_VERIFICATION_CODE_LEN)
-	if code_err != nil {
-		return model.EmailVerification{}, code_err
-	}
+	code := randstr.String(EMAIL_VERIFICATION_CODE_LEN)
 
 	query := table.EmailVerification.INSERT(
 		table.EmailVerification.UserID,
