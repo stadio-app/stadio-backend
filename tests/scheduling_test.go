@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/google/uuid"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
@@ -100,6 +101,12 @@ func TestLocation(t *testing.T) {
 		}
 		if len(location.LocationSchedule) != len(input.Schedule) {
 			t.Fatal("location.location_schedule and schedule must have the same number of values")
+		}
+		if len(location.LocationImages) != len(input.Images) {
+			t.Fatal("not all images were inserted")
+		}
+		if _, err := uuid.Parse(location.LocationImages[0].UploadID); err != nil {
+			t.Fatal("location_image.upload_id is not a valid UUID", err)
 		}
 
 		for i, schedule := range location.LocationSchedule {

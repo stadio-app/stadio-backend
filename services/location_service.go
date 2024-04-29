@@ -71,8 +71,8 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 		return gmodel.Location{}, err
 	}
 
-	// upload and store images
-	_, err = service.BulkCreateLocationImages(ctx, location.ID, user, input.Images)
+	// store image information
+	location.LocationImages, err = service.BulkCreateLocationImages(ctx, location.ID, user, input.Images)
 	if err != nil {
 		tx.Rollback()
 		return gmodel.Location{}, err
