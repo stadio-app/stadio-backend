@@ -27,6 +27,7 @@ type locationImageTable struct {
 	Caption          postgres.ColumnString
 	CreatedBy        postgres.ColumnInteger
 	UpdatedBy        postgres.ColumnInteger
+	ContentType      postgres.ColumnString
 
 	AllColumns     postgres.ColumnList
 	MutableColumns postgres.ColumnList
@@ -77,8 +78,9 @@ func newLocationImageTableImpl(schemaName, tableName, alias string) locationImag
 		CaptionColumn          = postgres.StringColumn("caption")
 		CreatedByColumn        = postgres.IntegerColumn("created_by")
 		UpdatedByColumn        = postgres.IntegerColumn("updated_by")
-		allColumns             = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, UploadIDColumn, OriginalFilenameColumn, LocationIDColumn, DefaultColumn, CaptionColumn, CreatedByColumn, UpdatedByColumn}
-		mutableColumns         = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, UploadIDColumn, OriginalFilenameColumn, LocationIDColumn, DefaultColumn, CaptionColumn, CreatedByColumn, UpdatedByColumn}
+		ContentTypeColumn      = postgres.StringColumn("content_type")
+		allColumns             = postgres.ColumnList{IDColumn, CreatedAtColumn, UpdatedAtColumn, UploadIDColumn, OriginalFilenameColumn, LocationIDColumn, DefaultColumn, CaptionColumn, CreatedByColumn, UpdatedByColumn, ContentTypeColumn}
+		mutableColumns         = postgres.ColumnList{CreatedAtColumn, UpdatedAtColumn, UploadIDColumn, OriginalFilenameColumn, LocationIDColumn, DefaultColumn, CaptionColumn, CreatedByColumn, UpdatedByColumn, ContentTypeColumn}
 	)
 
 	return locationImageTable{
@@ -95,6 +97,7 @@ func newLocationImageTableImpl(schemaName, tableName, alias string) locationImag
 		Caption:          CaptionColumn,
 		CreatedBy:        CreatedByColumn,
 		UpdatedBy:        UpdatedByColumn,
+		ContentType:      ContentTypeColumn,
 
 		AllColumns:     allColumns,
 		MutableColumns: mutableColumns,

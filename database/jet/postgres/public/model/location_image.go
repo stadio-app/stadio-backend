@@ -22,4 +22,5 @@ type LocationImage struct {
 	Caption          *string
 	CreatedBy        *int64
 	UpdatedBy        *int64
+	ContentType      string
 }
