@@ -2,9 +2,11 @@ package tests
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
@@ -60,6 +62,11 @@ func TestLocation(t *testing.T) {
 	}
 	var location gmodel.Location
 
+	file, err := os.Open("./img.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	t.Run("create location", func(t *testing.T) {
 		input := gmodel.CreateLocation{
 			Name: "My Soccer Field",
@@ -76,6 +83,16 @@ func TestLocation(t *testing.T) {
 			Schedule: init_schedule(9, 17, false),
 			Instances: []*gmodel.CreateLocationInstance{
 				{Name: "Field #1"},
+			},
+			Images: []*gmodel.CreateLocationImage{
+				{
+					File: graphql.Upload{
+						File: file,
+						Filename: file.Name(),
+						ContentType: "image/png",
+					},
+					Default: true,
+				},
 			},
 		}
 		if location, err = service.CreateLocation(ctx, &user, input); err != nil {
@@ -333,6 +350,16 @@ func TestLocation(t *testing.T) {
 			},
 			Schedule: init_schedule(7, 20, true), // 7am - 8pm
 			Instances: init_location_instances(num_instances),
+			Images: []*gmodel.CreateLocationImage{
+				{
+					File: graphql.Upload{
+						File: file,
+						Filename: file.Name(),
+						ContentType: "image/png",
+					},
+					Default: true,
+				},
+			},
 		})
 		if err != nil {
 			t.Fatal("could not create complex location")
