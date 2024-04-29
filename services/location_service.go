@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
+	"github.com/google/uuid"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -18,6 +19,9 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	}
 	if len(input.Schedule) < 7 {
 		return gmodel.Location{}, fmt.Errorf("minimum of 7 days of schedule is required")
+	}
+	if len(input.Images) == 0 || len(input.Images) > 5 {
+		return gmodel.Location{}, fmt.Errorf("minimum 1 image upload, and maximum of 5 images")
 	}
 	
 	tx, err := service.DB.BeginTx(ctx, nil)
@@ -64,6 +68,13 @@ func (service Service) CreateLocation(ctx context.Context, user *gmodel.User, in
 	// add location schedules
 	location.LocationSchedule, err = service.BulkCreateLocationSchedule(ctx, location.ID, input.Schedule)
 	if err != nil {
+		return gmodel.Location{}, err
+	}
+
+	// store image information
+	location.LocationImages, err = service.BulkCreateLocationImages(ctx, location.ID, user, input.Images)
+	if err != nil {
+		tx.Rollback()
 		return gmodel.Location{}, err
 	}
 
@@ -116,6 +127,46 @@ func (service Service) BulkCreateLocationSchedule(
 		location_schedule_ptrs[i] = &location_schedules[i]
 	}
 	return location_schedule_ptrs, nil
+}
+
+// Creates location_image entries. This method does not upload the images to the CDN.
+// Instead use the upload_id column to set the CDN image id
+func (service Service) BulkCreateLocationImages(
+	ctx context.Context, 
+	location_id int64,
+	user *gmodel.User,
+	image_inputs []*gmodel.CreateLocationImage,
+) ([]*gmodel.LocationImage, error) {
+	inserted_images := make([]model.LocationImage, len(image_inputs))
+	for i, image_input := range image_inputs {
+		inserted_images[i] = model.LocationImage{
+			LocationID: location_id,
+			Default: image_input.Default,
+			UploadID: uuid.New().String(),
+			OriginalFilename: image_input.Image.Filename,
+			Caption: image_input.Caption,
+			CreatedBy: &user.ID,
+			UpdatedBy: &user.ID,
+		}
+	}
+
+	insert_qb := table.LocationImage.
+		INSERT(
+			table.LocationImage.LocationID,
+			table.LocationImage.Default,
+			table.LocationImage.UploadID,
+			table.LocationImage.OriginalFilename,
+			table.LocationImage.Caption,
+			table.LocationImage.CreatedBy,
+			table.LocationImage.UpdatedBy,
+		).
+		MODELS(inserted_images).
+		RETURNING(table.LocationImage.AllColumns)
+	var location_images []*gmodel.LocationImage
+	if err := insert_qb.QueryContext(ctx, service.DbOrTxQueryable(), &location_images); err != nil {
+		return nil, err
+	}
+	return location_images, nil
 }
 
 func (service Service) CreateLocationSchedule(

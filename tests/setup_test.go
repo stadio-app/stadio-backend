@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/ayaanqui/go-migration-tool/migration_tool"
+	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
 	"github.com/ory/dockertest/v3"
@@ -48,11 +49,18 @@ func NewMockServer() {
 		log.Fatalf(err.Error())
 	}
 
+	// Cloudinary CDN
+	cloudinary, err := cloudinary.NewFromParams(tokens.Cloudinary.CloudName, tokens.Cloudinary.ApiKey, tokens.Cloudinary.ApiSecret)
+	if err != nil {
+		panic(err)
+	}
+
 	app.Tokens = &tokens
 	service = services.Service{
 		DB: app.DB,
 		StructValidator: app.StructValidator,
 		Tokens: &tokens,
+		Cloudinary: cloudinary,
 	}
 }
 

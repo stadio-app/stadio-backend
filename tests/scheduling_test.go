@@ -2,9 +2,12 @@ package tests
 
 import (
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/google/uuid"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
@@ -60,6 +63,12 @@ func TestLocation(t *testing.T) {
 	}
 	var location gmodel.Location
 
+	file, err := os.Open("./img.png")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
+
 	t.Run("create location", func(t *testing.T) {
 		input := gmodel.CreateLocation{
 			Name: "My Soccer Field",
@@ -77,6 +86,16 @@ func TestLocation(t *testing.T) {
 			Instances: []*gmodel.CreateLocationInstance{
 				{Name: "Field #1"},
 			},
+			Images: []*gmodel.CreateLocationImage{
+				{
+					Image: graphql.Upload{
+						File: file,
+						Filename: file.Name(),
+						ContentType: "image/png",
+					},
+					Default: true,
+				},
+			},
 		}
 		if location, err = service.CreateLocation(ctx, &user, input); err != nil {
 			t.Fatal(err.Error())
@@ -84,6 +103,26 @@ func TestLocation(t *testing.T) {
 		if len(location.LocationSchedule) != len(input.Schedule) {
 			t.Fatal("location.location_schedule and schedule must have the same number of values")
 		}
+		if len(location.LocationImages) != len(input.Images) {
+			t.Fatal("not all images were inserted")
+		}
+		if _, err := uuid.Parse(location.LocationImages[0].UploadID); err != nil {
+			t.Fatal("location_image.upload_id is not a valid UUID", err)
+		}
+
+		// TODO: Uncomment to test image uploading with the CDN
+		// t.Run("upload images to CDN", func(t *testing.T) {
+		// 	for i, image := range input.Images {
+		// 		location_image := location.LocationImages[i]
+		// 		upload, err := service.GraphImageUpload(ctx, image.Image, uploader.UploadParams{
+		// 			PublicID: location_image.UploadID,
+		// 		})
+		// 		if err != nil {
+		// 			t.Fatal(err)
+		// 		}
+		// 		log.Printf("Upload: %+v\n", upload)
+		// 	}
+		// })
 
 		for i, schedule := range location.LocationSchedule {
 			schedule_input := input.Schedule[i]
@@ -333,6 +372,16 @@ func TestLocation(t *testing.T) {
 			},
 			Schedule: init_schedule(7, 20, true), // 7am - 8pm
 			Instances: init_location_instances(num_instances),
+			Images: []*gmodel.CreateLocationImage{
+				{
+					Image: graphql.Upload{
+						File: file,
+						Filename: file.Name(),
+						ContentType: "image/png",
+					},
+					Default: true,
+				},
+			},
 		})
 		if err != nil {
 			t.Fatal("could not create complex location")
