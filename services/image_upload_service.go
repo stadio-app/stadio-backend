@@ -9,8 +9,8 @@ import (
 
 func (service Service) GraphImageUpload(
 	ctx context.Context,
-	file graphql.Upload,
+	image graphql.Upload,
 	params uploader.UploadParams,
 ) (*uploader.UploadResult, error) {
-	return service.Cloudinary.Upload.Upload(ctx, file.File, params)
+	return service.Cloudinary.Upload.Upload(ctx, image.File, params)
 }

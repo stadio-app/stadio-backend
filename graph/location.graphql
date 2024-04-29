@@ -35,7 +35,7 @@ input CreateLocationInstance {
 }
 
 input CreateLocationImage {
-  file: Upload!
+  image: Upload!
   default: Boolean!
   caption: String
 }

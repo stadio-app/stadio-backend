@@ -143,7 +143,7 @@ func (service Service) BulkCreateLocationImages(
 			LocationID: location_id,
 			Default: image_input.Default,
 			UploadID: uuid.New().String(),
-			OriginalFilename: image_input.File.Filename,
+			OriginalFilename: image_input.Image.Filename,
 			Caption: image_input.Caption,
 			CreatedBy: &user.ID,
 			UpdatedBy: &user.ID,

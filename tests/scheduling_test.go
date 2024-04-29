@@ -87,7 +87,7 @@ func TestLocation(t *testing.T) {
 			},
 			Images: []*gmodel.CreateLocationImage{
 				{
-					File: graphql.Upload{
+					Image: graphql.Upload{
 						File: file,
 						Filename: file.Name(),
 						ContentType: "image/png",
@@ -359,7 +359,7 @@ func TestLocation(t *testing.T) {
 			Instances: init_location_instances(num_instances),
 			Images: []*gmodel.CreateLocationImage{
 				{
-					File: graphql.Upload{
+					Image: graphql.Upload{
 						File: file,
 						Filename: file.Name(),
 						ContentType: "image/png",

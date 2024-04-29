@@ -94,7 +94,7 @@ type CreateLocation struct {
 }
 
 type CreateLocationImage struct {
-	File    graphql.Upload `json:"file"`
+	Image   graphql.Upload `json:"image"`
 	Default bool           `json:"default"`
 	Caption *string        `json:"caption,omitempty"`
 }

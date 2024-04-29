@@ -10538,20 +10538,20 @@ func (ec *executionContext) unmarshalInputCreateLocationImage(ctx context.Contex
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"file", "default", "caption"}
+	fieldsInOrder := [...]string{"image", "default", "caption"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "file":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("file"))
+		case "image":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("image"))
 			data, err := ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.File = data
+			it.Image = data
 		case "default":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("default"))
 			data, err := ec.unmarshalNBoolean2bool(ctx, v)

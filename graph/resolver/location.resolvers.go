@@ -29,9 +29,9 @@ func (r *mutationResolver) CreateLocation(ctx context.Context, input gmodel.Crea
 		upload_params := uploader.UploadParams{
 			PublicID: location_image.UploadID,
 		}
-		_, err := r.Service.GraphImageUpload(ctx, image_input.File, upload_params)
+		_, err := r.Service.GraphImageUpload(ctx, image_input.Image, upload_params)
 		if err != nil {
-			return nil, fmt.Errorf("failed to upload image %s to CDN", image_input.File.Filename)
+			return nil, fmt.Errorf("failed to upload image %s to CDN", image_input.Image.Filename)
 		}
 	}
 	return &location, nil
