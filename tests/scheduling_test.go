@@ -2,13 +2,11 @@ package tests
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/google/uuid"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -112,18 +110,19 @@ func TestLocation(t *testing.T) {
 			t.Fatal("location_image.upload_id is not a valid UUID", err)
 		}
 
-		t.Run("upload images to CDN", func(t *testing.T) {
-			for i, image := range input.Images {
-				location_image := location.LocationImages[i]
-				upload, err := service.GraphImageUpload(ctx, image.Image, uploader.UploadParams{
-					PublicID: location_image.UploadID,
-				})
-				if err != nil {
-					t.Fatal(err)
-				}
-				log.Printf("Upload: %+v\n", upload)
-			}
-		})
+		// TODO: Uncomment to test image uploading with the CDN
+		// t.Run("upload images to CDN", func(t *testing.T) {
+		// 	for i, image := range input.Images {
+		// 		location_image := location.LocationImages[i]
+		// 		upload, err := service.GraphImageUpload(ctx, image.Image, uploader.UploadParams{
+		// 			PublicID: location_image.UploadID,
+		// 		})
+		// 		if err != nil {
+		// 			t.Fatal(err)
+		// 		}
+		// 		log.Printf("Upload: %+v\n", upload)
+		// 	}
+		// })
 
 		for i, schedule := range location.LocationSchedule {
 			schedule_input := input.Schedule[i]
