@@ -229,6 +229,13 @@ type Owner struct {
 type Query struct {
 }
 
+type UpdateUser struct {
+	Name      *string         `json:"name,omitempty"`
+	Avatar    *graphql.Upload `json:"avatar,omitempty"`
+	BirthDate *time.Time      `json:"birthDate,omitempty"`
+	Bio       *string         `json:"bio,omitempty"`
+}
+
 type UpdatedByUser struct {
 	ID     int64   `json:"id" sql:"primary_key" alias:"updated_by_user.id"`
 	Name   string  `json:"name" alias:"updated_by_user.name"`

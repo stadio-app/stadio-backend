@@ -2,6 +2,7 @@ extend type Mutation {
   createAccount(input: CreateAccountInput!): User!
   verifyEmail(verificationCode: String!): User!
   resendEmailVerificationCode(email: String!): Boolean!
+  updateProfile(input: UpdateUser!): User! @isAuthenticated
 }
 
 extend type Query {
@@ -15,6 +16,13 @@ input CreateAccountInput {
   phoneNumber: String @goTag(key: "validate", value: "omitempty,e164") # e164 phone number format ("+[country code] [area code] [subscriber number]")
   name: String! @goTag(key: "validate", value: "required")
   password: String! @goTag(key: "validate", value: "required")
+}
+
+input UpdateUser {
+  name: String
+  avatar: Upload
+  birthDate: Time
+  bio: String
 }
 
 enum AuthPlatformType {

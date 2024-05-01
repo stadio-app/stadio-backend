@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-jet/jet/v2/postgres"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/model"
 	"github.com/stadio-app/stadio-backend/database/jet/postgres/public/table"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -412,4 +413,36 @@ func (service Service) VerifyJwt(ctx context.Context, authorization types.Author
 
 func (Service) GetAuthUserFromContext(ctx context.Context) gmodel.User {
 	return ctx.Value(types.AuthUserKey).(gmodel.User)
+}
+
+func (service Service) UpdateUser(ctx context.Context, user gmodel.User, input gmodel.UpdateUser) (updated_user gmodel.User, err error) {
+	columns := postgres.ColumnList{}
+	if input.Name != nil {
+		columns = append(columns, table.User.Name)
+		user.Name = *input.Name
+	}
+	if input.Avatar != nil {
+		columns = append(columns, table.User.Avatar)
+		avatar_id := uuid.New().String()
+		user.Avatar = &avatar_id
+	}
+	if input.BirthDate != nil {
+		columns = append(columns, table.User.BirthDate)
+		user.BirthDate = input.BirthDate
+	}
+	if input.Bio != nil {
+		columns = append(columns, table.User.Bio)
+		user.Bio = input.Bio
+	}
+	user.UpdatedAt = time.Now()
+	qb := table.User.
+		UPDATE(columns, table.User.UpdatedAt).
+		MODEL(user).
+		WHERE(table.User.ID.EQ(postgres.Int(user.ID))).
+		RETURNING(table.User.AllColumns)
+	
+	if err = qb.QueryContext(ctx, service.DbOrTxQueryable(), &updated_user); err != nil {
+		return gmodel.User{}, err
+	}
+	return updated_user, nil
 }

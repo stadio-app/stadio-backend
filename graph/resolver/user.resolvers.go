@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
 )
 
@@ -52,6 +53,32 @@ func (r *mutationResolver) ResendEmailVerificationCode(ctx context.Context, emai
 		return false, fmt.Errorf(res.Body)
 	}
 	return email_verification.ID > 0, nil
+}
+
+// UpdateProfile is the resolver for the updateProfile field.
+func (r *mutationResolver) UpdateProfile(ctx context.Context, input gmodel.UpdateUser) (*gmodel.User, error) {
+	user := r.Service.GetAuthUserFromContext(ctx)
+	updated_user, err := r.Service.UpdateUser(ctx, user, input)
+	if err != nil {
+		return nil, err
+	}
+
+	if input.Avatar != nil && updated_user.Avatar != nil {
+		_, err := r.Service.GraphImageUpload(ctx, *input.Avatar, uploader.UploadParams{
+			PublicID: *updated_user.Avatar,
+			Tags: []string{"USER_PROFILE"},
+		})
+		if err != nil {
+			return nil, fmt.Errorf("could not upload avatar to CDN")
+		}
+	}
+	// Delete old avatar
+	if user.Avatar != nil {
+		if _, err := r.Service.DeleteImageUpload(ctx, *user.Avatar); err != nil {
+			return nil, fmt.Errorf("could not delete old avatar UUID: %s", *user.Avatar)
+		}
+	}
+	return &updated_user, nil
 }
 
 // Login is the resolver for the login field.
