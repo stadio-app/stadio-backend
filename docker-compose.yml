@@ -11,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=postgres
     ports:
       - '5431:5432'
-    volumes: 
+    volumes:
       - stadio-db:/var/lib/postgresql/data
 volumes:
   stadio-db:
