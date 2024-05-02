@@ -35,31 +35,14 @@ func DbConnectionString(options DbConnection) string {
 	return dns
 }
 
-func DbConfig() (DbConnection, error) {
-	var db_config DbConnection
-	err := utils.FileMapper("db_config.json", &db_config)
-	if os.Getenv("PGENV") != "local" {
-		return ProdDbConfig(), nil
-	}
+// This method should only be used for local development
+func DbConfig() (db_config DbConnection, err error) {
+	err = utils.FileMapper("db_config.json", &db_config)
 	return db_config, err
 }
 
-func ProdDbConfig() DbConnection {
-	port, err := strconv.Atoi(os.Getenv("PGPORT"))
-	if err != nil {
-		panic("Error establishing DB connection, no port found.")
-	}
-	return DbConnection{
-		Host:     os.Getenv("PGHOST"),
-		DbName:   os.Getenv("PGDATABASE"),
-		Username: os.Getenv("POSTGRES_USER"),
-		Password: os.Getenv("PGPASSWORD"),
-		Port:     uint16(port),
-	}
-}
-
 func CreateDbConnection(options DbConnection) (*sql.DB, error) {
-	if db_url, exists := os.LookupEnv("PG_PRIVATE_DATABASE_URL"); exists {
+	if db_url, exists := os.LookupEnv("PG_DATABASE_URL"); exists {
 		return sql.Open("postgres", db_url)
 	}
 	return sql.Open("postgres", DbConnectionString(options))
