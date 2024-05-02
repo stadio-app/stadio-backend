@@ -38,7 +38,7 @@ func DbConnectionString(options DbConnection) string {
 func DbConfig() (DbConnection, error) {
 	var db_config DbConnection
 	err := utils.FileMapper("db_config.json", &db_config)
-	if os.Getenv("PGENV") == "production" {
+	if os.Getenv("PGENV") != "local" {
 		return ProdDbConfig(), nil
 	}
 	return db_config, err
