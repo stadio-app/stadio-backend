@@ -59,6 +59,9 @@ func ProdDbConfig() DbConnection {
 }
 
 func CreateDbConnection(options DbConnection) (*sql.DB, error) {
+	if db_url, exists := os.LookupEnv("PG_PRIVATE_DATABASE_URL"); exists {
+		return sql.Open("postgres", db_url)
+	}
 	return sql.Open("postgres", DbConnectionString(options))
 }
 
