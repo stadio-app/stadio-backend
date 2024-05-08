@@ -9,6 +9,7 @@ import (
 
 	"github.com/stadio-app/stadio-backend/graph"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
+	"github.com/stadio-app/stadio-backend/utils"
 )
 
 // CreateEvent is the resolver for the createEvent field.
@@ -27,11 +28,16 @@ func (r *queryResolver) AllEvents(ctx context.Context, filter gmodel.AllEventsFi
 	if err != nil {
 		return nil, err
 	}
-	event_ptrs := make([]*gmodel.Event, len(events))
-	for i := range events {
-		event_ptrs[i] = &events[i]
+	return utils.PointersOf(events).([]*gmodel.Event), nil
+}
+
+// MyEvents is the resolver for the myEvents field.
+func (r *queryResolver) MyEvents(ctx context.Context, userID int) ([]*gmodel.Event, error) {
+	events, err := r.Service.MyEvents(ctx, int64(userID))
+	if err != nil {
+		return nil, err
 	}
-	return event_ptrs, nil
+	return utils.PointersOf(events).([]*gmodel.Event), nil
 }
 
 // Mutation returns graph.MutationResolver implementation.
