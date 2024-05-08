@@ -21,9 +21,9 @@ const GRAPH_ENDPOINT string = "/graphql"
 
 func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 	server := types.ServerBase{
-		DB: db_conn,
-		Router: router,
-		StructValidator: validator.New(),
+		DB:                 db_conn,
+		Router:             router,
+		StructValidator:    validator.New(),
 		MigrationDirectory: "./database/migrations",
 	}
 
@@ -50,11 +50,11 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 	sendgrid_client := sendgrid.NewSendClient(tokens.SendGrid.ApiKey)
 
 	service := services.Service{
-		DB: server.DB,
+		DB:              server.DB,
 		StructValidator: server.StructValidator,
-		Tokens: &tokens,
-		Cloudinary: cloudinary,
-		Sendgrid: sendgrid_client,
+		Tokens:          &tokens,
+		Cloudinary:      cloudinary,
+		Sendgrid:        sendgrid_client,
 	}
 
 	// TODO: only show in dev environment
@@ -64,7 +64,7 @@ func NewServer(db_conn *sql.DB, router *chi.Mux) *types.ServerBase {
 		c := graph.Config{}
 		c.Resolvers = &gresolver.Resolver{
 			AppContext: server,
-			Service: service,
+			Service:    service,
 		}
 		c.Directives.IsAuthenticated = service.IsAuthenticatedDirective
 		graphql_handler := handler.NewDefaultServer(graph.NewExecutableSchema(c))

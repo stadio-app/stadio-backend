@@ -40,15 +40,15 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 			table.Event.UpdatedByID,
 		).
 		MODEL(model.Event{
-			LocationID: &input.LocationID,
-			Name: input.Name,
-			Description: input.Description,
-			Type: &input.Type,
-			StartDate: input.StartDate,
-			EndDate: input.EndDate,
+			LocationID:         &input.LocationID,
+			Name:               input.Name,
+			Description:        input.Description,
+			Type:               &input.Type,
+			StartDate:          input.StartDate,
+			EndDate:            input.EndDate,
 			LocationInstanceID: &location_instances[0].ID,
-			CreatedByID: &user.ID,
-			UpdatedByID: &user.ID,
+			CreatedByID:        &user.ID,
+			UpdatedByID:        &user.ID,
 		}).RETURNING(table.Event.AllColumns)
 	var new_event gmodel.EventShallow
 	if err := qb.QueryContext(ctx, db, &new_event); err != nil {
