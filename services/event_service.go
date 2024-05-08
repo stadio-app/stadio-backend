@@ -123,3 +123,37 @@ func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEvent
 	}
 	return events, nil
 }
+
+func (service Service) MyEvents(ctx context.Context, user_id int64) ([]gmodel.Event, error) {
+	query := table.Event.
+		SELECT(
+			table.Event.AllColumns,
+			table.Participant.AllColumns,
+			table.Location.AllColumns,
+			table.Address.AllColumns,
+			table.Country.Name,
+			table.LocationImage.AllColumns,
+			table.User.ID.AS("created_by_user_id"),
+			table.User.Name.AS("created_by_name"),
+			table.User.Avatar.AS("created_by_avatar"),
+		).FROM(
+		table.Event.
+			INNER_JOIN(table.Location, table.Location.ID.EQ(table.Event.LocationID)).
+			INNER_JOIN(table.Address, table.Address.ID.EQ(table.Location.AddressID)).
+			INNER_JOIN(table.Country, table.Country.Code.EQ(table.Address.CountryCode)).
+			LEFT_JOIN(table.Participant, table.Participant.EventID.EQ(table.Event.ID)).
+			LEFT_JOIN(table.LocationImage, table.LocationImage.LocationID.EQ(table.Location.ID)).
+			LEFT_JOIN(table.User, table.User.ID.EQ(table.Event.CreatedByID)),
+	).WHERE(
+		table.Participant.UserID.EQ(postgres.Int64(user_id)),
+	).ORDER_BY(
+		table.Event.StartDate.ASC(),
+	)
+
+	db := service.DbOrTxQueryable()
+	var events []gmodel.Event
+	if err := query.QueryContext(ctx, db, &events); err != nil {
+		return nil, err
+	}
+	return events, nil
+}
