@@ -34,6 +34,15 @@ func (r *queryResolver) AllEvents(ctx context.Context, filter gmodel.AllEventsFi
 	return event_ptrs, nil
 }
 
+// EventDetails is the resolver for the eventDetails field.
+func (r *queryResolver) EventDetails(ctx context.Context, eventID int64) (*gmodel.Event, error) {
+	event, err := r.Service.GetEventDetailsById(ctx, eventID)
+	if err != nil {
+		return nil, err
+	}
+	return &event, nil
+}
+
 // Mutation returns graph.MutationResolver implementation.
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
 
