@@ -1,5 +1,6 @@
 extend type Query {
   allEvents(filter: AllEventsFilter!): [Event!]! @isAuthenticated
+  eventDetails(eventId: ID!): Event!
 }
 
 extend type Mutation {

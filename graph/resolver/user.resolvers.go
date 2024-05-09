@@ -66,7 +66,7 @@ func (r *mutationResolver) UpdateProfile(ctx context.Context, input gmodel.Updat
 	if input.Avatar != nil && updated_user.Avatar != nil {
 		_, err := r.Service.GraphImageUpload(ctx, *input.Avatar, uploader.UploadParams{
 			PublicID: *updated_user.Avatar,
-			Tags: []string{"USER_PROFILE"},
+			Tags:     []string{"USER_PROFILE"},
 		})
 		if err != nil {
 			return nil, fmt.Errorf("could not upload avatar to CDN")
