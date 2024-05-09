@@ -6,7 +6,6 @@ package gresolver
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/stadio-app/stadio-backend/graph"
 	"github.com/stadio-app/stadio-backend/graph/gmodel"
@@ -37,7 +36,11 @@ func (r *queryResolver) AllEvents(ctx context.Context, filter gmodel.AllEventsFi
 
 // EventDetails is the resolver for the eventDetails field.
 func (r *queryResolver) EventDetails(ctx context.Context, eventID int64) (*gmodel.Event, error) {
-	panic(fmt.Errorf("not implemented: EventDetails - eventDetails"))
+	event, err := r.Service.GetEventDetailsById(ctx, eventID)
+	if err != nil {
+		return nil, err
+	}
+	return &event, nil
 }
 
 // Mutation returns graph.MutationResolver implementation.

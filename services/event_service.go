@@ -57,6 +57,46 @@ func (service Service) CreateEvent(ctx context.Context, user gmodel.User, input 
 	return new_event, nil
 }
 
+func (service Service) GetEventDetailsById(ctx context.Context, event_id int64) (event gmodel.Event, err error) {
+	created_by_user_table := table.User.AS("created_by_user")
+	updated_by_user_table := table.User.AS("updated_by_user")
+	qb := table.Event.
+		SELECT(
+			table.Event.AllColumns,
+			table.Location.AllColumns,
+			table.Address.AllColumns,
+			table.LocationSchedule.AllColumns,
+			table.LocationInstance.AllColumns,
+			table.LocationImage.AllColumns,
+			table.Country.Name,
+			created_by_user_table.ID,
+			created_by_user_table.Name,
+			created_by_user_table.Avatar,
+			updated_by_user_table.ID,
+			updated_by_user_table.Name,
+			updated_by_user_table.Avatar,
+		).
+		FROM(
+			table.Event.
+				INNER_JOIN(table.Location, table.Location.ID.EQ(table.Event.LocationID)).
+				INNER_JOIN(table.Address, table.Address.ID.EQ(table.Location.AddressID)).
+				LEFT_JOIN(table.LocationSchedule, table.LocationSchedule.LocationID.EQ(table.Event.LocationID)).
+				LEFT_JOIN(table.LocationInstance, table.LocationInstance.LocationID.EQ(table.Event.LocationInstanceID)).
+				LEFT_JOIN(table.LocationImage, table.LocationImage.LocationID.EQ(table.Event.LocationID)).
+				INNER_JOIN(table.Country, table.Country.Code.EQ(table.Address.CountryCode)).
+				LEFT_JOIN(created_by_user_table, created_by_user_table.ID.EQ(table.Event.CreatedByID)).
+				LEFT_JOIN(updated_by_user_table, updated_by_user_table.ID.EQ(table.Event.UpdatedByID)),
+		).
+		WHERE(
+			table.Event.ID.EQ(postgres.Int(event_id)).
+			AND(table.LocationSchedule.On.IS_NULL()),
+		)
+	if err = qb.QueryContext(ctx, service.DbOrTxQueryable(), &event); err != nil {
+		return gmodel.Event{}, err
+	}
+	return event, nil
+}
+
 func (service Service) FindAllEvents(ctx context.Context, filter gmodel.AllEventsFilter) ([]gmodel.Event, error) {
 	created_by_user_table := table.User.AS("created_by_user")
 	updated_by_user_table := table.User.AS("updated_by_user")
