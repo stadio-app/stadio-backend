@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/go-jet/jet/v2/postgres"
@@ -142,11 +143,11 @@ func TestUser(t *testing.T) {
 						t.Fatal("invalid jwt", err.Error())
 					}
 
-					claims_user_id, ok := claims["id"].(float64)
-					if !ok {
+					claims_user_id, err := strconv.ParseInt(claims.Subject, 10, 64)
+					if err != nil {
 						t.Fatal("could not convert claims.id to float64")
 					}
-					if int64(claims_user_id) != user1.ID {
+					if claims_user_id != user1.ID {
 						t.Fatal("jwt claim user.id does not match")
 					}
 				})

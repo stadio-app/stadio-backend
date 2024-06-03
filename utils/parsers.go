@@ -21,7 +21,7 @@ func FileMapper[T any](filename string, dest T) error {
 }
 
 // Given a raw jwt token and an encryption key return the mapped jwt claims or an error
-func GetJwtClaims(jwt_token string, key string) (jwt.MapClaims, error) {
+func GetJwtClaims(jwt_token string, key string) (claims jwt.StandardClaims, err error) {
 	token, token_err := jwt.Parse(jwt_token, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("invalid signing method")
@@ -29,13 +29,17 @@ func GetJwtClaims(jwt_token string, key string) (jwt.MapClaims, error) {
 		return []byte(key), nil
 	})
 	if token_err != nil {
-		return nil, fmt.Errorf("could not parse jwt token")
+		return jwt.StandardClaims{}, fmt.Errorf("could not parse jwt token")
 	}
 	
-	// Get claims stored in parsed JWT token
-	claims, ok := token.Claims.(jwt.MapClaims)
+	// Get claims_map stored in parsed JWT token
+	claims_map, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return nil, fmt.Errorf("could not fetch jwt claims")
+		return jwt.StandardClaims{}, fmt.Errorf("could not transform claim map to desired object")
 	}
-	return claims, nil
+	marshalled_claims, err := json.Marshal(claims_map)
+	if err != nil {
+		return jwt.StandardClaims{}, err
+	}
+	return claims, json.Unmarshal(marshalled_claims, &claims)
 }

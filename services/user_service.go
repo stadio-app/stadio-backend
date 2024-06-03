@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/go-jet/jet/v2/postgres"
@@ -354,14 +355,12 @@ func (Service) VerifyPasswordHash(password string, hash string) bool {
 
 // Generates a JWT with claims, signed with key
 func (Service) GenerateJWT(key string, user *gmodel.User) (string, error) {
-	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"id": user.ID,
-		"name": user.Name,
-		"email": user.Email,
-		"authPlatform": (*user.AuthPlatform).String(),
-		"authStateId": *user.AuthStateID,
-		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(time.Hour * 24 * 30).Unix(),
+	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Subject: fmt.Sprintf("%d", user.ID),
+		Audience: user.Email,
+		Id: fmt.Sprintf("%d", *user.AuthStateID),
+		IssuedAt: time.Now().Unix(),
+		ExpiresAt: time.Now().Add(time.Hour * 24 * 30).Unix(),
 	})
 	token, err := jwt.SignedString([]byte(key))
 	if err != nil {
@@ -384,9 +383,14 @@ func (service Service) VerifyJwt(ctx context.Context, authorization types.Author
 		return gmodel.User{}, fmt.Errorf("token expired")
 	}
 
-	authStateId := int64(claims["authStateId"].(float64))
-	userId := int64(claims["id"].(float64))
-	email := claims["email"].(string)
+	authStateId, err := strconv.ParseInt(claims.Id, 10, 64)
+	if err != nil {
+		return gmodel.User{}, fmt.Errorf("auth state id is invalid")
+	}
+	userId, err := strconv.ParseInt(claims.Subject, 10, 64)
+	if err != nil {
+		return gmodel.User{}, fmt.Errorf("user id is invalid")
+	}
 	query := table.User.
 		SELECT(
 			table.User.AllColumns,
@@ -399,9 +403,9 @@ func (service Service) VerifyJwt(ctx context.Context, authorization types.Author
 		)).
 		WHERE(
 			table.User.ID.
-				EQ(postgres.Int64(userId)).
-				AND(table.User.Email.EQ(postgres.String(email))).
-				AND(table.AuthState.ID.EQ(postgres.Int64(authStateId))),
+				EQ(postgres.Int(userId)).
+				AND(table.User.Email.EQ(postgres.String(claims.Audience))).
+				AND(table.AuthState.ID.EQ(postgres.Int(authStateId))),
 		).
 		LIMIT(1)
 	var user gmodel.User
