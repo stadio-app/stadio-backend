@@ -22,7 +22,7 @@ func FileMapper[T any](filename string, dest T) error {
 
 // Given a raw jwt token and an encryption key return the mapped jwt claims or an error
 func GetJwtClaims(jwt_token string, key string) (claims jwt.StandardClaims, err error) {
-	token, token_err := jwt.Parse(jwt_token, func(t *jwt.Token) (interface{}, error) {
+	token, token_err := jwt.Parse(jwt_token, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("invalid signing method")
 		}
